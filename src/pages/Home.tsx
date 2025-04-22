@@ -101,7 +101,7 @@ export default function Home() {
   }, [sortOption]);
 
   const fetchLists = async () => {
-    const res = await fetch("http://localhost:8000/api/lists/", {
+    const res = await fetch("https://bale231.pythonanywhere.com/api/lists/", {
       credentials: "include",
     });
     const data = await res.json();
@@ -117,7 +117,7 @@ export default function Home() {
 
     if (editListId !== null) {
       const res = await fetch(
-        `http://localhost:8000/api/lists/${editListId}/`,
+        `https://bale231.pythonanywhere.com/api/lists/${editListId}/`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -128,7 +128,7 @@ export default function Home() {
       if (res.ok) fetchLists();
       setEditListId(null);
     } else {
-      const res = await fetch("http://localhost:8000/api/lists/", {
+      const res = await fetch("https://bale231.pythonanywhere.com/api/lists/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -159,7 +159,7 @@ export default function Home() {
         duration: 0.1,
         onComplete: () => {
           (async () => {
-            await fetch(`http://localhost:8000/api/lists/${id}/`, {
+            await fetch(`https://bale231.pythonanywhere.com/api/lists/${id}/`, {
               method: "DELETE",
               credentials: "include",
             });

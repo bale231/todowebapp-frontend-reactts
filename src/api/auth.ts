@@ -45,8 +45,13 @@ export async function getCurrentUser() {
   const res = await fetch(`${API_URL}/user/`, {
     credentials: "include",
   });
-  if (res.status === 401) return null;
-  return res.ok ? await res.json() : null;
+
+  if (res.status === 401) {
+    return { user: null, status: 401 };
+  }
+
+  const data = await res.json();
+  return { user: data, status: res.status };
 }
 
 // Update profile
