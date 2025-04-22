@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../api/auth";
+import { login, getCurrentUser } from "../api/auth";
 import gsap from "gsap";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const errorRef = useRef<HTMLDivElement>(null);
@@ -34,21 +35,25 @@ export default function Login() {
     }
   }, [error]);
 
-  const handleLogin = async () => {
-    if (!username || !password) {
-      setError("Inserisci username e password.");
-      return;
-    }
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
   
     const res = await login(username, password);
   
     if (res.status === 200 && res.message === "login success") {
-      setError("");
-      setTimeout(() => navigate("/"), 100);
-    } else if (res.status === 403) {
-      setError("Conferma l'account email prima di proseguire.");
+      const confirm = await getCurrentUser();
+      if (confirm.user) {
+        setIsLoading(false);
+        navigate("/");
+      } else {
+        setError("Errore durante la verifica dell'utente.");
+        setIsLoading(false);
+      }
     } else {
-      setError("Credenziali errate. Riprova.");
+      setError(res.message || "Credenziali non valide");
+      setIsLoading(false);
     }
   };  
 
@@ -113,10 +118,16 @@ export default function Login() {
         </div>
 
         <button
+          type="submit"
+          disabled={isLoading}
           onClick={handleLogin}
-          className="w-full py-2 rounded border border-blue-600 text-white bg-blue-600 hover:bg-transparent hover:text-blue-600 transition-colors duration-300"
+          className={`w-full py-2 rounded ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          } text-white font-semibold`}
         >
-          Login
+          {isLoading ? "Attendi..." : "Accedi"}
         </button>
 
         <p className="text-sm text-center mt-4 text-gray-700">
