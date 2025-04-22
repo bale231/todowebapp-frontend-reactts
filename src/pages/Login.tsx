@@ -44,7 +44,7 @@ export default function Login() {
   
     if (res.status === 200 && res.message === "login success") {
       setError("");
-      navigate("/");
+      setTimeout(() => navigate("/"), 100);
     } else if (res.status === 403) {
       setError("Conferma l'account email prima di proseguire.");
     } else {
