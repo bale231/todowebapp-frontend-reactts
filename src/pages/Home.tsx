@@ -157,14 +157,16 @@ export default function Home() {
         repeat: 3,
         yoyo: true,
         duration: 0.1,
-        onComplete: async () => {
-          await fetch(`http://localhost:8000/api/lists/${id}/`, {
-            method: "DELETE",
-            credentials: "include",
-          });
-          fetchLists();
-          setShowDeleteConfirm(null);
-        },
+        onComplete: () => {
+          (async () => {
+            await fetch(`http://localhost:8000/api/lists/${id}/`, {
+              method: "DELETE",
+              credentials: "include",
+            });
+            fetchLists();
+            setShowDeleteConfirm(null);
+          })();
+        }        
       }
     );
   };
