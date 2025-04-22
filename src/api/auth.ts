@@ -42,11 +42,19 @@ export async function logout() {
 
 // Get current user
 export async function getCurrentUser() {
-  const res = await fetch(`${API_URL}/user/`, {
-    credentials: "include",
-  });
-  if (res.status === 401) return null;
-  return res.ok ? await res.json() : null;
+  try {
+    const res = await fetch(`${API_URL}/user/`, {
+      credentials: "include",
+    });
+
+    if (res.status === 401) return null;
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Errore nel recupero utente:", error);
+    return null;
+  }
 }
 
 // Update profile

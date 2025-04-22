@@ -44,7 +44,7 @@ export default function Login() {
   
     if (res.status === 200 && res.message === "login success") {
       const confirm = await getCurrentUser();
-      if (confirm.user) {
+      if (confirm) {
         setIsLoading(false);
         navigate("/");
       } else {
