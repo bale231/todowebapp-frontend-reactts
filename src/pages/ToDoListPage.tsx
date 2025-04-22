@@ -81,7 +81,7 @@ export default function ToDoListPage() {
 
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
-      const res = await fetch(`http://localhost:8000/api/lists/${id}/`, {
+      const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/${id}/`, {
         credentials: "include",
       });
       const text = await res.text();
