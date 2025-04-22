@@ -1,5 +1,5 @@
 // ✅ src/api/todo.ts - gestisce tutto ciò che riguarda liste e ToDo
-const API_URL = "http://localhost:8000/api";
+const API_URL = "https://bale231.pythonanywhere.com/api";
 
 // --- 📋 LISTE ---
 export async function fetchAllLists() {

@@ -220,7 +220,7 @@ export default function Profile() {
               <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-700 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 flex items-center justify-center">
                 {avatar ? (
                   <img
-                    src={`http://localhost:8000${avatar}`}
+                    src={`https://bale231.pythonanywhere.com${avatar}`}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                   />

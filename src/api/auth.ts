@@ -1,5 +1,5 @@
 // ✅ src/api/auth.ts
-const API_URL = "http://localhost:8000/api";
+const API_URL = "https://bale231.pythonanywhere.com/api";
 
 // Login
 export async function login(username: string, password: string) {
@@ -51,7 +51,7 @@ export async function getCurrentUser() {
 
 // Update profile
 export const updateProfile = async (formData: FormData) => {
-  const res = await fetch("http://localhost:8000/api/update-profile/", {
+  const res = await fetch(`${API_URL}/update-profile/`, {
     method: "POST",
     credentials: "include",
     body: formData, // 👈 NON devi mettere headers se usi FormData!
@@ -108,7 +108,7 @@ export const deactivateAccount = async () => {
 
 // Update theme
 export const updateTheme = async (theme: string) => {
-  const res = await fetch("http://localhost:8000/api/update-theme/", {
+  const res = await fetch(`${API_URL}/update-theme/`, {
     method: "POST",
     credentials: "include",
     headers: {
