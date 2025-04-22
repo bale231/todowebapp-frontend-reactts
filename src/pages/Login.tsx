@@ -12,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const errorRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
 
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +56,28 @@ export default function Login() {
       setError(res.message || "Credenziali non valide");
       setIsLoading(false);
     }
-  };  
+  };
+
+  const handleMobileLogin = () => {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://bale231.pythonanywhere.com/api/mobile-login/";
+  
+    const inputUsername = document.createElement("input");
+    inputUsername.name = "username";
+    inputUsername.value = username;
+    form.appendChild(inputUsername);
+  
+    const inputPassword = document.createElement("input");
+    inputPassword.name = "password";
+    inputPassword.value = password;
+    form.appendChild(inputPassword);
+  
+    form.style.display = "none";
+    document.body.appendChild(form);
+    form.submit();
+  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -117,18 +139,29 @@ export default function Login() {
           </span>
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          onClick={handleLogin}
-          className={`w-full py-2 rounded ${
-            isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white font-semibold`}
-        >
-          {isLoading ? "Attendi..." : "Accedi"}
-        </button>
+
+        {isMobile ? (
+          <button
+            onClick={handleMobileLogin}
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
+          >
+            Accedi
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={isLoading}
+            onClick={handleLogin}
+            className={`w-full py-2 rounded ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white font-semibold`}
+          >
+            {isLoading ? "Attendi..." : "Accedi"}
+          </button>
+        )}
+
 
         <p className="text-sm text-center mt-4 text-gray-700">
           Non hai un account?{" "}
