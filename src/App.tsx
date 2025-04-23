@@ -6,6 +6,7 @@ import Profile from './pages/Profile'
 import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
 import ToDoListPage from './pages/ToDoListPage'
+import LoginRedirect from './components/LoginRedirect'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
         <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
         <Route path="/lists/:id" element={<ToDoListPage />} />
+        <Route path="/login-success" element={<LoginRedirect />} />
         <Route path="/" element={< Home /> } />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

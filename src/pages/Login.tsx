@@ -77,7 +77,6 @@ export default function Login() {
     document.body.appendChild(form);
     form.submit();
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
