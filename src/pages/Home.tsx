@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
-import { fetchAllLists } from "../api/todos";
+import { fetchAllLists, editList, deleteList } from "../api/todos";
 
 interface TodoList {
   id: number;
@@ -114,38 +114,32 @@ export default function Home() {
     }
   };
 
+  const API_URL = "https://bale231.pythonanywhere.com/api";
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-    const payload = {
-      name: newListName,
-      color: newListColor,
-    };
-  
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
-    };
   
     if (editListId !== null) {
-      const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/${editListId}/`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) fetchLists();
+      // ✅ MODIFICA LISTA
+      await editList(editListId, newListName, newListColor);
       setEditListId(null);
     } else {
-      const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/`, {
+      // ✅ CREA LISTA
+      const res = await fetch(`${API_URL}/lists/`, {
         method: "POST",
-        headers,
-        body: JSON.stringify(payload),
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newListName, color: newListColor }),
       });
-      if (res.ok) fetchLists();
+      if (!res.ok) console.error("Errore creazione lista");
     }
   
+    fetchLists();
     setNewListName("");
     setShowForm(false);
   };
+  
 
   const handleEditList = (list: TodoList) => {
     setEditListId(list.id);
