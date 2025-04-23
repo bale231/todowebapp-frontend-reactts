@@ -127,7 +127,7 @@ export default function Home() {
     };
   
     if (editListId !== null) {
-      const res = await fetch(`${API_URL}/lists/${editListId}/`, {
+      const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/${editListId}/`, {
         method: "PUT",
         headers,
         body: JSON.stringify(payload),
@@ -135,7 +135,7 @@ export default function Home() {
       if (res.ok) fetchLists();
       setEditListId(null);
     } else {
-      const res = await fetch(`${API_URL}/lists/`, {
+      const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/`, {
         method: "POST",
         headers,
         body: JSON.stringify(payload),
