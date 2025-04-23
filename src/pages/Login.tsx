@@ -58,27 +58,47 @@ export default function Login() {
     }
   };
 
-  const handleMobileLogin = () => {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://bale231.pythonanywhere.com/api/mobile-login/";
-    form.enctype = "application/x-www-form-urlencoded"; // 👈 Importantissimo!
+  // const handleMobileLogin = () => {
+  //   const form = document.createElement("form");
+  //   form.method = "POST";
+  //   form.action = "https://bale231.pythonanywhere.com/api/mobile-login/";
+  //   form.enctype = "application/x-www-form-urlencoded"; // 👈 Importantissimo!
   
-    const inputUsername = document.createElement("input");
-    inputUsername.type = "hidden"; // 👈 obbligatorio
-    inputUsername.name = "username";
-    inputUsername.value = username;
-    form.appendChild(inputUsername);
+  //   const inputUsername = document.createElement("input");
+  //   inputUsername.type = "hidden"; // 👈 obbligatorio
+  //   inputUsername.name = "username";
+  //   inputUsername.value = username;
+  //   form.appendChild(inputUsername);
   
-    const inputPassword = document.createElement("input");
-    inputPassword.type = "hidden"; // 👈 obbligatorio
-    inputPassword.name = "password";
-    inputPassword.value = password;
-    form.appendChild(inputPassword);
+  //   const inputPassword = document.createElement("input");
+  //   inputPassword.type = "hidden"; // 👈 obbligatorio
+  //   inputPassword.name = "password";
+  //   inputPassword.value = password;
+  //   form.appendChild(inputPassword);
   
-    document.body.appendChild(form);
-    form.submit();
-  };  
+  //   document.body.appendChild(form);
+  //   form.submit();
+  // };  
+
+  const handleMobileLoginFetch = async () => {
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+  
+    const res = await fetch("https://bale231.pythonanywhere.com/api/mobile-login/", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+  
+    if (res.ok) {
+      // Login OK: reindirizza su Home
+      window.location.href = "https://todowebapp-frontend-reactts-stml.vercel.app";
+    } else {
+      alert("Login fallito");
+    }
+  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -143,7 +163,7 @@ export default function Login() {
 
         {isMobile ? (
           <button
-            onClick={handleMobileLogin}
+            onClick={handleMobileLoginFetch}
             className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
           >
             Accedi
