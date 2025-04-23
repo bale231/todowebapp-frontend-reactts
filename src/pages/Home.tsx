@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
+import { fetchAllLists } from "../api/todos";
 
 interface TodoList {
   id: number;
@@ -101,11 +102,16 @@ export default function Home() {
   }, [sortOption]);
 
   const fetchLists = async () => {
-    const res = await fetch("https://bale231.pythonanywhere.com/api/lists/", {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setLists(data);
+    try {
+      const data = await fetchAllLists();
+      if (Array.isArray(data)) {
+        setLists(data);
+      } else {
+        console.error("Formato risposta non valido:", data);
+      }
+    } catch (err) {
+      console.error("Errore nel caricamento liste:", err);
+    }
   };
 
   const handleCreateList = async () => {
