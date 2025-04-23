@@ -35,6 +35,26 @@ export async function renameList(listId: number, newName: string) {
   return res.json();
 }
 
+// ✅ Modifica lista (PUT su /lists/:id/)
+export async function editList(listId: number, name: string, color: string) {
+  const res = await fetch(`${API_URL}/lists/${listId}/`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ name, color }),
+  });
+  return res.json();
+}
+
+// ✅ Elimina lista (DELETE su /lists/:id/)
+export async function deleteList(listId: number) {
+  const res = await fetch(`${API_URL}/lists/${listId}/`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  return res.json();
+}
+
+
 // --- ✅ TODOS ---
 export async function createTodo(listId: number | string, title: string) {
   const res = await fetch(`${API_URL}/lists/${listId}/todos/`, {
