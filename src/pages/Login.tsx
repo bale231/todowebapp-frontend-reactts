@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login, getCurrentUser, loginJWT, getJWTUser } from "../api/auth";
+import { login } from "../api/auth";
 import gsap from "gsap";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -39,6 +39,7 @@ export default function Login() {
   const handleLogin = async () => {
     const result = await login(username, password);
     if (result.success) {
+      setIsLoading(false);
       navigate("/"); // oppure dove vuoi andare dopo il login
     } else {
       setError(result.message);

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser } from "../api/auth";
+import { getCurrentUserJWT } from "../api/auth";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
@@ -56,7 +56,7 @@ export default function Home() {
 
   useEffect(() => {
     if (themeLoaded) {
-      getCurrentUser().then((res) => {
+      getCurrentUserJWT().then((res) => {
         if (!res) navigate("/login");
         else setUser(res);
       });
