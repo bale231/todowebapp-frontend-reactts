@@ -2,54 +2,82 @@
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
 // Login JWT
-export async function loginJWT(username: string, password: string) {
-  const res = await fetch(`${API_URL}/token/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+// ✅ auth.ts
 
-  const data = await res.json();
-  if (res.ok) {
-    localStorage.setItem("access", data.access);
-    localStorage.setItem("refresh", data.refresh);
+// 🔐 Funzione login con JWT
+export async function login(username: string, password: string) {
+  try {
+    const res = await fetch("https://bale231.pythonanywhere.com/api/token/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!res.ok) {
+      return { success: false, message: "Credenziali errate" };
+    }
+
+    const data = await res.json();
+    localStorage.setItem("accessToken", data.access);
+    localStorage.setItem("refreshToken", data.refresh);
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, message: "Errore di rete" };
   }
-  return data;
 }
 
+// 🔐 Recupero utente corrente tramite JWT
 export async function getCurrentUserJWT() {
-  const token = localStorage.getItem("access");
+  const token = localStorage.getItem("accessToken");
   if (!token) return null;
 
-  const res = await fetch("https://bale231.pythonanywhere.com/api/user/", {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    const res = await fetch("https://bale231.pythonanywhere.com/api/user/", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  if (res.ok) return await res.json();
-  return null;
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
+
+// 🔄 Esempio fetch con JWT
+// fetch("https://bale231.pythonanywhere.com/api/lists/", {
+//   method: "GET",
+//   headers: {
+//     "Content-Type": "application/json",
+//     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+//   },
+// });
 
 
 // Login
-export async function login(username: string, password: string) {
-  const res = await fetch("https://bale231.pythonanywhere.com/api/token/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+// export async function login(username: string, password: string) {
+//   const res = await fetch("https://bale231.pythonanywhere.com/api/token/", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ username, password }),
+//   });
 
-  const data = await res.json();
+//   const data = await res.json();
 
-  if (res.ok) {
-    // salva il token
-    localStorage.setItem("access", data.access);
-    localStorage.setItem("refresh", data.refresh);
-    return { success: true };
-  } else {
-    return { success: false, message: data.detail || "Errore di login" };
-  }
-}
+//   if (res.ok) {
+//     // salva il token
+//     localStorage.setItem("access", data.access);
+//     localStorage.setItem("refresh", data.refresh);
+//     return { success: true };
+//   } else {
+//     return { success: false, message: data.detail || "Errore di login" };
+//   }
+// }
 
 // Register
 export const register = async (
