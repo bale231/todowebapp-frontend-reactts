@@ -17,31 +17,38 @@ export async function loginJWT(username: string, password: string) {
   return data;
 }
 
-export async function getJWTUser() {
+export async function getCurrentUserJWT() {
   const token = localStorage.getItem("access");
-  const res = await fetch(`${API_URL}/jwt-user/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  if (!token) return null;
+
+  const res = await fetch("https://bale231.pythonanywhere.com/api/user/", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
   });
-  return res.ok ? await res.json() : null;
+
+  if (res.ok) return await res.json();
+  return null;
 }
 
 
 // Login
 export async function login(username: string, password: string) {
-  const res = await fetch(`${API_URL}/login/`, {
+  const res = await fetch("https://bale231.pythonanywhere.com/api/token/", {
     method: "POST",
-    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
 
   const data = await res.json();
-  return {
-    status: res.status,
-    message: data.message,
-  };
+
+  if (res.ok) {
+    // salva il token
+    localStorage.setItem("access", data.access);
+    localStorage.setItem("refresh", data.refresh);
+    return { success: true };
+  } else {
+    return { success: false, message: data.detail || "Errore di login" };
+  }
 }
 
 // Register

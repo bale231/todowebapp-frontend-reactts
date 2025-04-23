@@ -36,67 +36,12 @@ export default function Login() {
     }
   }, [error]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-  
-    const res = await login(username, password);
-  
-    if (res.status === 200 && res.message === "login success") {
-      const data = await loginJWT(username, password);
-      if (data.access) {
-        setIsLoading(false);
-        // setta lo user nel context o nello state
-        navigate("/"); // vai in Home
-      } else {
-        setError("Credenziali errate");
-      }
+  const handleLogin = async () => {
+    const result = await login(username, password);
+    if (result.success) {
+      navigate("/"); // oppure dove vuoi andare dopo il login
     } else {
-      setError(res.message || "Credenziali non valide");
-      setIsLoading(false);
-    }
-  };
-
-  // const handleMobileLogin = () => {
-  //   const form = document.createElement("form");
-  //   form.method = "POST";
-  //   form.action = "https://bale231.pythonanywhere.com/api/mobile-login/";
-  //   form.enctype = "application/x-www-form-urlencoded"; // 👈 Importantissimo!
-  
-  //   const inputUsername = document.createElement("input");
-  //   inputUsername.type = "hidden"; // 👈 obbligatorio
-  //   inputUsername.name = "username";
-  //   inputUsername.value = username;
-  //   form.appendChild(inputUsername);
-  
-  //   const inputPassword = document.createElement("input");
-  //   inputPassword.type = "hidden"; // 👈 obbligatorio
-  //   inputPassword.name = "password";
-  //   inputPassword.value = password;
-  //   form.appendChild(inputPassword);
-  
-  //   document.body.appendChild(form);
-  //   form.submit();
-  // };  
-
-  const handleMobileLogin = async () => {
-    const res = await fetch("https://bale231.pythonanywhere.com/api/login/", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-  
-    const data = await res.json();
-  
-    if (res.ok) {
-      // login riuscito, reindirizza su Home
-      navigate("/");
-    } else {
-      alert("Login fallito: " + data.message);
+      setError(result.message);
     }
   };  
 
@@ -163,10 +108,16 @@ export default function Login() {
 
         {isMobile ? (
           <button
+            type="submit"
+            disabled={isLoading}
             onClick={handleLogin}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
+            className={`w-full py-2 rounded ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            } text-white font-semibold`}
           >
-            Accedi
+            {isLoading ? "Attendi..." : "Accedi"}
           </button>
         ) : (
           <button
