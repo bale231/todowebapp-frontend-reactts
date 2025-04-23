@@ -62,15 +62,16 @@ export default function Login() {
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://bale231.pythonanywhere.com/api/mobile-login/";
+    form.enctype = "application/x-www-form-urlencoded"; // 👈 Importantissimo!
   
     const inputUsername = document.createElement("input");
-    inputUsername.type = "hidden"; // 👈 AGGIUNTO
+    inputUsername.type = "hidden"; // 👈 obbligatorio
     inputUsername.name = "username";
     inputUsername.value = username;
     form.appendChild(inputUsername);
   
     const inputPassword = document.createElement("input");
-    inputPassword.type = "hidden"; // 👈 AGGIUNTO
+    inputPassword.type = "hidden"; // 👈 obbligatorio
     inputPassword.name = "password";
     inputPassword.value = password;
     form.appendChild(inputPassword);
