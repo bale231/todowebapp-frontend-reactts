@@ -1,6 +1,33 @@
 // ✅ src/api/auth.ts
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
+// Login JWT
+export async function loginJWT(username: string, password: string) {
+  const res = await fetch(`${API_URL}/token/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem("access", data.access);
+    localStorage.setItem("refresh", data.refresh);
+  }
+  return data;
+}
+
+export async function getJWTUser() {
+  const token = localStorage.getItem("access");
+  const res = await fetch(`${API_URL}/jwt-user/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.ok ? await res.json() : null;
+}
+
+
 // Login
 export async function login(username: string, password: string) {
   const res = await fetch(`${API_URL}/login/`, {

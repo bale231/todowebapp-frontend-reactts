@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login, getCurrentUser } from "../api/auth";
+import { login, getCurrentUser, loginJWT, getJWTUser } from "../api/auth";
 import gsap from "gsap";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -44,13 +44,13 @@ export default function Login() {
     const res = await login(username, password);
   
     if (res.status === 200 && res.message === "login success") {
-      const confirm = await getCurrentUser();
-      if (confirm) {
+      const data = await loginJWT(username, password);
+      if (data.access) {
         setIsLoading(false);
-        navigate("/");
+        // setta lo user nel context o nello state
+        navigate("/"); // vai in Home
       } else {
-        setError("Errore durante la verifica dell'utente.");
-        setIsLoading(false);
+        setError("Credenziali errate");
       }
     } else {
       setError(res.message || "Credenziali non valide");
@@ -163,7 +163,7 @@ export default function Login() {
 
         {isMobile ? (
           <button
-            onClick={handleMobileLogin}
+            onClick={handleLogin}
             className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
           >
             Accedi
