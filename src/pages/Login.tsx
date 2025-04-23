@@ -42,7 +42,7 @@ export default function Login() {
       setIsLoading(false);
       navigate("/"); // oppure dove vuoi andare dopo il login
     } else {
-      setError(result.message);
+      setError(`${result.message}`);
     }
   };  
 
