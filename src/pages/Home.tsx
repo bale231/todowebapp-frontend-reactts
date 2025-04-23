@@ -148,28 +148,26 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleDeleteList = async (id: number) => {
-    gsap.fromTo(
-      `#card-${id}`,
-      { x: -5 },
-      {
-        x: 5,
-        repeat: 3,
-        yoyo: true,
-        duration: 0.1,
-        onComplete: () => {
-          (async () => {
-            await fetch(`https://bale231.pythonanywhere.com/api/lists/${id}/`, {
-              method: "DELETE",
-              credentials: "include",
-            });
-            fetchLists();
-            setShowDeleteConfirm(null);
-          })();
-        }        
-      }
-    );
-  };
+const handleDeleteList = async (id: number) => {
+  gsap.fromTo(
+    `#card-${id}`,
+    { x: -5 },
+    {
+      x: 5,
+      repeat: 3,
+      yoyo: true,
+      duration: 0.1,
+      onComplete: () => {
+        (async () => {
+          await deleteList(id);
+          fetchLists();
+          setShowDeleteConfirm(null);
+        })();
+      }      
+    }
+  );
+};
+
 
   const sortedLists = [...lists].sort((a, b) => {
     if (sortOption === "name") {
