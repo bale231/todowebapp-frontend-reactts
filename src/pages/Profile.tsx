@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Navbar from "../components/Navbar";
 import {
-  getCurrentUser,
+  getCurrentUserJWT,
   updateProfile,
   resetPassword,
   deactivateAccount,
@@ -42,7 +42,7 @@ export default function Profile() {
   }, [showConfirmModal]);
 
   const fetchUserData = async () => {
-    const user = await getCurrentUser();
+    const user = await getCurrentUserJWT();
     if (user) {
       setUsername(user.username);
       setEmail(user.email);

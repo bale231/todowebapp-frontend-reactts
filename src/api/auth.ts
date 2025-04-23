@@ -1,13 +1,10 @@
 // ✅ src/api/auth.ts
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
-// Login JWT
-// ✅ auth.ts
-
 // 🔐 Funzione login con JWT
 export async function login(username: string, password: string) {
   try {
-    const res = await fetch("https://bale231.pythonanywhere.com/api/token/", {
+    const res = await fetch(`${API_URL}/token/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -16,7 +13,8 @@ export async function login(username: string, password: string) {
     });
 
     if (!res.ok) {
-      return { success: false, message: "Credenziali errate" };
+      const data = await res.json();
+      return { success: false, message: data.message || "Credenziali errate" };
     }
 
     const data = await res.json();
@@ -25,7 +23,7 @@ export async function login(username: string, password: string) {
 
     return { success: true };
   } catch (err) {
-    return { success: false, message: "Errore di rete" };
+    return { success: false, message: "Errore di rete: " + err };
   }
 }
 
@@ -35,7 +33,7 @@ export async function getCurrentUserJWT() {
   if (!token) return null;
 
   try {
-    const res = await fetch("https://bale231.pythonanywhere.com/api/user/", {
+    const res = await fetch(`${API_URL}/jwt-user/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -49,37 +47,13 @@ export async function getCurrentUserJWT() {
   }
 }
 
-// 🔄 Esempio fetch con JWT
-// fetch("https://bale231.pythonanywhere.com/api/lists/", {
-//   method: "GET",
-//   headers: {
-//     "Content-Type": "application/json",
-//     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-//   },
-// });
+// 🔄 Logout locale
+export function logout() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+}
 
-
-// Login
-// export async function login(username: string, password: string) {
-//   const res = await fetch("https://bale231.pythonanywhere.com/api/token/", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({ username, password }),
-//   });
-
-//   const data = await res.json();
-
-//   if (res.ok) {
-//     // salva il token
-//     localStorage.setItem("access", data.access);
-//     localStorage.setItem("refresh", data.refresh);
-//     return { success: true };
-//   } else {
-//     return { success: false, message: data.detail || "Errore di login" };
-//   }
-// }
-
-// Register
+// 📝 Register
 export const register = async (
   username: string,
   email: string,
@@ -87,60 +61,37 @@ export const register = async (
 ) => {
   const res = await fetch(`${API_URL}/register/`, {
     method: "POST",
-    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
   });
   return res.json();
 };
 
-// Logout
-export async function logout() {
-  await fetch(`${API_URL}/logout/`, {
-    method: "POST",
-    credentials: "include",
-  });
-}
-
-// Get current user
-export async function getCurrentUser() {
-  try {
-    const res = await fetch(`${API_URL}/user/`, {
-      credentials: "include",
-    });
-
-    if (res.status === 401) return null;
-
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Errore nel recupero utente:", error);
-    return null;
-  }
-}
-
-// Update profile
+// 🧑‍💻 Update profile
 export const updateProfile = async (formData: FormData) => {
   const res = await fetch(`${API_URL}/update-profile/`, {
     method: "POST",
-    credentials: "include",
-    body: formData, // 👈 NON devi mettere headers se usi FormData!
-  });
-  return await res.json();
-};
-
-
-// Send reset password email
-export const resetPassword = async () => {
-  const res = await fetch(`${API_URL}/reset-password/`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+    },
+    body: formData,
   });
   return res.json();
 };
 
-// Update password from reset
+// 🔐 Invia reset password
+export const resetPassword = async () => {
+  const res = await fetch(`${API_URL}/reset-password/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.json();
+};
+
+// 🔐 Aggiorna password da token
 export const updatePassword = async (
   uid: string,
   token: string,
@@ -148,40 +99,42 @@ export const updatePassword = async (
 ) => {
   const res = await fetch(`${API_URL}/reset-password/${uid}/${token}/`, {
     method: "POST",
-    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password: newPassword }),
   });
   return res.json();
 };
 
-// Send email verification
+// 📧 Verifica email
 export const sendVerificationEmail = async () => {
   const res = await fetch(`${API_URL}/send-verification-email/`, {
     method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      "Content-Type": "application/json",
+    },
   });
   return res.json();
 };
 
-// Elimina account
+// ❌ Elimina account
 export const deactivateAccount = async () => {
   const res = await fetch(`${API_URL}/delete-account/`, {
-    method: "DELETE", // cambiato da POST a DELETE
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      "Content-Type": "application/json",
+    },
   });
   return res.json();
 };
 
-
-// Update theme
+// 🎨 Cambia tema
 export const updateTheme = async (theme: string) => {
   const res = await fetch(`${API_URL}/update-theme/`, {
     method: "POST",
-    credentials: "include",
     headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ theme }),

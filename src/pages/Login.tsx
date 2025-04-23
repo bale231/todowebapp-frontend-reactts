@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../api/auth";
+import { login, getCurrentUserJWT } from "../api/auth";
 import gsap from "gsap";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -11,12 +11,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const errorRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
-
   const formRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {  
+  useEffect(() => {
     if (formRef.current) {
       gsap.fromTo(
         formRef.current,
@@ -24,7 +22,7 @@ export default function Login() {
         { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
       );
     }
-  }, []);  
+  }, []);
 
   useEffect(() => {
     if (error && errorRef.current) {
@@ -37,34 +35,41 @@ export default function Login() {
   }, [error]);
 
   const handleLogin = async () => {
+    setIsLoading(true);
+    setError("");
+
     const result = await login(username, password);
+
     if (result.success) {
-      setIsLoading(false);
-      navigate("/"); // oppure dove vuoi andare dopo il login
+      const user = await getCurrentUserJWT();
+      if (user) {
+        console.log("Utente loggato:", user);
+        navigate("/"); // Oppure imposta utente globale se hai un context
+      } else {
+        setError("Errore nel recupero dati utente");
+      }
     } else {
-      setError(`${result.message}`);
+      setError(result.message);
     }
-  };  
+
+    setIsLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div
-        ref={formRef}
-        className="p-6 rounded-xl w-full max-w-sm"
-      >
+      <div ref={formRef} className="p-6 rounded-xl w-full max-w-sm">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
           Login
         </h2>
 
         {error && (
-          <div 
+          <div
             ref={errorRef}
             className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm border border-red-400"
           >
             {error}
           </div>
         )}
-
 
         <div className="relative w-full mb-4">
           <input
@@ -106,35 +111,18 @@ export default function Login() {
           </span>
         </div>
 
-
-        {isMobile ? (
-          <button
-            type="submit"
-            disabled={isLoading}
-            onClick={handleLogin}
-            className={`w-full py-2 rounded ${
-              isLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            } text-white font-semibold`}
-          >
-            {isLoading ? "Attendi..." : "Accedi"}
-          </button>
-        ) : (
-          <button
-            type="submit"
-            disabled={isLoading}
-            onClick={handleLogin}
-            className={`w-full py-2 rounded ${
-              isLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            } text-white font-semibold`}
-          >
-            {isLoading ? "Attendi..." : "Accedi"}
-          </button>
-        )}
-
+        <button
+          type="submit"
+          disabled={isLoading}
+          onClick={handleLogin}
+          className={`w-full py-2 rounded ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          } text-white font-semibold`}
+        >
+          {isLoading ? "Attendi..." : "Accedi"}
+        </button>
 
         <p className="text-sm text-center mt-4 text-gray-700">
           Non hai un account?{" "}
