@@ -58,25 +58,32 @@ export default function Login() {
     }
   };
 
-  const handleMobileLogin = () => {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://bale231.pythonanywhere.com/api/mobile-login/";
+  const handleMobileLogin = async () => {
+    try {
+      const res = await fetch("https://bale231.pythonanywhere.com/api/mobile-login/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
   
-    const inputUsername = document.createElement("input");
-    inputUsername.name = "username";
-    inputUsername.value = username;
-    form.appendChild(inputUsername);
-  
-    const inputPassword = document.createElement("input");
-    inputPassword.name = "password";
-    inputPassword.value = password;
-    form.appendChild(inputPassword);
-  
-    form.style.display = "none";
-    document.body.appendChild(form);
-    form.submit();
-  };
+      if (res.ok) {
+        // Login andato a buon fine → reindirizza a Home
+        navigate("/");
+      } else {
+        // Login fallito → mostra errore
+        setError("Credenziali errate o utente non trovato");
+      }
+    } catch (err) {
+      console.error("Errore di rete:", err);
+      setError("Errore durante la richiesta, riprova.");
+    }
+  };  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
