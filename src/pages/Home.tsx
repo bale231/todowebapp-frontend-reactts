@@ -120,29 +120,29 @@ export default function Home() {
       name: newListName,
       color: newListColor,
     };
-
+  
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+    };
+  
     if (editListId !== null) {
-      const res = await fetch(
-        `https://bale231.pythonanywhere.com/api/lists/${editListId}/`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(`${API_URL}/lists/${editListId}/`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(payload),
+      });
       if (res.ok) fetchLists();
       setEditListId(null);
     } else {
-      const res = await fetch("https://bale231.pythonanywhere.com/api/lists/", {
+      const res = await fetch(`${API_URL}/lists/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers,
         body: JSON.stringify(payload),
       });
       if (res.ok) fetchLists();
     }
-
+  
     setNewListName("");
     setShowForm(false);
   };
