@@ -81,24 +81,25 @@ export default function Login() {
   // };  
 
   const handleMobileLoginFetch = async () => {
-    const formData = new FormData();
-    formData.append("username", username);
-    formData.append("password", password);
+    const payload = new URLSearchParams();
+    payload.append("username", username);
+    payload.append("password", password);
   
     const res = await fetch("https://bale231.pythonanywhere.com/api/mobile-login/", {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: payload,
       credentials: "include",
     });
   
     if (res.ok) {
-      // Login OK: reindirizza su Home
       window.location.href = "https://todowebapp-frontend-reactts-stml.vercel.app";
     } else {
       alert("Login fallito");
     }
-  };
-  
+  };  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
