@@ -60,17 +60,8 @@ export default function Home() {
     if (themeLoaded) {
       getCurrentUserJWT().then((res) => {
         if (!res) navigate("/login");
-        else {
-          setUser(res);
-      
-          // 🔥 Imposta tema personalizzato
-          if (res.theme === "dark") {
-            document.documentElement.classList.add("dark");
-          } else {
-            document.documentElement.classList.remove("dark");
-          }
-        }
-      });      
+        else setUser(res);
+      });
     }
   }, [navigate, themeLoaded]);
 
