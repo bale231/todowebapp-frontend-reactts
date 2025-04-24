@@ -15,6 +15,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState("");
 
   const [passwordValid, setPasswordValid] = useState(true);
@@ -78,8 +79,7 @@ export default function Register() {
   
       if (res.message === "register success") {
         setError("");
-        alert("Registrazione completata! Controlla la tua email per confermare l'account.");
-        navigate("/login");  // ✅ Vai al login
+        setShowModal(true); // ✅ Mostra la modale
       } else if (res.error?.includes("Username")) {
         setError("Username già esistente.");
       } else if (res.error?.includes("Email")) {
@@ -214,6 +214,24 @@ export default function Register() {
           </Link>
         </p>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gray-900 text-white rounded-2xl shadow-xl p-6 w-[90%] max-w-md text-center">
+            <h2 className="text-2xl font-bold mb-2">Registrazione completata</h2>
+            <p className="mb-6">Ora puoi effettuare il login con le tue credenziali.</p>
+            <button
+              onClick={() => {
+                setShowModal(false);
+                navigate("/login");
+              }}
+              className="bg-green-600 px-5 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              Ok
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+    
   );
 }
