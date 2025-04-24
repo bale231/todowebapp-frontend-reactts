@@ -27,6 +27,7 @@ import {
   reorderTodos,
   updateSortOrder,
 } from "../api/todos";
+import { useTheme } from "../context/ThemeContext";
 
 interface Todo {
   id: number;
@@ -59,7 +60,7 @@ export default function ToDoListPage() {
   const [listColor, setListColor] = useState("blue");
   const [editedTodo, setEditedTodo] = useState<Todo | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [themeLoaded, setThemeLoaded] = useState(false);
+  const { themeLoaded, setThemeLoaded } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const shouldAnimate = useRef(true);
