@@ -69,9 +69,6 @@ export default function Home() {
           } else {
             document.documentElement.classList.remove("dark");
           }
-      
-          // Disabilita il "caricamento tema"
-          setThemeLoaded(true);
         }
       });      
     }
