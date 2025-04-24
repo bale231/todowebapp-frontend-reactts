@@ -54,17 +54,20 @@ export function logout() {
 }
 
 // 📝 Register
-export const register = async (
-  username: string,
-  email: string,
-  password: string
-) => {
+export const register = async (username: string, email: string, password: string) => {
   const res = await fetch(`${API_URL}/register/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
   });
-  return res.json();
+
+  const text = await res.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: "Server error", html: text };
+  }
 };
 
 // 🧑‍💻 Update profile
