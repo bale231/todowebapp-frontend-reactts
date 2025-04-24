@@ -73,17 +73,22 @@ export default function Register() {
       return;
     }
   
-    const res = await register(username, email, password);
+    try {
+      const res = await register(username, email, password);
   
-    if (res.message === "register success") {
-      setError("");
-      navigate("/login");
-    } else if (res.error?.includes("Username")) {
-      setError("Username già esistente.");
-    } else if (res.error?.includes("Email")) {
-      setError("Email già registrata.");
-    } else {
-      setError("Errore nella registrazione.");
+      if (res.message === "register success") {
+        setError("");
+        alert("Registrazione completata! Controlla la tua email per confermare l'account.");
+        navigate("/login");  // ✅ Vai al login
+      } else if (res.error?.includes("Username")) {
+        setError("Username già esistente.");
+      } else if (res.error?.includes("Email")) {
+        setError("Email già registrata.");
+      } else {
+        setError("Errore nella registrazione.");
+      }
+    } catch (err) {
+      setError("Errore imprevisto, riprova.");
     }
   };  
 
