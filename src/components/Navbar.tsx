@@ -2,30 +2,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { Sun, Moon } from "lucide-react";
-import { updateTheme, getCurrentUserJWT } from "../api/auth";
+import { useTheme } from "../context/ThemeContext"; // 👈 importa il context
+import { updateTheme } from "../api/auth";
 
 interface NavbarProps {
   username?: string;
 }
 
-function ThemeToggle() {
-  const [darkMode, setDarkMode] = useState(false);
 
-  useEffect(() => {
-    const init = async () => {
-      const user = await getCurrentUserJWT();
-      if (user?.theme === "dark") {
-        document.documentElement.classList.add("dark");
-        setDarkMode(true);
-      }
-    };
-    init();
-  }, []);
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = async () => {
-    const newTheme = darkMode ? "light" : "dark";
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-    setDarkMode(!darkMode);
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
     await updateTheme(newTheme);
   };
 
@@ -34,7 +24,7 @@ function ThemeToggle() {
       onClick={toggleTheme}
       className="text-blue-600 dark:text-yellow-400 hover:scale-105 transition"
     >
-      {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
     </button>
   );
 }

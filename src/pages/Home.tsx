@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
+import { useTheme } from "../context/ThemeContext";
 
 interface TodoList {
   id: number;
@@ -25,7 +26,7 @@ const colorClasses: Record<string, string> = {
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
-  const [themeLoaded, setThemeLoaded] = useState(false);
+  const { themeLoaded, setThemeLoaded } = useTheme();
   const [lists, setLists] = useState<TodoList[]>([]);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
