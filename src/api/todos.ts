@@ -20,7 +20,6 @@ export async function fetchAllLists() {
 
 export async function fetchListDetails(listId: number | string) {
   const headers = getAuthHeaders();
-  console.log("🔥 Headers in fetchListDetails:", headers);
 
   const res = await fetch(`${API_URL}/lists/${listId}/`, {
     method: "GET",

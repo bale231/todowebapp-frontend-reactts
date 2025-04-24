@@ -87,15 +87,12 @@ export default function ToDoListPage() {
         headers: getAuthHeaders(),
       });
       const text = await res.text();
-      console.log("RESPONSE TEXT:", text);
       const data = JSON.parse(text);
       setTodos(data.todos);
 
       if (!preserveSort) {
         setSortOption(data.sort_order || "created");
       }
-
-      console.log("Fetched sort_order:", data.sort_order);
 
       setListName(data.name);
       setListColor(data.color || "blue");

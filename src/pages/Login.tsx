@@ -44,7 +44,7 @@ export default function Login() {
       const user = await getCurrentUserJWT();
       if (user) {
         console.log("Utente loggato:", user);
-        navigate("/"); // Oppure imposta utente globale se hai un context
+        navigate("/");
       } else {
         setError("Errore nel recupero dati utente");
       }
