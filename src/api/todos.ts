@@ -19,10 +19,20 @@ export async function fetchAllLists() {
 }
 
 export async function fetchListDetails(listId: number | string) {
+  const headers = getAuthHeaders();
+  console.log("📡 Fetching details for list:", listId);
+  console.log("🛡 Headers:", headers);
+
   const res = await fetch(`${API_URL}/lists/${listId}/`, {
     method: "GET",
-    headers: getAuthHeaders(),
+    headers: headers,
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("❌ RESPONSE TEXT:", text);
+  }
+
   return res.json();
 }
 
