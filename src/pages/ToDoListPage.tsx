@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CheckSquare, Pencil, Plus, Trash, ListFilter } from "lucide-react";
+import { getAuthHeaders } from "../api/todos";
 import gsap from "gsap";
 import {
   DndContext,
@@ -82,7 +83,8 @@ export default function ToDoListPage() {
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
       const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/${id}/`, {
-        credentials: "include",
+        method: "GET",
+        headers: getAuthHeaders(),
       });
       const text = await res.text();
       console.log("RESPONSE TEXT:", text);

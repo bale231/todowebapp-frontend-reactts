@@ -1,7 +1,7 @@
 // ✅ src/api/todos.ts - gestisce tutto ciò che riguarda liste e ToDo
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
-function getAuthHeaders() {
+export function getAuthHeaders() {
   const token = localStorage.getItem("accessToken");
   return {
     Authorization: `Bearer ${token}`,
