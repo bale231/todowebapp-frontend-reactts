@@ -73,13 +73,13 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div ref={formRef} className="p-6 rounded-xl w-full max-w-sm">
-        <div className="flex justify-center w-full">
+        <div className="flex justify-center w-full mb-6">
           <img
             ref={logoRef}
             src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
             alt="ToDoApp Logo"
             width={270}
-            className="transition-opacity duration-500 ease-in-out text-center mb-6"
+            className="transition-opacity duration-500 ease-in-out text-center"
           />
         </div>
 
