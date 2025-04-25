@@ -60,7 +60,7 @@ export default function ToDoListPage() {
   const [listColor, setListColor] = useState("blue");
   const [editedTodo, setEditedTodo] = useState<Todo | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const { themeLoaded, setThemeLoaded, theme } = useTheme();
+  const { themeLoaded } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const shouldAnimate = useRef(true);
@@ -154,15 +154,6 @@ export default function ToDoListPage() {
     setSortOption(newSort); // 👈 Prima aggiorni lo stato local
     fetchTodos(true); // 👈 Passi true per NON sovrascrivere
   };
-
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    setThemeLoaded(true);
-  }, [setThemeLoaded, theme]);
 
   useEffect(() => {
     if (editedTodo && wasModalClosed.current && modalRef.current) {
