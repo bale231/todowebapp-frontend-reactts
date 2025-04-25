@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CheckSquare, Pencil, Plus, Trash, ListFilter } from "lucide-react";
+import { CheckSquare, Pencil, Plus, Trash, ListFilter, ArrowLeft } from "lucide-react";
 import { getAuthHeaders } from "../api/todos";
 import gsap from "gsap";
 import {
@@ -204,9 +204,10 @@ export default function ToDoListPage() {
         </h1>
         <button
           onClick={() => navigate("/home")}
-          className="text-sm text-blue-600 hover:underline"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
         >
-          ← Torna alla Home
+          <ArrowLeft size={20} />
+          <span className="hidden sm:inline">Torna alla Home</span>
         </button>
       </div>
 
