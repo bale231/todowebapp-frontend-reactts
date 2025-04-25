@@ -21,30 +21,28 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadThemeFromBackend = async () => {
       const user = await getCurrentUserJWT();
-      const userTheme = user?.theme === "dark" ? "dark" : "light";
   
-      setThemeState(userTheme);
-      document.documentElement.classList.remove("dark");
-      if (userTheme === "dark") {
-        document.documentElement.classList.add("dark");
+      if (user?.theme) {
+        document.documentElement.classList.toggle("dark", user.theme === "dark");
+        setThemeState(user.theme);
       }
   
       setThemeLoaded(true);
     };
+  
     loadThemeFromBackend();
   }, []);  
   
   const setTheme = async (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
-  
-    // ✅ Rimuove e aggiunge esplicitamente
-    document.documentElement.classList.remove("dark");
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    
+    try {
+      await updateTheme(newTheme);
+    } catch (err) {
+      console.error("Errore aggiornamento tema:", err);
     }
-  
-    await updateTheme(newTheme); // salva nel backend
-  };  
+  };   
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, themeLoaded }}>

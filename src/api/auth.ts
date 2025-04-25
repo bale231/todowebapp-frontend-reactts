@@ -40,6 +40,8 @@ export async function getCurrentUserJWT() {
       },
     });
 
+    console.log(res);
+
     if (!res.ok) return null;
 
     const data = await res.json();
