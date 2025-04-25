@@ -41,8 +41,12 @@ export async function getCurrentUserJWT() {
     });
 
     if (!res.ok) return null;
-    return await res.json();
-  } catch {
+
+    const data = await res.json();
+    console.log("👤 User from JWT:", data);
+    return data;
+  } catch (err) {
+    console.error("Errore nel recupero dell'utente:", err);
     return null;
   }
 }

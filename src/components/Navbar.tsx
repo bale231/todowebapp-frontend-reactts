@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext"; // 👈 importa il context
-import { updateTheme } from "../api/auth";
+// import { updateTheme } from "../api/auth";
 
 interface NavbarProps {
   username?: string;
@@ -11,13 +11,26 @@ interface NavbarProps {
 
 
 function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
 
+  const API_URL = "https://bale231.pythonanywhere.com/api";
   const toggleTheme = async () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    await updateTheme(newTheme);
+    const token = localStorage.getItem("accessToken") || "";
+    const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+  
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  
+    await fetch(`${API_URL}/update-theme/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ theme: newTheme }),
+    });
   };
+  
 
   return (
     <button
