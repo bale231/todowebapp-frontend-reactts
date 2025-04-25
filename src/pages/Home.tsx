@@ -36,6 +36,7 @@ export default function Home() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
     null
   );
+  const [loading, setLoading] = useState(true); // ← loading per mostrare nulla finché non sappiamo
   const [editMode, setEditMode] = useState(false);
   const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
     "created"
@@ -57,13 +58,30 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (themeLoaded) {
-      getCurrentUserJWT().then((res) => {
-        if (!res) navigate("/login");
-        else setUser(res);
-      });
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
     }
-  }, [navigate, themeLoaded]);
+    // altrimenti prosegui con il fetch dell’utente
+    getCurrentUserJWT()
+      .then((res) => {
+        if (!res) {
+          // token scaduto o non valido
+          localStorage.removeItem("authToken");
+          navigate("/login", { replace: true });
+        } else {
+          setUser(res);
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem("authToken");
+        navigate("/login", { replace: true });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [navigate]);
 
   useEffect(() => {
     if (user) {
@@ -102,6 +120,9 @@ export default function Home() {
     );
   }, [sortOption]);
 
+  // 2️⃣ Rendi null finché loading è true
+  if (loading) return null;
+
   const fetchLists = async () => {
     try {
       const data = await fetchAllLists();
@@ -118,7 +139,7 @@ export default function Home() {
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-  
+
     if (editListId !== null) {
       // ✅ MODIFICA LISTA
       await editList(editListId, newListName, newListColor);
@@ -135,12 +156,11 @@ export default function Home() {
       });
       if (!res.ok) console.error("Errore creazione lista");
     }
-  
+
     fetchLists();
     setNewListName("");
     setShowForm(false);
   };
-  
 
   const handleEditList = (list: TodoList) => {
     setEditListId(list.id);
@@ -149,26 +169,25 @@ export default function Home() {
     setShowForm(true);
   };
 
-const handleDeleteList = async (id: number) => {
-  gsap.fromTo(
-    `#card-${id}`,
-    { x: -5 },
-    {
-      x: 5,
-      repeat: 3,
-      yoyo: true,
-      duration: 0.1,
-      onComplete: () => {
-        (async () => {
-          await deleteList(id);
-          fetchLists();
-          setShowDeleteConfirm(null);
-        })();
-      }      
-    }
-  );
-};
-
+  const handleDeleteList = async (id: number) => {
+    gsap.fromTo(
+      `#card-${id}`,
+      { x: -5 },
+      {
+        x: 5,
+        repeat: 3,
+        yoyo: true,
+        duration: 0.1,
+        onComplete: () => {
+          (async () => {
+            await deleteList(id);
+            fetchLists();
+            setShowDeleteConfirm(null);
+          })();
+        },
+      }
+    );
+  };
 
   const sortedLists = [...lists].sort((a, b) => {
     if (sortOption === "name") {
@@ -203,74 +222,79 @@ const handleDeleteList = async (id: number) => {
           id="list-wrapper"
           className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {Array.isArray(sortedLists) && sortedLists.map((list) => {
-            const completed = list.todos.filter((t) => t.completed).length;
-            const pending = list.todos.length - completed;
+          {Array.isArray(sortedLists) &&
+            sortedLists.map((list) => {
+              const completed = list.todos.filter((t) => t.completed).length;
+              const pending = list.todos.length - completed;
 
-            return (
-              <div
-                key={list.id}
-                id={`card-${list.id}`}
-                className={`relative p-4 bg-white dark:bg-gray-800 rounded shadow border-l-4 ${
-                  colorClasses[list.color]
-                } ${editMode ? "animate-wiggle" : ""}`}
-              >
-                {/* Contenuto cliccabile */}
-                <Link to={`/lists/${list.id}`}>
-                  <div className="cursor-pointer">
-                    <h3 className="text-xl font-semibold mb-2">{list.name}</h3>
-                    {list.todos.length === 0 ? (
-                      <p className="text-sm text-gray-500">Nessuna ToDo</p>
-                    ) : (
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {pending} ToDo {list.name} da completare, {completed}{" "}
-                        completate.
-                      </p>
-                    )}
-                  </div>
-                </Link>
+              return (
+                <div
+                  key={list.id}
+                  id={`card-${list.id}`}
+                  className={`relative p-4 bg-white dark:bg-gray-800 rounded shadow border-l-4 ${
+                    colorClasses[list.color]
+                  } ${editMode ? "animate-wiggle" : ""}`}
+                >
+                  {/* Contenuto cliccabile */}
+                  <Link to={`/lists/${list.id}`}>
+                    <div className="cursor-pointer">
+                      <h3 className="text-xl font-semibold mb-2">
+                        {list.name}
+                      </h3>
+                      {list.todos.length === 0 ? (
+                        <p className="text-sm text-gray-500">Nessuna ToDo</p>
+                      ) : (
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {pending} ToDo {list.name} da completare, {completed}{" "}
+                          completate.
+                        </p>
+                      )}
+                    </div>
+                  </Link>
 
-                {/* Bottoni Modifica/Elimina */}
-                {editMode && (
-                  <div className="absolute top-2 right-2 flex gap-2 z-10">
-                    <button
-                      onClick={() => handleEditList(list)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      <Edit size={25} />
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(list.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash size={25} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Conferma eliminazione */}
-                {showDeleteConfirm === list.id && (
-                  <div className="mt-4 text-lg">
-                    <p className="text-red-500 mb-2">Confermi eliminazione?</p>
-                    <div className="flex gap-2">
+                  {/* Bottoni Modifica/Elimina */}
+                  {editMode && (
+                    <div className="absolute top-2 right-2 flex gap-2 z-10">
                       <button
-                        onClick={() => handleDeleteList(list.id)}
-                        className="px-2 py-1 bg-red-600 text-white text-lg rounded"
+                        onClick={() => handleEditList(list)}
+                        className="text-blue-500 hover:text-blue-700"
                       >
-                        Sì
+                        <Edit size={25} />
                       </button>
                       <button
-                        onClick={() => setShowDeleteConfirm(null)}
-                        className="px-2 py-1 bg-gray-300 text-xs rounded"
+                        onClick={() => setShowDeleteConfirm(list.id)}
+                        className="text-red-500 hover:text-red-700"
                       >
-                        No
+                        <Trash size={25} />
                       </button>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  )}
+
+                  {/* Conferma eliminazione */}
+                  {showDeleteConfirm === list.id && (
+                    <div className="mt-4 text-lg">
+                      <p className="text-red-500 mb-2">
+                        Confermi eliminazione?
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDeleteList(list.id)}
+                          className="px-2 py-1 bg-red-600 text-white text-lg rounded"
+                        >
+                          Sì
+                        </button>
+                        <button
+                          onClick={() => setShowDeleteConfirm(null)}
+                          className="px-2 py-1 bg-gray-300 text-xs rounded"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
         </div>
       </div>
 
