@@ -81,7 +81,7 @@ export default function Navbar({ username }: NavbarProps) {
         className="text-xl font-bold text-blue-600 dark:text-blue-400"
       >
         <img
-          src="https://webdesign-vito-luigi.it/appIcon/logo-todoapp.png"
+          src="https://webdesign-vito-luigi.it/appIcon/newlogo-todoapp.png"
           alt="ToDoApp Logo"
           width={300}
         />
