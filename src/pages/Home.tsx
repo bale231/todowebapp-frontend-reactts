@@ -26,7 +26,7 @@ const colorClasses: Record<string, string> = {
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
-  const { setTheme, themeLoaded, setThemeLoaded } = useTheme();
+  const { setTheme, themeLoaded } = useTheme();
   const [lists, setLists] = useState<TodoList[]>([]);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
