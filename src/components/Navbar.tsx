@@ -3,17 +3,25 @@ import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext"; // 👈 importa il context
+import { updateTheme } from "../api/auth";
 
 interface NavbarProps {
   username?: string;
 }
 
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
+  const toggleTheme = async () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    await updateTheme(newTheme);
+  };
+
   return (
     <button
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      onClick={toggleTheme}
       className="text-blue-600 dark:text-yellow-400 hover:scale-105 transition"
     >
       {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
