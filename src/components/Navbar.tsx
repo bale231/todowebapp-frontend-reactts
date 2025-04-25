@@ -74,14 +74,29 @@ export default function Navbar({ username }: NavbarProps) {
     }
   }, [dropdownOpen]);
 
+  const { theme } = useTheme();
+
   return (
     <nav className="w-full sticky top-0 h-[80px] px-6 flex items-center justify-between bg-white dark:bg-gray-800 shadow z-50">
       <Link
         to="/home"
         className="text-xl font-bold text-blue-600 dark:text-blue-400"
       >
+        {theme === "dark" ? (
+          <img
+            src="https://webdesign-vito-luigi.it/appIcon/logo-themedark.png"
+            alt="ToDoApp Logo"
+            width={300}
+          />
+        ) : (
+          <img
+            src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
+            alt="ToDoApp Logo"
+            width={300}
+          />
+        )}
         <img
-          src="https://webdesign-vito-luigi.it/appIcon/newlogo-todoapp.png"
+          src="https://webdesign-vito-luigi.it/appIcon/.png"
           alt="ToDoApp Logo"
           width={300}
         />
