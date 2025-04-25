@@ -187,9 +187,11 @@ const handleDeleteList = async (id: number) => {
         <h1 ref={titleRef} className="text-3xl font-bold">
           Benvenuto, {user.username} 👋
         </h1>
-        <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
-          Qui andranno le tue liste ToDo animate 💫
-        </p>
+        {Array.isArray(sortedLists) && sortedLists.length === 0 && (
+          <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
+            Qui andranno le tue liste ToDo animate 💫
+          </p>
+        )}
 
         <div
           id="list-wrapper"
