@@ -70,7 +70,15 @@ export default function ToDoListPage() {
   );
 
   const listRef = useRef<HTMLDivElement>(null);
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor), 
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
   const animateTodos = () => {
     if (listRef.current) {
       gsap.fromTo(
@@ -379,7 +387,7 @@ function SortableTodo({
         <span
           {...attributes}
           {...listeners}
-          className="cursor-grab text-gray-400 hover:text-gray-600"
+          className="cursor-grab text-gray-400 hover:text-gray-600 touch-none"
           title="Trascina"
         >
           ⠿
