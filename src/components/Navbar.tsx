@@ -77,7 +77,7 @@ export default function Navbar({ username }: NavbarProps) {
   const { theme } = useTheme();
 
   return (
-    <nav className="w-full sticky top-0 h-[80px] px-6 flex items-center justify-between bg-white dark:bg-gray-800 shadow z-50">
+    <nav className="w-full sticky top-0 h-[80px] pl-2 pr-6 flex items-center justify-between bg-white dark:bg-gray-800 shadow z-50">
       <Link
         to="/home"
         className="text-xl font-bold text-blue-600 dark:text-blue-400"
@@ -87,14 +87,14 @@ export default function Navbar({ username }: NavbarProps) {
             src="https://webdesign-vito-luigi.it/appIcon/logo-themedark.png"
             alt="ToDoApp Logo"
             className="transition-opacity duration-500 ease-in-out"
-            width={180}
+            width={160}
           />
         ) : (
           <img
             src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
             alt="ToDoApp Logo"
             className="transition-opacity duration-500 ease-in-out"
-            width={180}
+            width={160}
           />
         )}
       </Link>
