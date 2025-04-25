@@ -47,15 +47,16 @@ export default function Home() {
   const modalRef = useRef(null);
 
   useEffect(() => {
+    if (!themeLoaded) return;
+  
     getCurrentUserJWT().then((res) => {
       if (!res) {
         navigate("/");
       } else {
         setUser(res);
-        setTheme(res.theme === "dark" ? "dark" : "light");  // sincronizza
       }
     });
-  }, [navigate, setTheme]);  
+  }, [themeLoaded, navigate]);  
    
 
   useEffect(() => {
