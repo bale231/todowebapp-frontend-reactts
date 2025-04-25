@@ -10,6 +10,7 @@ export default function Register() {
 
   const formRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +52,16 @@ export default function Register() {
   }, [error]);
 
   useEffect(() => {
+    if (showModal && modalRef.current) {
+      gsap.fromTo(
+        modalRef.current,
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+      );
+    }
+  }, [showModal]);  
+
+  useEffect(() => {
     if (formRef.current) {
       gsap.fromTo(
         formRef.current,
@@ -87,6 +98,7 @@ export default function Register() {
       } else {
         setError("Errore nella registrazione.");
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Errore imprevisto, riprova.");
     }
@@ -216,7 +228,7 @@ export default function Register() {
       </div>
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gray-900 text-white rounded-2xl shadow-xl p-6 w-[90%] max-w-md text-center">
+          <div ref={modalRef} className="bg-gray-900 text-white rounded-2xl shadow-xl p-6 w-[90%] max-w-md text-center">
             <h2 className="text-2xl font-bold mb-2">Registrazione completata</h2>
             <p className="mb-6">Ora puoi effettuare il login con le tue credenziali.</p>
             <button
