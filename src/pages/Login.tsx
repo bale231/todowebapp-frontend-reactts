@@ -78,13 +78,10 @@ export default function Login() {
             ref={logoRef}
             src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
             alt="ToDoApp Logo"
-            width={180}
+            width={270}
             className="transition-opacity duration-500 ease-in-out text-center"
           />
         </div>
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
-          Login
-        </h2>
 
         {error && (
           <div
