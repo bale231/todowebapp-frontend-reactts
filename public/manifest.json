@@ -1,0 +1,22 @@
+{
+    "short_name": "ToDo",
+    "name": "ToDo WebApp",
+    "icons": [
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": "/login",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0d6efd"
+  }
+  
