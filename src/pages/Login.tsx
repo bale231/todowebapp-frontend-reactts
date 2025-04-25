@@ -44,7 +44,7 @@ export default function Login() {
       const user = await getCurrentUserJWT();
       if (user) {
         console.log("Utente loggato:", user);
-        navigate("/");
+        navigate("/home");
       } else {
         setError("Errore nel recupero dati utente");
       }

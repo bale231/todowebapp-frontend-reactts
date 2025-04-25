@@ -78,7 +78,7 @@ export default function Navbar({ username }: NavbarProps) {
   return (
     <nav className="w-full sticky top-0 h-[80px] px-6 flex items-center justify-between bg-white dark:bg-gray-800 shadow z-50">
       <Link
-        to="/"
+        to="/home"
         className="text-xl font-bold text-blue-600 dark:text-blue-400"
       >
         <img

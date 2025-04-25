@@ -204,7 +204,7 @@ export default function ToDoListPage() {
           {listName}
         </h1>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
           className="text-sm text-blue-600 hover:underline"
         >
           ← Torna alla Home
