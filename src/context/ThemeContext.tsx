@@ -1,4 +1,3 @@
-// src/context/ThemeContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { getCurrentUserJWT, updateTheme } from "../api/auth";
 
@@ -21,28 +20,35 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadThemeFromBackend = async () => {
       const user = await getCurrentUserJWT();
-  
       if (user?.theme) {
-        document.documentElement.classList.toggle("dark", user.theme === "dark");
         setThemeState(user.theme);
+        if (user.theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
       }
-  
       setThemeLoaded(true);
     };
-  
+
     loadThemeFromBackend();
-  }, []);  
-  
+
+    // 🔁 Ricarica il tema anche al cambio di accessToken (nuovo login)
+    const observer = new MutationObserver(loadThemeFromBackend);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["data-access-token"] });
+
+    return () => observer.disconnect();
+  }, []);
+
   const setTheme = async (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-    
-    try {
-      await updateTheme(newTheme);
-    } catch (err) {
-      console.error("Errore aggiornamento tema:", err);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
-  };   
+    await updateTheme(newTheme);
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, themeLoaded }}>

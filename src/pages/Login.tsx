@@ -44,6 +44,10 @@ export default function Login() {
       const user = await getCurrentUserJWT();
       if (user) {
         console.log("Utente loggato:", user);
+        const accessToken = localStorage.getItem("accessToken");
+        if (accessToken) {
+          document.body.setAttribute("data-access-token", accessToken);
+        }
         navigate("/home");
       } else {
         setError("Errore nel recupero dati utente");

@@ -131,6 +131,7 @@ export default function ToDoListPage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = async (event: any) => {
     if (sortOption === "alphabetical") return;
 

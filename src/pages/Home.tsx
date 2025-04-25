@@ -25,6 +25,7 @@ const colorClasses: Record<string, string> = {
 };
 
 export default function Home() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const { themeLoaded } = useTheme();
   const [lists, setLists] = useState<TodoList[]>([]);
@@ -290,6 +291,7 @@ const handleDeleteList = async (id: number) => {
             <ListFilter size={18} />
             <select
               value={sortOption}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(e) => setSortOption(e.target.value as any)}
               className="bg-transparent text-[black] text-sm"
             >
