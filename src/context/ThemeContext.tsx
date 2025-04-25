@@ -1,5 +1,5 @@
 // src/context/ThemeContext.tsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface ThemeContextProps {
   theme: "light" | "dark";
@@ -19,18 +19,19 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<"light" | "dark">("light");
   const [themeLoaded, setThemeLoaded] = useState(false);
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    const initialTheme = savedTheme || "light";
-    setThemeState(initialTheme);
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
-    setThemeLoaded(true);
-  }, []);
-
   const setTheme = (newTheme: "light" | "dark") => {
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
     setThemeState(newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+
+    // 🔥 Aggiorna anche il backend
+    fetch("https://bale231.pythonanywhere.com/api/update-theme/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ theme: newTheme }),
+    });
   };
 
   return (
@@ -42,4 +43,5 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => useContext(ThemeContext);

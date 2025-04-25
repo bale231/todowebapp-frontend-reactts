@@ -26,7 +26,7 @@ const colorClasses: Record<string, string> = {
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
-  const { themeLoaded, setThemeLoaded } = useTheme();
+  const { setTheme, themeLoaded, setThemeLoaded } = useTheme();
   const [lists, setLists] = useState<TodoList[]>([]);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
@@ -47,33 +47,20 @@ export default function Home() {
   const modalRef = useRef(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    setThemeLoaded(true);
-  }, []);
-
-  useEffect(() => {
     getCurrentUserJWT().then((res) => {
       if (!res) {
         navigate("/");
       } else {
         setUser(res);
   
-        // 🌙 Imposta il tema per l’utente
-        if (res.theme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-  
+        // 🌙 Sincronizza il tema backend -> frontend
+        const theme = res.theme === "dark" ? "dark" : "light";
+        setTheme(theme);
         setThemeLoaded(true);
       }
     });
-  }, [navigate]);  
+  }, [navigate, setTheme, setThemeLoaded]);
+   
 
   useEffect(() => {
     if (user) {
