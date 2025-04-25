@@ -364,7 +364,7 @@ function SortableTodo({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between bg-white dark:bg-gray-800 px-4 py-2 rounded shadow p-20 text-xl font-semibold"
+      className="flex items-center justify-between bg-white dark:bg-gray-800 px-8 py-4 rounded shadow text-xl font-semibold"
     >
       <div
         className={`flex items-center gap-2 ${
