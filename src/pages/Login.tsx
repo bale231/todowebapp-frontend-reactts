@@ -73,13 +73,15 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div ref={formRef} className="p-6 rounded-xl w-full max-w-sm">
-        <img
-          ref={logoRef}
-          src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
-          alt="ToDoApp Logo"
-          width={180}
-          className="transition-opacity duration-500 ease-in-out w-full text-center"
-        />
+        <div className="flex justify-center w-full">
+          <img
+            ref={logoRef}
+            src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
+            alt="ToDoApp Logo"
+            width={180}
+            className="transition-opacity duration-500 ease-in-out text-center"
+          />
+        </div>
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
           Login
         </h2>
