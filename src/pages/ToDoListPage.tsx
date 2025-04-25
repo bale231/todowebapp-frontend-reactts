@@ -207,7 +207,7 @@ export default function ToDoListPage() {
           className="flex items-center gap-2 text-[#121212]-600 hover:text-black-800 dark:text-[#d3d3d3]-400 dark:hover:text-white-300 transition"
         >
           <ArrowLeft size={20} />
-          <span className="hidden sm:inline text-xl">Torna alla Home</span>
+          <span className="hidden sm:inline text-lg">Torna alla Home</span>
         </button>
       </div>
 
@@ -364,7 +364,7 @@ function SortableTodo({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between bg-white dark:bg-gray-800 px-8 py-4 rounded shadow text-xl font-semibold"
+      className="flex items-center justify-between bg-white dark:bg-gray-800 px-6 py-2 rounded shadow text-xl font-semibold"
     >
       <div
         className={`flex items-center gap-2 ${
