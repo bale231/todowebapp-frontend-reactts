@@ -11,6 +11,7 @@ export default function Register() {
   const formRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,6 +51,17 @@ export default function Register() {
       );
     }
   }, [error]);
+
+  
+  useEffect(() => {
+    if (logoRef.current) {
+      gsap.fromTo(
+        logoRef.current,
+        { opacity: 0, y: -20, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power2.out" }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     if (showModal && modalRef.current) {
@@ -110,9 +122,15 @@ export default function Register() {
         ref={formRef}
         className="p-6 rounded-xl w-full max-w-sm"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">
-          Registrati
-        </h2>
+        <div className="flex justify-center w-full mb-6">
+          <img
+            ref={logoRef}
+            src="https://webdesign-vito-luigi.it/appIcon/logo-themedark.png"
+            alt="ToDoApp Logo"
+            width={270}
+            className="transition-opacity duration-500 ease-in-out text-center"
+          />
+        </div>
         {error && (
           <div 
             ref={errorRef}
