@@ -78,7 +78,7 @@ export const register = async (username: string, email: string, password: string
 
 // 🧑‍💻 Update profile
 export const updateProfile = async (formData: FormData) => {
-  const res = await fetch(`${API_URL}/update-profile/`, {
+  const res = await fetch(`${API_URL}/update-profile-jwt/`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
