@@ -53,9 +53,16 @@ export default function Home() {
       } else {
         setUser(res);
   
-        // 🌙 Sincronizza il tema backend -> frontend
-        const theme = res.theme === "dark" ? "dark" : "light";
-        setTheme(theme);
+        // 🔁 Sincronizza tema ma non bloccare tutto il rendering
+        if (res.theme === "dark") {
+          document.documentElement.classList.add("dark");
+          setTheme("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+          setTheme("light");
+        }
+  
+        // ✅ Caricamento completato
         setThemeLoaded(true);
       }
     });

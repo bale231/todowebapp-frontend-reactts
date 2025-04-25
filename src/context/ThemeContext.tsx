@@ -1,5 +1,5 @@
-// src/context/ThemeContext.tsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
+import { getCurrentUserJWT, updateTheme as updateThemeAPI } from "../api/auth";
 
 interface ThemeContextProps {
   theme: "light" | "dark";
@@ -20,17 +20,23 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [themeLoaded, setThemeLoaded] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    const initialTheme = savedTheme || "light";
-    setThemeState(initialTheme);
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
-    setThemeLoaded(true);
+    const fetchTheme = async () => {
+      const user = await getCurrentUserJWT();
+      if (!user) return;
+
+      const userTheme = user.theme || "light";
+      setThemeState(userTheme);
+      document.documentElement.classList.toggle("dark", userTheme === "dark");
+      setThemeLoaded(true);
+    };
+
+    fetchTheme();
   }, []);
 
   const setTheme = (newTheme: "light" | "dark") => {
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
     setThemeState(newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    updateThemeAPI(newTheme); // 🔁 aggiorna il backend
   };
 
   return (
