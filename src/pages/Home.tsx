@@ -57,13 +57,23 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (themeLoaded) {
-      getCurrentUserJWT().then((res) => {
-        if (!res) navigate("/");
-        else setUser(res);
-      });
-    }
-  }, [navigate, themeLoaded]);
+    getCurrentUserJWT().then((res) => {
+      if (!res) {
+        navigate("/");
+      } else {
+        setUser(res);
+  
+        // 🌙 Imposta il tema per l’utente
+        if (res.theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+  
+        setThemeLoaded(true);
+      }
+    });
+  }, [navigate]);  
 
   useEffect(() => {
     if (user) {
