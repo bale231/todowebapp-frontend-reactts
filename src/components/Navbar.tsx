@@ -86,12 +86,14 @@ export default function Navbar({ username }: NavbarProps) {
           <img
             src="https://webdesign-vito-luigi.it/appIcon/logo-themedark.png"
             alt="ToDoApp Logo"
+            className="transition-opacity duration-500 ease-in-out"
             width={180}
           />
         ) : (
           <img
             src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
             alt="ToDoApp Logo"
+            className="transition-opacity duration-500 ease-in-out"
             width={180}
           />
         )}
