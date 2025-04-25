@@ -204,7 +204,7 @@ export default function ToDoListPage() {
         </h1>
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
+          className="flex items-center gap-2 text-[#121212]-600 hover:text-black-800 dark:text-[#d3d3d3]-400 dark:hover:text-white-300 transition"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline">Torna alla Home</span>
