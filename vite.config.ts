@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       manifest: {
         name: 'ToDo WebApp',
-        short_name: 'ToDo',
-        start_url: '/login',
+        short_name: 'ToDoApp',
+        start_url: '/',
         scope: '/',
         display: 'standalone',
         background_color: '#ffffff',

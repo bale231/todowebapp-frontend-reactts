@@ -9,6 +9,9 @@ import ToDoListPage from './pages/ToDoListPage'
 import LoginRedirect from './components/LoginRedirect'
 
 function App() {
+
+  const isLoggedIn = !!localStorage.getItem("jwt");
+
   return (
     <Router>
       <Routes>
@@ -19,7 +22,11 @@ function App() {
         <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
         <Route path="/lists/:id" element={<ToDoListPage />} />
         <Route path="/login-success" element={<LoginRedirect />} />
-        <Route path="/" element={< Home /> } />
+        <Route path="/home" element={<Home />} />
+        <Route
+          path="/"
+          element={isLoggedIn ? <Navigate to="/home" /> : <Navigate to="/login" />}
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

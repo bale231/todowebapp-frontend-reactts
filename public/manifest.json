@@ -1,5 +1,5 @@
 {
-    "short_name": "ToDo",
+    "short_name": "ToDoApp",
     "name": "ToDo WebApp",
     "icons": [
       {
@@ -13,7 +13,7 @@
         "sizes": "512x512"
       }
     ],
-    "start_url": "/login",
+    "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "background_color": "#ffffff",
