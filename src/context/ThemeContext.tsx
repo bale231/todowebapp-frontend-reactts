@@ -21,25 +21,29 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadThemeFromBackend = async () => {
       const user = await getCurrentUserJWT();
-      if (user?.theme) {
-        setThemeState(user.theme);
-        document.documentElement.classList.remove("dark");
-        if (user.theme === "dark") {
-          document.documentElement.classList.add("dark");
-        }
+      const userTheme = user?.theme === "dark" ? "dark" : "light";
+  
+      setThemeState(userTheme);
+      document.documentElement.classList.remove("dark");
+      if (userTheme === "dark") {
+        document.documentElement.classList.add("dark");
       }
+  
       setThemeLoaded(true);
     };
     loadThemeFromBackend();
-  }, []);
+  }, []);  
   
   const setTheme = async (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
+  
+    // ✅ Rimuove e aggiunge esplicitamente
     document.documentElement.classList.remove("dark");
     if (newTheme === "dark") {
       document.documentElement.classList.add("dark");
     }
-    await updateTheme(newTheme);
+  
+    await updateTheme(newTheme); // salva nel backend
   };  
 
   return (

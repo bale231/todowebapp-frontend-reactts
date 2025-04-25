@@ -1,4 +1,3 @@
-// ✅ Profile.tsx completo con animazione GSAP al primo click, alert slide da destra e bottone abilitato solo in modalità modifica + pulsante reset password + disattiva account con modale di conferma + animazione GSAP e sfondo sfocato
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import Navbar from "../components/Navbar";
