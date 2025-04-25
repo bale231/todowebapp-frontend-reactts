@@ -79,7 +79,7 @@ export default function Login() {
             src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
             alt="ToDoApp Logo"
             width={270}
-            className="transition-opacity duration-500 ease-in-out text-center"
+            className="transition-opacity duration-500 ease-in-out text-center mb-6"
           />
         </div>
 
