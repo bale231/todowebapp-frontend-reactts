@@ -12,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const errorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +34,16 @@ export default function Login() {
       );
     }
   }, [error]);
+
+  useEffect(() => {
+    if (logoRef.current) {
+      gsap.fromTo(
+        logoRef.current,
+        { opacity: 0, y: -20, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power2.out" }
+      );
+    }
+  }, []);
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -61,6 +72,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <img
+        ref={logoRef}
+        src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
+        alt="ToDoApp Logo"
+        width={200}
+        className="transition-opacity duration-500 ease-in-out"
+      />
       <div ref={formRef} className="p-6 rounded-xl w-full max-w-sm">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
           Login
