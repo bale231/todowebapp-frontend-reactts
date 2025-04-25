@@ -185,7 +185,7 @@ const handleDeleteList = async (id: number) => {
       <Navbar username={user.username} />
       <div className="p-6" ref={boxRef}>
         <h1 ref={titleRef} className="text-3xl font-bold">
-          Benvenuto, {user.username} 👋
+          Ciao {user.username} 👋!! Crea le tue prime Liste e organizza il tuo tempo nel modo giusto!
         </h1>
         {Array.isArray(sortedLists) && sortedLists.length === 0 && (
           <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
