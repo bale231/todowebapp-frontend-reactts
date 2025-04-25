@@ -52,21 +52,10 @@ export default function Home() {
         navigate("/");
       } else {
         setUser(res);
-  
-        // 🔁 Sincronizza tema ma non bloccare tutto il rendering
-        if (res.theme === "dark") {
-          document.documentElement.classList.add("dark");
-          setTheme("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-          setTheme("light");
-        }
-  
-        // ✅ Caricamento completato
-        setThemeLoaded(true);
+        setTheme(res.theme === "dark" ? "dark" : "light");  // sincronizza
       }
     });
-  }, [navigate, setTheme, setThemeLoaded]);
+  }, [navigate, setTheme]);  
    
 
   useEffect(() => {

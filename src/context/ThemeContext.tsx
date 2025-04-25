@@ -1,48 +1,44 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { getCurrentUserJWT, updateTheme as updateThemeAPI } from "../api/auth";
+// src/context/ThemeContext.tsx
+import { createContext, useContext, useEffect, useState } from "react";
+import { getCurrentUserJWT, updateTheme } from "../api/auth";
 
 interface ThemeContextProps {
   theme: "light" | "dark";
   setTheme: (theme: "light" | "dark") => void;
   themeLoaded: boolean;
-  setThemeLoaded: (loaded: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps>({
   theme: "light",
   setTheme: () => {},
   themeLoaded: false,
-  setThemeLoaded: () => {},
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<"light" | "dark">("light");
   const [themeLoaded, setThemeLoaded] = useState(false);
 
+  // Al primo load: prendi il tema dal backend
   useEffect(() => {
-    const fetchTheme = async () => {
+    const loadThemeFromBackend = async () => {
       const user = await getCurrentUserJWT();
-      if (!user) return;
-
-      const userTheme = user.theme || "light";
-      setThemeState(userTheme);
-      document.documentElement.classList.toggle("dark", userTheme === "dark");
+      if (user?.theme) {
+        setThemeState(user.theme);
+        document.documentElement.classList.toggle("dark", user.theme === "dark");
+      }
       setThemeLoaded(true);
     };
-
-    fetchTheme();
+    loadThemeFromBackend();
   }, []);
 
-  const setTheme = (newTheme: "light" | "dark") => {
+  const setTheme = async (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
-    updateThemeAPI(newTheme); // 🔁 aggiorna il backend
+    await updateTheme(newTheme);
   };
 
   return (
-    <ThemeContext.Provider
-      value={{ theme, setTheme, themeLoaded, setThemeLoaded }}
-    >
+    <ThemeContext.Provider value={{ theme, setTheme, themeLoaded }}>
       {children}
     </ThemeContext.Provider>
   );
