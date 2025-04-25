@@ -99,7 +99,7 @@ export default function ToDoListPage() {
       setListColor(data.color || "blue");
       if (shouldAnimate.current) {
         setTimeout(() => animateTodos(), 50);
-        shouldAnimate.current = false; // ❌ dopo la prima animazione, disattiva
+        shouldAnimate.current = false;
       }
     },
     [id]
@@ -126,13 +126,13 @@ export default function ToDoListPage() {
     if (editedTodo) {
       await updateTodo(editedTodo.id, editedTodo.title);
       setEditedTodo(null);
-      shouldAnimate.current = false; // 👈 Disattiva l'animazione!
+      shouldAnimate.current = false;
       fetchTodos();
     }
   };
 
   const handleDragEnd = async (event: any) => {
-    if (sortOption === "alphabetical") return; // 👈 Evita il drag in ordine alfabetico
+    if (sortOption === "alphabetical") return;
 
     const { active, over } = event;
     if (!over || active.id === over.id) return;

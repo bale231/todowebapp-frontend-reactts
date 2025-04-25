@@ -47,18 +47,13 @@ export default function Home() {
   const modalRef = useRef(null);
 
   useEffect(() => {
-    const fetchUserAndTheme = async () => {
+    const loadUser = async () => {
       const res = await getCurrentUserJWT();
-      if (!res) {
-        navigate("/");
-      } else {
-        setUser(res);
-        document.documentElement.classList.toggle("dark", res.theme === "dark");
-      }
+      if (!res) navigate("/");
+      else setUser(res);
     };
-  
-    fetchUserAndTheme();
-  }, [navigate]);   
+    loadUser();
+  }, [navigate]);    
    
 
   useEffect(() => {
