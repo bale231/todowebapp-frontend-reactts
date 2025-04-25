@@ -59,7 +59,7 @@ export default function Home() {
   useEffect(() => {
     if (themeLoaded) {
       getCurrentUserJWT().then((res) => {
-        if (!res) navigate("/login");
+        if (!res) navigate("/");
         else setUser(res);
       });
     }

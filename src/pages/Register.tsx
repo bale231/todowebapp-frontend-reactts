@@ -209,7 +209,7 @@ export default function Register() {
 
         <p className="text-sm text-center mt-4 text-gray-700 dark:text-gray-300">
           Hai già un account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
+          <Link to="/" className="text-blue-500 hover:underline">
             Accedi
           </Link>
         </p>
@@ -222,7 +222,7 @@ export default function Register() {
             <button
               onClick={() => {
                 setShowModal(false);
-                navigate("/login");
+                navigate("/");
               }}
               className="bg-green-600 px-5 py-2 rounded-lg hover:bg-green-700 transition"
             >

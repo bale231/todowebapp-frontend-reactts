@@ -11,12 +11,12 @@ export default function LoginRedirect() {
     })
       .then((res) => {
         if (res.ok) {
-          navigate("/"); // 👈 vai alla home
+          navigate("/home"); // 👈 vai alla home
         } else {
-          navigate("/login"); // 👈 torna al login se non sei loggato
+          navigate("/"); // 👈 torna al login se non sei loggato
         }
       })
-      .catch(() => navigate("/login"));
+      .catch(() => navigate("/"));
   }, [navigate]);
 
   return (

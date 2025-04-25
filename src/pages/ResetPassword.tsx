@@ -62,7 +62,7 @@ export default function ResetPassword() {
     const res = await updatePassword(uid || "", token || "", password);
     if (res.message === "Password aggiornata con successo") {
       showAlert("Password aggiornata! Reindirizzamento...", "success");
-      setTimeout(() => navigate("/login"), 2500);
+      setTimeout(() => navigate("/"), 2500);
     } else {
       showAlert(res.error || "Errore imprevisto", "error");
     }

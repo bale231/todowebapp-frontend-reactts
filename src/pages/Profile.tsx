@@ -156,7 +156,7 @@ export default function Profile() {
     const res = await deactivateAccount();
     if (res.message === "Account disattivato") {
       showAlert("Account disattivato correttamente.", "success");
-      setTimeout(() => (window.location.href = "/login"), 2000);
+      setTimeout(() => (window.location.href = "/"), 2000);
     } else {
       showAlert("Errore nella disattivazione dell'account", "error");
     }

@@ -17,7 +17,7 @@ export default function VerifyEmail() {
         const data = await res.json();
         if (data.verified) {
           setStatus("success");
-          setTimeout(() => navigate("/login"), 3000);
+          setTimeout(() => navigate("/"), 3000);
         } else {
           setStatus("error");
         }

@@ -118,7 +118,7 @@ export default function Navbar({ username }: NavbarProps) {
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   document.cookie = "token=; Max-Age=0; path=/;";
-                  navigate("/login");
+                  navigate("/");
                 }}
                 className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
               >
@@ -131,7 +131,7 @@ export default function Navbar({ username }: NavbarProps) {
             onMouseDown={(e) => {
               e.stopPropagation();
               document.cookie = "token=; Max-Age=0; path=/;";
-              navigate("/login");
+              navigate("/");
             }}
             className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
           >
