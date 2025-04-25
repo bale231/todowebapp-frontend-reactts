@@ -77,7 +77,7 @@ export default function Navbar({ username }: NavbarProps) {
   const { theme } = useTheme();
 
   return (
-    <nav className="w-full top-0 h-[80px] pl-2 pr-6 flex items-center justify-between bg-white dark:bg-gray-800 shadow z-50">
+    <nav className="w-full sticky top-0 h-[80px] pl-2 pr-6 flex items-center justify-between bg-white dark:bg-gray-800 shadow z-50">
       <Link
         to="/home"
         className="text-xl font-bold text-blue-600 dark:text-blue-400"
