@@ -13,7 +13,7 @@ function ThemeToggle() {
 
   return (
     <button
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      onClick={() => setTheme(theme === "light" ? "light" : "dark")}
       className="text-blue-600 dark:text-yellow-400 hover:scale-105 transition"
     >
       {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
