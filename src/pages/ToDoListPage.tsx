@@ -207,7 +207,7 @@ export default function ToDoListPage() {
           className="flex items-center gap-2 text-[#121212]-600 hover:text-black-800 dark:text-[#d3d3d3]-400 dark:hover:text-white-300 transition"
         >
           <ArrowLeft size={20} />
-          <span className="hidden sm:inline">Torna alla Home</span>
+          <span className="hidden sm:inline text-xl">Torna alla Home</span>
         </button>
       </div>
 
