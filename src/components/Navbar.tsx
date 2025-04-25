@@ -86,20 +86,15 @@ export default function Navbar({ username }: NavbarProps) {
           <img
             src="https://webdesign-vito-luigi.it/appIcon/logo-themedark.png"
             alt="ToDoApp Logo"
-            width={300}
+            width={180}
           />
         ) : (
           <img
             src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
             alt="ToDoApp Logo"
-            width={300}
+            width={180}
           />
         )}
-        <img
-          src="https://webdesign-vito-luigi.it/appIcon/.png"
-          alt="ToDoApp Logo"
-          width={300}
-        />
       </Link>
 
       <div className="flex items-center gap-4">
