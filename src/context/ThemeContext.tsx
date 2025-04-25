@@ -42,13 +42,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setTheme = async (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+  
+    // ✅ Prima rimuovi sempre entrambe
+    document.documentElement.classList.remove("dark", "light");
+    // ✅ Poi aggiungi quella giusta
+    document.documentElement.classList.add(newTheme);
+  
     await updateTheme(newTheme);
-  };
+  };  
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, themeLoaded }}>
