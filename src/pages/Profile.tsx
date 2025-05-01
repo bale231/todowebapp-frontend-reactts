@@ -247,7 +247,7 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="text-xs text-white-600 bg-red-600 px-4 py-2 hover:border-red-600 hover:bg-transparent rounded-[6px] mt-1"
+                className="text-sm text-white-600 bg-red-600 px-4 py-2 border border-red-600 hover:bg-transparent transition-all rounded-[6px] mt-1"
               >
                 Rimuovi immagine
               </button>
@@ -255,7 +255,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-sm text-white-600 bg-blue-600 px-4 py-2 rounded-[6px] hover:border-blue-600 hover:bg-transparent flex items-center gap-2 group"
+              className="text-sm text-white-600 bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
             >
               <span className="relative w-5 h-5">
                 <svg
@@ -346,7 +346,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={() => setShowConfirmModal(true)}
-            className="w-full text-sm text-white-500 bg-red-600 hover:bg-transparent border border-red-600 rounded-[6px] mt-2"
+            className="w-full text-sm text-white-500 bg-red-600 px-4 py-2 hover:bg-transparent border border-red-600 rounded-[6px] mt-2"
           >
             Disattiva il mio account
           </button>
