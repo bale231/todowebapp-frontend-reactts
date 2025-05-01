@@ -6,3 +6,15 @@ html,
 body, * {
   font-family: "Poppins", sans-serif;
 }
+
+/* Scrollbar invisibile per Webkit (Chrome, Edge, Safari) */
+.invisible-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+/* Scrollbar invisibile per Firefox */
+.invisible-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}

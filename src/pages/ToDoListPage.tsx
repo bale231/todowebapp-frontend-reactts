@@ -246,9 +246,10 @@ export default function ToDoListPage() {
             items={displayedTodos.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
           >
+
             <div
               ref={listRef}
-              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1"
+              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 invisible-scrollbar"
             >
               {displayedTodos.map((todo) => (
                 <SortableTodo
