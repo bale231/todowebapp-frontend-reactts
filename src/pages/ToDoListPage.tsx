@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CheckSquare, Pencil, Plus, Trash, ListFilter, ArrowLeft } from "lucide-react";
+import {
+  CheckSquare,
+  Pencil,
+  Plus,
+  Trash,
+  ListFilter,
+  ArrowLeft,
+} from "lucide-react";
 import { getAuthHeaders } from "../api/todos";
 import gsap from "gsap";
 import {
@@ -71,7 +78,7 @@ export default function ToDoListPage() {
 
   const listRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(
-    useSensor(PointerSensor), 
+    useSensor(PointerSensor),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 250,
@@ -91,10 +98,13 @@ export default function ToDoListPage() {
 
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
-      const res = await fetch(`https://bale231.pythonanywhere.com/api/lists/${id}/`, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
+      const res = await fetch(
+        `https://bale231.pythonanywhere.com/api/lists/${id}/`,
+        {
+          method: "GET",
+          headers: getAuthHeaders(),
+        }
+      );
       const text = await res.text();
       const data = JSON.parse(text);
       setTodos(data.todos);
@@ -236,7 +246,10 @@ export default function ToDoListPage() {
             items={displayedTodos.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div ref={listRef} className="space-y-3">
+            <div
+              ref={listRef}
+              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1"
+            >
               {displayedTodos.map((todo) => (
                 <SortableTodo
                   key={todo.id}
