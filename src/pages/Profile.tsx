@@ -255,22 +255,24 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-sm text-blue-600 dark:text-blue-400 underline hover:no-underline flex items-center gap-1 group"
+              className="text-sm text-blue-600 dark:text-blue-400 underline hover:no-underline flex items-center gap-2 group"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4 group-hover:animate-bounce"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.862 4.487a2.25 2.25 0 113.182 3.182L7.5 20.213 3 21l.787-4.5L16.862 4.487z"
-                />
-              </svg>
+              <span className="relative w-5 h-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5 absolute top-0 left-0 group-hover:animate-[wiggle_0.3s_ease-in-out_1]"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.862 4.487a2.25 2.25 0 113.182 3.182L7.5 20.213 3 21l.787-4.5L16.862 4.487z"
+                  />
+                </svg>
+              </span>
               {editMode ? "Annulla modifica" : "Modifica profilo"}
             </button>
           </div>
