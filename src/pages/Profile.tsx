@@ -20,7 +20,26 @@ export default function Profile() {
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [clearPicture, setClearPicture] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [password, setPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  useEffect(() => {
+    const calcStrength = () => {
+      if (!newPassword) return setPasswordStrength(0);
+
+      let strength = 0;
+      if (newPassword.length >= 8) strength += 1;
+      if (/[A-Z]/.test(newPassword)) strength += 1;
+      if (/[0-9]/.test(newPassword)) strength += 1;
+      if (/[^A-Za-z0-9]/.test(newPassword)) strength += 1;
+
+      setPasswordStrength(strength);
+    };
+
+    calcStrength();
+  }, [newPassword]);
 
   useEffect(() => {
     gsap.fromTo(
@@ -128,7 +147,15 @@ export default function Profile() {
     formData.append("email", email);
     if (avatarFile) formData.append("profile_picture", avatarFile);
     if (clearPicture) formData.append("clear_picture", "true");
-    if (password) formData.append("password", password);
+    if (newPassword && newPassword !== confirmPassword) {
+      showAlert("La nuova password e la conferma non coincidono", "error");
+      return;
+    }
+
+    if (newPassword) {
+      formData.append("old_password", oldPassword);
+      formData.append("new_password", newPassword);
+    }
 
     const res = await updateProfile(formData);
     if (res.message === "Profile updated") {
@@ -247,7 +274,7 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="flex items-center gap-2 text-xs text-white-600 bg-red-600 px-4 py-2 border border-red-600 hover:bg-transparent transition-all rounded-[6px] group"
+                className="flex items-center gap-2 text-xs text-white dark:text-white bg-red-600 px-4 py-2 border border-red-600 hover:bg-transparent transition-all rounded-[6px] group"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -269,7 +296,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-xs text-white-600 bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
+              className="text-xs text-white dark:text-white bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
             >
               <span className="relative w-4 h-4">
                 <svg
@@ -327,23 +354,89 @@ export default function Profile() {
             </label>
           </div>
 
-          <div className="flex flex-col relative">
-            <input
-              id="password"
-              type="password"
-              disabled={!editMode}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white transition duration-300 focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
-              placeholder="Password"
-            />
-            <label
-              htmlFor="password"
-              className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300 transition-all duration-200 peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
-            >
-              Password
-            </label>
-          </div>
+          {!editMode ? (
+            <div className="flex flex-col relative">
+              <input
+                id="password"
+                type="password"
+                disabled
+                value="********"
+                className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white transition duration-300"
+              />
+              <label
+                htmlFor="password"
+                className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300"
+              >
+                Password
+              </label>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col relative">
+                <input
+                  type="password"
+                  placeholder="Vecchia password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+                <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
+                  Vecchia password
+                </label>
+              </div>
+
+              <div className="flex flex-col relative">
+                <input
+                  type="password"
+                  placeholder="Nuova password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="mt-2 h-2 w-full bg-gray-300 rounded">
+                  <div
+                    className="h-full rounded transition-all duration-300"
+                    ref={(el) => {
+                      if (el) {
+                        const width = ["0%", "33%", "66%", "100%"][
+                          passwordStrength
+                        ];
+                        const color = [
+                          "#DC2626",
+                          "#FACC15",
+                          "#22C55E",
+                          "#16A34A",
+                        ][passwordStrength];
+
+                        gsap.to(el, {
+                          width,
+                          backgroundColor: color,
+                          duration: 0.5,
+                          ease: "power2.out",
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
+                  Nuova password
+                </label>
+              </div>
+
+              <div className="flex flex-col relative">
+                <input
+                  type="password"
+                  placeholder="Conferma nuova password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+                <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
+                  Conferma password
+                </label>
+              </div>
+            </>
+          )}
 
           <button
             type="submit"
@@ -360,7 +453,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={() => setShowConfirmModal(true)}
-            className="w-full text-sm text-white-500 bg-red-600 px-4 py-2 transition-all hover:bg-transparent border border-red-600 rounded-[6px] mt-2"
+            className="w-full text-sm text-white dark:text-white bg-red-600 px-4 py-2 transition-all hover:bg-transparent border border-red-600 rounded-[6px] mt-2"
           >
             Disattiva il mio account
           </button>
