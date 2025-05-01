@@ -255,7 +255,7 @@ export default function Profile() {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-4 h-4 group-hover:rotate-[20deg] transition-transform duration-300"
+                  className="w-4 h-4 group-hover:rotate-[90deg] transition-transform duration-300"
                 >
                   <path
                     strokeLinecap="round"
@@ -278,7 +278,7 @@ export default function Profile() {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-5 h-5 absolute top-0 left-0 group-hover:animate-[wiggle_0.3s_ease-in-out_1]"
+                  className="w-4 h-4 absolute top-0 left-0 group-hover:animate-[wiggle_0.3s_ease-in-out_1]"
                 >
                   <path
                     strokeLinecap="round"
