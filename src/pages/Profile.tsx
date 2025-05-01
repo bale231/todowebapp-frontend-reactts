@@ -198,11 +198,11 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="max-w-lg mx-auto px-4 py-8">
+      <div className="max-w-lg mx-auto">
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="rounded-xl p-6 space-y-6"
+          className="rounded-xl p-4 space-y-6"
         >
           <h2 className="text-2xl font-bold text-center">Profilo</h2>
 
@@ -242,12 +242,12 @@ export default function Profile() {
             />
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between gap-4 items-center">
             {avatar && (
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="flex items-center gap-2 text-sm sm:text-xs text-white-600 bg-red-600 px-4 py-2 border border-red-600 hover:bg-transparent transition-all rounded-[6px] group"
+                className="flex items-center gap-2 text-xs text-white-600 bg-red-600 px-4 py-2 border border-red-600 hover:bg-transparent transition-all rounded-[6px] group"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -269,7 +269,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-sm sm:text-xs text-white-600 bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
+              className="text-xs text-white-600 bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
             >
               <span className="relative w-5 h-5">
                 <svg
