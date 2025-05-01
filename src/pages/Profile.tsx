@@ -271,7 +271,7 @@ export default function Profile() {
               onClick={() => setEditMode((prev) => !prev)}
               className="text-xs text-white-600 bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
             >
-              <span className="relative w-5 h-5">
+              <span className="relative w-4 h-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
