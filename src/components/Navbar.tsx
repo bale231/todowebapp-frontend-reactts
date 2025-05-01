@@ -2,13 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { Sun, Moon } from "lucide-react";
-import { useTheme } from "../context/ThemeContext"; // 👈 importa il context
-// import { updateTheme } from "../api/auth";
+import { useTheme } from "../context/ThemeContext";
 
 interface NavbarProps {
   username?: string;
+  profilePicture?: string;
 }
-
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -16,8 +15,8 @@ function ThemeToggle() {
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-  };  
-  
+  };
+
   return (
     <button
       onClick={toggleTheme}
@@ -28,7 +27,7 @@ function ThemeToggle() {
   );
 }
 
-export default function Navbar({ username }: NavbarProps) {
+export default function Navbar({ username, profilePicture }: NavbarProps) {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -108,8 +107,12 @@ export default function Navbar({ username }: NavbarProps) {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
             >
-              {username}
-              <span className="text-xs">▼</span>
+              <img
+                src={profilePicture || "https://placehold.co/40x40"}
+                alt="Avatar"
+                className="w-8 h-8 rounded-full object-cover border"
+              />
+              <span className="text-xs hidden sm:inline">▼</span>
             </button>
 
             <div
@@ -124,7 +127,6 @@ export default function Navbar({ username }: NavbarProps) {
               >
                 Profilo
               </Link>
-
               <button
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -137,18 +139,7 @@ export default function Navbar({ username }: NavbarProps) {
               </button>
             </div>
           </div>
-        ) : (
-          <button
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              document.cookie = "token=; Max-Age=0; path=/;";
-              navigate("/");
-            }}
-            className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
-          >
-            Logout
-          </button>
-        )}
+        ) : null}
       </div>
     </nav>
   );
