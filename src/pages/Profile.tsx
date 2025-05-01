@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import {
   getCurrentUserJWT,
   updateProfile,
-  resetPassword,
   deactivateAccount,
 } from "../api/auth";
 
@@ -21,6 +20,7 @@ export default function Profile() {
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [clearPicture, setClearPicture] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     gsap.fromTo(
@@ -128,6 +128,7 @@ export default function Profile() {
     formData.append("email", email);
     if (avatarFile) formData.append("profile_picture", avatarFile);
     if (clearPicture) formData.append("clear_picture", "true");
+    if (password) formData.append("password", password);
 
     const res = await updateProfile(formData);
     if (res.message === "Profile updated") {
@@ -138,15 +139,6 @@ export default function Profile() {
       fetchUserData();
     } else {
       showAlert("Errore nell'aggiornamento del profilo", "error");
-    }
-  };
-
-  const handlePasswordReset = async () => {
-    const res = await resetPassword();
-    if (res.message === "Password reset email sent") {
-      showAlert("Richiesta inviata! Controlla la tua email.", "success");
-    } else {
-      showAlert("Errore nell'invio della richiesta", "error");
     }
   };
 
@@ -250,7 +242,7 @@ export default function Profile() {
             />
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             {avatar && (
               <button
                 type="button"
@@ -263,9 +255,23 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-sm text-blue-600 dark:text-blue-400 underline hover:no-underline"
+              className="text-sm text-blue-600 dark:text-blue-400 underline hover:no-underline flex items-center gap-1 group"
             >
-              {editMode ? "Annulla modifica" : "Modifica dati"}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4 group-hover:animate-bounce"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16.862 4.487a2.25 2.25 0 113.182 3.182L7.5 20.213 3 21l.787-4.5L16.862 4.487z"
+                />
+              </svg>
+              {editMode ? "Annulla modifica" : "Modifica profilo"}
             </button>
           </div>
 
@@ -305,24 +311,22 @@ export default function Profile() {
             </label>
           </div>
 
-          <div className="flex flex-col">
-            <label className="mb-1">Password</label>
+          <div className="flex flex-col relative">
             <input
+              id="password"
               type="password"
-              disabled
-              value="********"
-              className="px-4 py-2 rounded border bg-gray-200 dark:bg-gray-600 cursor-not-allowed text-gray-500"
+              disabled={!editMode}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white transition duration-300 focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+              placeholder="Password"
             />
-            <small className="text-gray-500 dark:text-gray-400 mb-2">
-              La password può essere cambiata solo via email.
-            </small>
-            <button
-              type="button"
-              onClick={handlePasswordReset}
-              className="text-sm text-blue-600 dark:text-blue-400 underline hover:no-underline text-left"
+            <label
+              htmlFor="password"
+              className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300 transition-all duration-200 peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
             >
-              Richiedi cambio password via email
-            </button>
+              Password
+            </label>
           </div>
 
           <button
