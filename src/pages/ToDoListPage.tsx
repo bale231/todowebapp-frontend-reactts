@@ -246,10 +246,9 @@ export default function ToDoListPage() {
             items={displayedTodos.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
           >
-
             <div
               ref={listRef}
-              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 invisible-scrollbar"
+              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24 invisible-scrollbar"
             >
               {displayedTodos.map((todo) => (
                 <SortableTodo
@@ -265,7 +264,10 @@ export default function ToDoListPage() {
           </SortableContext>
         </DndContext>
       ) : (
-        <div ref={listRef} className="space-y-3">
+        <div
+          ref={listRef}
+          className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24 invisible-scrollbar"
+        >
           {displayedTodos.map((todo) => (
             <SortableTodo
               key={todo.id}
