@@ -3,11 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-
-interface NavbarProps {
-  username?: string;
-  profilePicture?: string;
-}
+import { getCurrentUserJWT } from "../api/auth";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -27,10 +23,23 @@ function ThemeToggle() {
   );
 }
 
-export default function Navbar({ username, profilePicture }: NavbarProps) {
+export default function Navbar() {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      const user = await getCurrentUserJWT();
+      if (user?.profile_picture) {
+        setProfilePictureUrl(`https://bale231.pythonanywhere.com${user.profile_picture}`);
+      } else {
+        setProfilePictureUrl(null);
+      }
+    };
+    fetchProfilePicture();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -101,45 +110,62 @@ export default function Navbar({ username, profilePicture }: NavbarProps) {
       <div className="flex items-center gap-4">
         <ThemeToggle />
 
-        {username ? (
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            >
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="focus:outline-none"
+          >
+            {profilePictureUrl ? (
               <img
-                src={profilePicture || "https://placehold.co/40x40"}
-                alt="Avatar"
-                className="w-8 h-8 rounded-full object-cover border"
+                src={profilePictureUrl}
+                alt="User Profile"
+                className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-700 shadow-sm object-cover"
               />
-              <span className="text-xs hidden sm:inline">▼</span>
-            </button>
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 text-gray-500 dark:text-gray-300"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                  />
+                </svg>
+              </div>
+            )}
+          </button>
 
-            <div
-              ref={dropdownRef}
-              style={{ display: "none" }}
-              className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-700 rounded shadow-lg p-2 text-sm z-50"
+          <div
+            ref={dropdownRef}
+            style={{ display: "none" }}
+            className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-700 rounded shadow-lg p-2 text-sm z-50"
+          >
+            <Link
+              to="/profile"
+              onClick={() => setDropdownOpen(false)}
+              className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
             >
-              <Link
-                to="/profile"
-                onClick={() => setDropdownOpen(false)}
-                className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
-              >
-                Profilo
-              </Link>
-              <button
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  document.cookie = "token=; Max-Age=0; path=/;";
-                  navigate("/");
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
-              >
-                Logout
-              </button>
-            </div>
+              Profilo
+            </Link>
+
+            <button
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                document.cookie = "token=; Max-Age=0; path=/;";
+                navigate("/");
+              }}
+              className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
+            >
+              Logout
+            </button>
           </div>
-        ) : null}
+        </div>
       </div>
     </nav>
   );
