@@ -46,10 +46,6 @@ export default function Home() {
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
-  const mapToBackend = (opt: "created"|"name"|"complete") =>
-    opt === "name" ? "alphabetical" :
-    opt === "created" ? "created" :
-    /* per ora backend non supporta questa opzione: */ "created";  
 
   useEffect(() => {
     const loadUser = async () => {
