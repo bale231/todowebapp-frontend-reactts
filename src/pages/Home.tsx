@@ -152,7 +152,7 @@ export default function Home() {
     // se vuoi persistere solo per created/name:
     const backendOrder = mapToBackend(newOpt);
     try {
-      await fetch(`${API_URL}/lists/${USER_LIST_ID}/ordering/`, {
+      await fetch(`${API_URL}/lists/${USER_LIST_ID}/sort_order/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
