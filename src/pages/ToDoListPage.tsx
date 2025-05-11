@@ -82,7 +82,7 @@ export default function ToDoListPage() {
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
-  
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(TouchSensor, {
@@ -377,7 +377,14 @@ export default function ToDoListPage() {
           </div>
         </div>
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => {
+            setMenuOpen((prev) => {
+              const next = !prev;
+              // se sto chiudendo il menu (next === false), resetto editMode
+              if (!next) setEditMode(false);
+              return next;
+            });
+          }}
           className={`w-14 h-14 flex items-center justify-center rounded-full transition-transform duration-300 ${
             colorMap[listColor]
           } text-white ${menuOpen ? "rotate-45" : "rotate-0"}`}
@@ -422,7 +429,10 @@ export default function ToDoListPage() {
       {showBulkConfirm &&
         createPortal(
           <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div ref={bulkModalRef} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80">
+            <div
+              ref={bulkModalRef}
+              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80"
+            >
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
                 Elimina {selectedIds.length} ToDo?
               </h2>
@@ -451,7 +461,7 @@ export default function ToDoListPage() {
             </div>
           </div>,
           document.body
-      )}
+        )}
     </div>
   );
 }

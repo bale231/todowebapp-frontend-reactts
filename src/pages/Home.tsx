@@ -65,9 +65,11 @@ export default function Home() {
           const { sort_order } = await res.json();
           // mappa da backend → frontend
           setSortOption(
-            sort_order === "alphabetical" ? "name"
-            : sort_order === "complete"     ? "complete"
-            : "created"
+            sort_order === "alphabetical"
+              ? "name"
+              : sort_order === "complete"
+              ? "complete"
+              : "created"
           );
         }
       } catch (err) {
@@ -75,8 +77,7 @@ export default function Home() {
       }
     };
     loadUserAndPref();
-  }, [navigate]);  
-   
+  }, [navigate]);
 
   useEffect(() => {
     if (user) {
@@ -130,7 +131,7 @@ export default function Home() {
 
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-  
+
     if (editListId !== null) {
       // ✅ MODIFICA LISTA
       await editList(editListId, newListName, newListColor);
@@ -147,12 +148,11 @@ export default function Home() {
       });
       if (!res.ok) console.error("Errore creazione lista");
     }
-  
+
     fetchLists();
     setNewListName("");
     setShowForm(false);
   };
-  
 
   const handleEditList = (list: TodoList) => {
     setEditListId(list.id);
@@ -161,17 +161,17 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleSortChange = async (
-    newOpt: "created" | "name" | "complete"
-  ) => {
+  const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
     setSortOption(newOpt);
-  
+
     // Mappatura interna → backend
     const backendOrder =
-      newOpt === "name" ? "alphabetical" :
-      newOpt === "complete" ? "complete" :
-      "created";
-  
+      newOpt === "name"
+        ? "alphabetical"
+        : newOpt === "complete"
+        ? "complete"
+        : "created";
+
     try {
       await fetch(`${API_URL}/lists/sort_order/`, {
         method: "PATCH",
@@ -184,7 +184,7 @@ export default function Home() {
     } catch (err) {
       console.error("Errore nel salvataggio ordinamento liste:", err);
     }
-  };  
+  };
 
   const handleDeleteList = async (id: number) => {
     gsap.fromTo(
@@ -201,11 +201,10 @@ export default function Home() {
             fetchLists();
             setShowDeleteConfirm(null);
           })();
-        }      
+        },
       }
     );
   };
-
 
   const sortedLists = [...lists].sort((a, b) => {
     if (sortOption === "name") {
@@ -230,7 +229,8 @@ export default function Home() {
       <Navbar />
       <div className="p-6" ref={boxRef}>
         <h1 ref={titleRef} className="text-xl sm:text-3xl font-bold">
-          Ciao {user.username} 👋!! Crea le tue prime Liste e organizza il tuo tempo nel modo giusto!
+          Ciao {user.username} 👋!! Crea le tue prime Liste e organizza il tuo
+          tempo nel modo giusto!
         </h1>
         {Array.isArray(sortedLists) && sortedLists.length === 0 && (
           <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
@@ -257,18 +257,22 @@ export default function Home() {
                       id={`card-${list.id}`}
                       className={`relative p-4 bg-white dark:bg-gray-800 rounded shadow border-l-4 ${
                         colorClasses[list.color]
-                      } ${editMode ? 'animate-wiggle' : ''}`}
+                      } ${editMode ? "animate-wiggle" : ""}`}
                     >
                       {/* Contenuto cliccabile */}
                       <Link to={`/lists/${list.id}`}>
                         <div className="cursor-pointer">
-                          <h3 className="text-xl font-semibold mb-2">{list.name}</h3>
+                          <h3 className="text-xl font-semibold mb-2">
+                            {list.name}
+                          </h3>
                           {list.todos.length === 0 ? (
-                            <p className="text-sm text-gray-500">Nessuna ToDo</p>
+                            <p className="text-sm text-gray-500">
+                              Nessuna ToDo
+                            </p>
                           ) : (
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              {pending} ToDo {list.name} da completare, {completed}{' '}
-                              completate.
+                              {pending} ToDo {list.name} da completare,{" "}
+                              {completed} completate.
                             </p>
                           )}
                         </div>
@@ -295,7 +299,9 @@ export default function Home() {
                       {/* Conferma eliminazione */}
                       {showDeleteConfirm === list.id && (
                         <div className="mt-4 text-lg">
-                          <p className="text-red-500 mb-2">Confermi eliminazione?</p>
+                          <p className="text-red-500 mb-2">
+                            Confermi eliminazione?
+                          </p>
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleDeleteList(list.id)}
@@ -318,7 +324,6 @@ export default function Home() {
               })}
           </div>
         </main>
-
       </div>
 
       {/* Floating action button menu */}
@@ -357,7 +362,14 @@ export default function Home() {
           </div>
         </div>
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => {
+            setMenuOpen((prev) => {
+              const next = !prev;
+              // se sto chiudendo il menu (next === false), resetto editMode
+              if (!next) setEditMode(false);
+              return next;
+            });
+          }}
           className={`w-14 h-14 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform duration-300 ${
             menuOpen ? "rotate-45" : ""
           }`}
