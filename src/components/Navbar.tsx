@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getCurrentUserJWT } from "../api/auth";
+import { logout } from "../api/auth"; // assicurati che ci sia
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -155,15 +156,16 @@ export default function Navbar() {
             </Link>
 
             <button
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                document.cookie = "token=; Max-Age=0; path=/;";
-                navigate("/");
+              onClick={() => {
+                logout();               // ✅ cancella accessToken & refreshToken
+                navigate("/");          // ✅ torna al login
+                window.location.reload(); // (opzionale) forza reset dell'app
               }}
               className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition"
             >
               Logout
             </button>
+
           </div>
         </div>
       </div>
