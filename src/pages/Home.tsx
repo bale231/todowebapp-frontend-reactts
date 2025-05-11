@@ -41,20 +41,40 @@ export default function Home() {
   const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
     "created"
   );
-
+  // url API
+  const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const res = await getCurrentUserJWT();
-      if (!res) navigate("/");
-      else setUser(res);
+    const loadUserAndPref = async () => {
+      const resUser = await getCurrentUserJWT();
+      if (!resUser) return navigate("/");
+      setUser(resUser);
+
+      try {
+        const res = await fetch(`${API_URL}/lists/sort_order/`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        if (res.ok) {
+          const { sort_order } = await res.json();
+          // mappa da backend → frontend
+          setSortOption(
+            sort_order === "alphabetical" ? "name"
+            : sort_order === "complete"     ? "complete"
+            : "created"
+          );
+        }
+      } catch (err) {
+        console.error("Impossibile caricare preference ordinamento:", err);
+      }
     };
-    loadUser();
-  }, [navigate]);    
+    loadUserAndPref();
+  }, [navigate]);  
    
 
   useEffect(() => {
@@ -107,7 +127,6 @@ export default function Home() {
     }
   };
 
-  const API_URL = "https://bale231.pythonanywhere.com/api";
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
   
