@@ -19,7 +19,7 @@ export async function login(username: string, password: string) {
 
     const data = await res.json();
 
-    // Torna anche i token nel return, ma NON salvarli qui
+    // ✅ NON salvare qui — lascialo decidere al frontend
     return {
       success: true,
       accessToken: data.access,

@@ -51,8 +51,14 @@ export default function Login() {
     setError("");
   
     const result = await login(username, password);
-  
+
     if (result.success) {
+      const { accessToken, refreshToken } = result;
+      const storage = rememberMe ? localStorage : sessionStorage;
+    
+      storage.setItem("accessToken", accessToken);
+      storage.setItem("refreshToken", refreshToken);
+    
       const user = await getCurrentUserJWT();
       if (user) {
         // se rememberMe=true, usa localStorage, altrimenti sessionStorage
