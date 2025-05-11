@@ -146,13 +146,19 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleSortChange = async (newOpt: "created"|"name"|"complete") => {
+  const handleSortChange = async (
+    newOpt: "created" | "name" | "complete"
+  ) => {
     setSortOption(newOpt);
   
-    // se vuoi persistere solo per created/name:
-    const backendOrder = mapToBackend(newOpt);
+    // Mappatura interna → backend
+    const backendOrder =
+      newOpt === "name" ? "alphabetical" :
+      newOpt === "complete" ? "complete" :
+      "created";
+  
     try {
-      await fetch(`${API_URL}/lists/${USER_LIST_ID}/sort_order/`, {
+      await fetch(`${API_URL}/lists/sort_order/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -161,9 +167,9 @@ export default function Home() {
         body: JSON.stringify({ sort_order: backendOrder }),
       });
     } catch (err) {
-      console.error("Impossibile salvare ordinamento:", err);
+      console.error("Errore nel salvataggio ordinamento liste:", err);
     }
-  };
+  };  
 
   const handleDeleteList = async (id: number) => {
     gsap.fromTo(
