@@ -46,6 +46,10 @@ export default function Home() {
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
+  const mapToBackend = (opt: "created"|"name"|"complete") =>
+    opt === "name" ? "alphabetical" :
+    opt === "created" ? "created" :
+    /* per ora backend non supporta questa opzione: */ "created";  
 
   useEffect(() => {
     const loadUser = async () => {
@@ -108,6 +112,7 @@ export default function Home() {
   };
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
+  const USER_LIST_ID = user?.id || 0;
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
   
@@ -141,25 +146,44 @@ export default function Home() {
     setShowForm(true);
   };
 
-const handleDeleteList = async (id: number) => {
-  gsap.fromTo(
-    `#card-${id}`,
-    { x: -5 },
-    {
-      x: 5,
-      repeat: 3,
-      yoyo: true,
-      duration: 0.1,
-      onComplete: () => {
-        (async () => {
-          await deleteList(id);
-          fetchLists();
-          setShowDeleteConfirm(null);
-        })();
-      }      
+  const handleSortChange = async (newOpt: "created"|"name"|"complete") => {
+    setSortOption(newOpt);
+  
+    // se vuoi persistere solo per created/name:
+    const backendOrder = mapToBackend(newOpt);
+    try {
+      await fetch(`${API_URL}/lists/${USER_LIST_ID}/ordering/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ sort_order: backendOrder }),
+      });
+    } catch (err) {
+      console.error("Impossibile salvare ordinamento:", err);
     }
-  );
-};
+  };
+
+  const handleDeleteList = async (id: number) => {
+    gsap.fromTo(
+      `#card-${id}`,
+      { x: -5 },
+      {
+        x: 5,
+        repeat: 3,
+        yoyo: true,
+        duration: 0.1,
+        onComplete: () => {
+          (async () => {
+            await deleteList(id);
+            fetchLists();
+            setShowDeleteConfirm(null);
+          })();
+        }      
+      }
+    );
+  };
 
 
   const sortedLists = [...lists].sort((a, b) => {
@@ -294,7 +318,7 @@ const handleDeleteList = async (id: number) => {
             <select
               value={sortOption}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onChange={(e) => setSortOption(e.target.value as any)}
+              onChange={(e) => handleSortChange(e.target.value as any)}
               className="bg-transparent text-[black] text-sm"
             >
               <option value="created">Più recente</option>
