@@ -225,7 +225,6 @@ export default function ToDoListPage() {
         </button>
       </div>
 
-      {/* ←─────────────────────────────────────────── */}
       {/* MASTER CHECKBOX (solo in editMode) */}
       {editMode && (
         <div className="mb-4 flex items-center gap-2">
@@ -462,18 +461,45 @@ function SortableTodo({
             todo.completed ? "line-through text-gray-400" : ""
           }`}
         >
-            {editMode && (
+          {/* ✅ Checkbox */}
+          {editMode && (
+            <label className="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
+                className="peer sr-only"
                 checked={selectedIds.includes(todo.id)}
-                onChange={(e) => {
+                onChange={e => {
                   if (e.target.checked)
-                    setSelectedIds((ids) => [...ids, todo.id]);
+                    setSelectedIds(ids => [...ids, todo.id]);
                   else
-                    setSelectedIds((ids) => ids.filter((i) => i !== todo.id));
+                    setSelectedIds(ids => ids.filter(i => i !== todo.id));
                 }}
               />
-            )}
+              <div className="
+                w-6 h-6 border-2 border-gray-300 rounded-md
+                bg-white dark:bg-gray-800
+                relative transition-all duration-200 ease-out
+                peer-checked:border-blue-600 peer-checked:bg-blue-600
+                peer-focus:ring-2 peer-focus:ring-blue-300
+              ">
+                <svg
+                  className="
+                    absolute inset-0 m-auto w-4 h-4 text-white
+                    opacity-0 scale-50 transition-all duration-150 ease-out
+                    peer-checked:opacity-100 peer-checked:scale-100
+                  "
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              {/* opzionale label: <span className="ml-2"> {todo.title} </span> */}
+            </label>
+          )}
+
           {/* ✅ Check */}
           <button
             onClick={() => onCheck(todo.id)}
