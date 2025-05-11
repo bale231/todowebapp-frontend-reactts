@@ -236,10 +236,10 @@ export default function Home() {
             Qui andranno le tue liste ToDo animate 💫
           </p>
         )}
-        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[70vh] invisible-scrollbar">
+        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[vh] invisible-scrollbar">
           <div
             id="list-wrapper"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid max-h-[60vh] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {Array.isArray(sortedLists) && sortedLists.map((list) => {
               const completed = list.todos.filter((t) => t.completed).length;
