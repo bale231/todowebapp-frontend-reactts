@@ -380,6 +380,7 @@ function SortableTodo({
   return (
     <SwipeableTodoItem
       onEdit={onEdit}
+      label={todo.title}
       onDelete={() => onDelete(todo.id)}
     >
       <div
