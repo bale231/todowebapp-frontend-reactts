@@ -36,6 +36,7 @@ import {
 } from "../api/todos";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
+import { createPortal } from "react-dom";
 
 interface Todo {
   id: number;
@@ -76,6 +77,8 @@ export default function ToDoListPage() {
   const [sortOption, setSortOption] = useState<"created" | "alphabetical">(
     "created"
   );
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   const listRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(
@@ -222,6 +225,32 @@ export default function ToDoListPage() {
         </button>
       </div>
 
+      {/* ←─────────────────────────────────────────── */}
+      {/* MASTER CHECKBOX (solo in editMode) */}
+      {editMode && (
+        <div className="mb-4 flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={selectedIds.length === todos.length}
+            onChange={e => {
+              if (e.target.checked) setSelectedIds(todos.map(t => t.id));
+              else setSelectedIds([]);
+            }}
+            className="h-5 w-5"
+          />
+          <span className="font-medium">Seleziona tutte le ToDo</span>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setShowBulkConfirm(true)}
+              className="ml-auto px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Elimina selezionate ({selectedIds.length})
+            </button>
+          )}
+        </div>
+      )}
+      {/* ───────────────────────────────────────────→ */}
+
       <div className="mb-6 flex items-center gap-2">
         <input
           value={title}
@@ -258,6 +287,8 @@ export default function ToDoListPage() {
                   onCheck={handleToggle}
                   onDelete={handleDelete}
                   onEdit={() => setEditedTodo(todo)}
+                  selectedIds={selectedIds}
+                  setSelectedIds={setSelectedIds}
                   editMode={editMode}
                 />
               ))}
@@ -277,6 +308,8 @@ export default function ToDoListPage() {
               onDelete={handleDelete}
               onEdit={() => setEditedTodo(todo)}
               editMode={editMode}
+              selectedIds={selectedIds}
+              setSelectedIds={setSelectedIds}
             />
           ))}
         </div>
@@ -352,6 +385,38 @@ export default function ToDoListPage() {
           </div>
         </div>
       )}
+
+      {showBulkConfirm &&
+        createPortal(
+          <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80">
+              <h2 className="text-xl font-semibold mb-4">
+                Elimina {selectedIds.length} ToDo?
+              </h2>
+              <p className="mb-6">Questa operazione è irreversibile.</p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowBulkConfirm(false)}
+                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={async () => {
+                    await Promise.all(selectedIds.map((i) => deleteTodo(i)));
+                    setShowBulkConfirm(false);
+                    setSelectedIds([]);
+                    fetchTodos();
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Conferma
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+      )}
     </div>
   );
 }
@@ -362,12 +427,16 @@ function SortableTodo({
   onDelete,
   onEdit,
   editMode,
+  selectedIds,
+  setSelectedIds,
 }: {
   todo: Todo;
   onCheck: (id: number) => void;
   onDelete: (id: number) => void;
   onEdit: () => void;
   editMode: boolean;
+  selectedIds: number[];
+  setSelectedIds: React.Dispatch<React.SetStateAction<number[]>>;
 }) {
   const { setNodeRef, attributes, listeners, transform, transition } =
     useSortable({ id: todo.id });
@@ -393,6 +462,18 @@ function SortableTodo({
             todo.completed ? "line-through text-gray-400" : ""
           }`}
         >
+            {editMode && (
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(todo.id)}
+                onChange={(e) => {
+                  if (e.target.checked)
+                    setSelectedIds((ids) => [...ids, todo.id]);
+                  else
+                    setSelectedIds((ids) => ids.filter((i) => i !== todo.id));
+                }}
+              />
+            )}
           {/* ✅ Check */}
           <button
             onClick={() => onCheck(todo.id)}
