@@ -1,5 +1,6 @@
 // src/components/SwipeableListItem.tsx
 import { ReactNode, useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { Edit, Trash } from "lucide-react";
 
@@ -21,7 +22,9 @@ export default function SwipeableListItem({
   const [showConfirm, setShowConfirm] = useState(false);
   const startXRef = useRef(0);
   const currentXRef = useRef(0);
+  const movedRef = useRef(false);
   const xTo = useRef<(value: number) => void>(() => {});
+  const modalInnerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (wrapperRef.current) {
@@ -32,16 +35,28 @@ export default function SwipeableListItem({
     }
   }, []);
 
+  useEffect(() => {
+    if (showConfirm && modalInnerRef.current) {
+      gsap.fromTo(
+        modalInnerRef.current,
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }
+      );
+    }
+  }, [showConfirm]);
+
   const handleStart = (x: number) => {
     startXRef.current = x;
     currentXRef.current = x;
+    movedRef.current = false;
     setDragging(true);
   };
 
   const handleMove = (x: number) => {
     if (!dragging) return;
+    const dx = x - startXRef.current;
+    if (Math.abs(dx) > 5) movedRef.current = true;
     currentXRef.current = x;
-    const dx = currentXRef.current - startXRef.current;
     const clamped = Math.max(
       -ACTION_WIDTH * 1.2,
       Math.min(ACTION_WIDTH * 1.2, dx)
@@ -64,18 +79,55 @@ export default function SwipeableListItem({
 
   const confirmDelete = () => {
     setShowConfirm(true);
+    closeSwipe();
   };
 
   const handleConfirmYes = () => {
     onDelete();
     setShowConfirm(false);
-    closeSwipe();
   };
 
   const handleConfirmNo = () => {
     setShowConfirm(false);
-    closeSwipe();
   };
+
+  const onClickWrapper = (e: React.MouseEvent) => {
+    if (movedRef.current) {
+      e.stopPropagation();
+      movedRef.current = false;
+    }
+  };
+
+  const modalJSX = (
+    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div
+        ref={modalInnerRef}
+        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80"
+      >
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          Conferma Eliminazione
+        </h2>
+        <p className="mb-6 text-gray-700 dark:text-gray-300">
+          Sei sicuro di voler eliminare questa lista? Questa operazione non può
+          essere annullata.
+        </p>
+        <div className="flex justify-end gap-4">
+          <button
+            onClick={handleConfirmNo}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 rounded hover:bg-gray-300"
+          >
+            Annulla
+          </button>
+          <button
+            onClick={handleConfirmYes}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Elimina
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -102,7 +154,8 @@ export default function SwipeableListItem({
         {/* Contenuto swipeable */}
         <div
           ref={wrapperRef}
-          className="relative bg-white dark:bg-gray-800 touch-none"
+          className="relative bg-white dark:bg-gray-800"
+          style={{ touchAction: "pan-y" }}
           onTouchStart={(e) => handleStart(e.touches[0].clientX)}
           onTouchMove={(e) => handleMove(e.touches[0].clientX)}
           onTouchEnd={handleEnd}
@@ -110,39 +163,13 @@ export default function SwipeableListItem({
           onMouseMove={(e) => dragging && handleMove(e.clientX)}
           onMouseUp={handleEnd}
           onMouseLeave={dragging ? handleEnd : undefined}
+          onClick={onClickWrapper}
         >
           {children}
         </div>
       </div>
 
-      {/* Modale di conferma eliminazione */}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              Conferma Eliminazione
-            </h2>
-            <p className="mb-6 text-gray-700 dark:text-gray-300">
-              Sei sicuro di voler eliminare questa lista? Questa operazione non
-              può essere annullata.
-            </p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={handleConfirmNo}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 rounded hover:bg-gray-300"
-              >
-                Annulla
-              </button>
-              <button
-                onClick={handleConfirmYes}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Elimina
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showConfirm && createPortal(modalJSX, document.body)}
     </>
   );
 }
