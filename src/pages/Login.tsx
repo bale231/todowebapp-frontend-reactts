@@ -17,6 +17,16 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkAlreadyLoggedIn = async () => {
+      const user = await getCurrentUserJWT();
+      if (user) {
+        navigate("/home");
+      }
+    };
+    checkAlreadyLoggedIn();
+  }, [navigate]);
+  
+  useEffect(() => {
     if (formRef.current) {
       gsap.fromTo(
         formRef.current,
