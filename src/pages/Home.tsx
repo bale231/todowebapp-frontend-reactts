@@ -112,7 +112,6 @@ export default function Home() {
   };
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
-  const USER_LIST_ID = user?.id || 0;
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
   
