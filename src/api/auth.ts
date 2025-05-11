@@ -102,8 +102,9 @@ export async function getCurrentUserJWT() {
 
 // 🔄 Logout locale
 export function logout() {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+  localStorage.clear();
+  sessionStorage.clear();
+  // setUser(null); // se usi un context
 }
 
 // 📝 Register
