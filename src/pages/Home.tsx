@@ -239,7 +239,7 @@ export default function Home() {
 
         <div
           id="list-wrapper"
-          className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[70vh] invisible-scrollbar"
         >
           {Array.isArray(sortedLists) && sortedLists.map((list) => {
             const completed = list.todos.filter((t) => t.completed).length;
