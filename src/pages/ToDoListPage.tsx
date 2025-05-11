@@ -81,6 +81,8 @@ export default function ToDoListPage() {
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   const listRef = useRef<HTMLDivElement>(null);
+  const bulkModalRef = useRef<HTMLDivElement>(null);
+  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(TouchSensor, {
@@ -90,6 +92,7 @@ export default function ToDoListPage() {
       },
     })
   );
+
   const animateTodos = () => {
     if (listRef.current) {
       gsap.fromTo(
@@ -178,6 +181,17 @@ export default function ToDoListPage() {
     fetchTodos(true); // 👈 Passi true per NON sovrascrivere
   };
 
+  // Animazione GSAP per modale multi-delete
+  useEffect(() => {
+    if (showBulkConfirm && bulkModalRef.current) {
+      gsap.fromTo(
+        bulkModalRef.current,
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }
+      );
+    }
+  }, [showBulkConfirm]);
+
   useEffect(() => {
     if (editedTodo && wasModalClosed.current && modalRef.current) {
       gsap.fromTo(
@@ -228,16 +242,34 @@ export default function ToDoListPage() {
       {/* MASTER CHECKBOX (solo in editMode) */}
       {editMode && (
         <div className="mb-4 flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={selectedIds.length === todos.length}
-            onChange={e => {
-              if (e.target.checked) setSelectedIds(todos.map(t => t.id));
-              else setSelectedIds([]);
-            }}
-            className="h-5 w-5"
-          />
-          <span className="font-medium">Seleziona tutte le ToDo</span>
+          {/* Checkbox stile Apple */}
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={selectedIds.length === todos.length}
+              onChange={(e) => {
+                if (e.target.checked) setSelectedIds(todos.map((t) => t.id));
+                else setSelectedIds([]);
+              }}
+            />
+            <div className="w-6 h-6 border-2 border-gray-300 rounded-md bg-white dark:bg-gray-800 relative transition-all duration-200 ease-out peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-300">
+              <svg
+                className="absolute inset-0 m-auto w-4 h-4 text-white opacity-0 scale-50 transition-all duration-150 ease-out peer-checked:opacity-100 peer-checked:scale-100"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <span className="ml-2 font-medium text-gray-700 dark:text-gray-300">
+              Seleziona tutte le ToDo
+            </span>
+          </label>
           {selectedIds.length > 0 && (
             <button
               onClick={() => setShowBulkConfirm(true)}
@@ -388,11 +420,13 @@ export default function ToDoListPage() {
       {showBulkConfirm &&
         createPortal(
           <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80">
-              <h2 className="text-xl font-semibold mb-4">
+            <div ref={bulkModalRef} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
                 Elimina {selectedIds.length} ToDo?
               </h2>
-              <p className="mb-6">Questa operazione è irreversibile.</p>
+              <p className="mb-6 text-gray-700 dark:text-gray-300">
+                Questa operazione è irreversibile.
+              </p>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setShowBulkConfirm(false)}
@@ -468,20 +502,22 @@ function SortableTodo({
                 type="checkbox"
                 className="peer sr-only"
                 checked={selectedIds.includes(todo.id)}
-                onChange={e => {
+                onChange={(e) => {
                   if (e.target.checked)
-                    setSelectedIds(ids => [...ids, todo.id]);
+                    setSelectedIds((ids) => [...ids, todo.id]);
                   else
-                    setSelectedIds(ids => ids.filter(i => i !== todo.id));
+                    setSelectedIds((ids) => ids.filter((i) => i !== todo.id));
                 }}
               />
-              <div className="
+              <div
+                className="
                 w-6 h-6 border-2 border-gray-300 rounded-md
                 bg-white dark:bg-gray-800
                 relative transition-all duration-200 ease-out
                 peer-checked:border-blue-600 peer-checked:bg-blue-600
                 peer-focus:ring-2 peer-focus:ring-blue-300
-              ">
+              "
+              >
                 <svg
                   className="
                     absolute inset-0 m-auto w-4 h-4 text-white
