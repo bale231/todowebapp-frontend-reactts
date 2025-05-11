@@ -18,10 +18,13 @@ export async function login(username: string, password: string) {
     }
 
     const data = await res.json();
-    localStorage.setItem("accessToken", data.access);
-    localStorage.setItem("refreshToken", data.refresh);
 
-    return { success: true };
+    // Torna anche i token nel return, ma NON salvarli qui
+    return {
+      success: true,
+      accessToken: data.access,
+      refreshToken: data.refresh,
+    };
   } catch (err) {
     return { success: false, message: "Errore di rete: " + err };
   }

@@ -10,6 +10,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
@@ -48,17 +49,18 @@ export default function Login() {
   const handleLogin = async () => {
     setIsLoading(true);
     setError("");
-
+  
     const result = await login(username, password);
-
+  
     if (result.success) {
       const user = await getCurrentUserJWT();
       if (user) {
-        console.log("Utente loggato:", user);
-        const accessToken = localStorage.getItem("accessToken");
-        if (accessToken) {
-          document.body.setAttribute("data-access-token", accessToken);
-        }
+        // se rememberMe=true, usa localStorage, altrimenti sessionStorage
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("accessToken", result.accessToken);
+        storage.setItem("refreshToken", result.refreshToken);
+  
+        document.body.setAttribute("data-access-token", result.accessToken);
         navigate("/home");
       } else {
         setError("Errore nel recupero dati utente");
@@ -66,9 +68,10 @@ export default function Login() {
     } else {
       setError(result.message);
     }
-
+  
     setIsLoading(false);
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -130,6 +133,45 @@ export default function Login() {
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </span>
+        </div>
+
+        {/* Ricordami */}
+        <div className="flex items-center mb-4">
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <div
+              className="
+                w-6 h-6 border-2 border-gray-300 rounded-md bg-white
+                dark:bg-gray-800 relative transition-all duration-200 ease-out
+                peer-checked:border-blue-600 peer-checked:bg-blue-600
+                peer-focus:ring-2 peer-focus:ring-blue-300
+              "
+            >
+              <svg
+                className="
+                  absolute inset-0 m-auto w-4 h-4 text-white opacity-0 scale-50
+                  transition-all duration-150 ease-out
+                  peer-checked:opacity-100 peer-checked:scale-100
+                "
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <span className="ml-2 text-gray-700 dark:text-gray-300 text-sm">
+              Rimani loggato
+            </span>
+          </label>
         </div>
 
         <button
