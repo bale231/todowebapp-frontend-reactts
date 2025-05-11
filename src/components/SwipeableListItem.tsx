@@ -1,5 +1,5 @@
 // src/components/SwipeableListItem.tsx
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { Edit, Trash } from "lucide-react";
 
@@ -9,74 +9,97 @@ interface SwipeableListItemProps {
   onDelete: () => void;
 }
 
-const ACTION_WIDTH = 80; // larghezza in px del div azione
+// larghezza action drawer
+const ACTION_WIDTH = 80;
 
-export default function SwipeableListItem({ children, onEdit, onDelete }: SwipeableListItemProps) {
+export default function SwipeableListItem({
+  children,
+  onEdit,
+  onDelete,
+}: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const startXRef = useRef(0);
   const currentXRef = useRef(0);
 
-  // Inizio del touch/mouse
+  // Quick setter per animazioni fluide, inizializzato a noop
+  const xTo = useRef<(value: number) => void>(() => {});
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      xTo.current = gsap.quickTo(wrapperRef.current, "x", {
+        duration: 0.5,
+        ease: "power4.out",
+      });
+    }
+  }, []);
+
   const handleStart = (x: number) => {
     startXRef.current = x;
+    currentXRef.current = x;
     setDragging(true);
   };
 
-  // Durante il touch/move
   const handleMove = (x: number) => {
     if (!dragging) return;
     currentXRef.current = x;
     const dx = currentXRef.current - startXRef.current;
-    if (wrapperRef.current) gsap.to(wrapperRef.current, { x: dx, duration: 0 });
+    // limita spostamento massimo
+    const clamped = Math.max(
+      -ACTION_WIDTH * 1.2,
+      Math.min(ACTION_WIDTH * 1.2, dx)
+    );
+    xTo.current(clamped);
   };
 
-  // Fine del touch/mouse
   const handleEnd = () => {
     setDragging(false);
     const dx = currentXRef.current - startXRef.current;
-    if (!wrapperRef.current) return;
-
-    // Se superi soglia, mantieni aperto altrimenti resetta
-    if (dx < -ACTION_WIDTH) {
-      gsap.to(wrapperRef.current, { x: -ACTION_WIDTH, duration: 0.2, ease: "power2.out" });
-    } else if (dx > ACTION_WIDTH) {
-      gsap.to(wrapperRef.current, { x: ACTION_WIDTH, duration: 0.2, ease: "power2.out" });
-    } else {
-      gsap.to(wrapperRef.current, { x: 0, duration: 0.2, ease: "power2.out" });
-    }
+    let target = 0;
+    if (dx < -ACTION_WIDTH) target = -ACTION_WIDTH;
+    else if (dx > ACTION_WIDTH) target = ACTION_WIDTH;
+    xTo.current(target);
   };
 
-  // Chiude le azioni (dopo click)
   const close = () => {
-    if (wrapperRef.current) gsap.to(wrapperRef.current, { x: 0, duration: 0.2, ease: "power2.out" });
+    xTo.current(0);
   };
 
   return (
     <div className="relative overflow-hidden">
-      {/* Azione modifica (swipe a sinistra) */}
+      {/* Azione modifica */}
       <div className="absolute left-0 top-0 bottom-0 w-[80px] flex items-center justify-center bg-yellow-400 z-0">
-        <button onClick={() => { onEdit(); close(); }}>
+        <button
+          onClick={() => {
+            onEdit();
+            close();
+          }}
+        >
           <Edit size={24} />
         </button>
       </div>
 
-      {/* Azione elimina (swipe a destra) */}
+      {/* Azione elimina */}
       <div className="absolute right-0 top-0 bottom-0 w-[80px] flex items-center justify-center bg-red-500 z-0">
-        <button onClick={() => { onDelete(); close(); }}>
+        <button
+          onClick={() => {
+            onDelete();
+            close();
+          }}
+        >
           <Trash size={24} />
         </button>
       </div>
 
-      {/* Contenuto card swipeable */}
+      {/* Contenuto swipeable */}
       <div
         ref={wrapperRef}
-        className="relative bg-white dark:bg-gray-800"
+        className="relative bg-white dark:bg-gray-800 touch-none"
         onTouchStart={(e) => handleStart(e.touches[0].clientX)}
         onTouchMove={(e) => handleMove(e.touches[0].clientX)}
         onTouchEnd={handleEnd}
         onMouseDown={(e) => handleStart(e.clientX)}
-        onMouseMove={(e) => handleMove(e.clientX)}
+        onMouseMove={(e) => dragging && handleMove(e.clientX)}
         onMouseUp={handleEnd}
         onMouseLeave={dragging ? handleEnd : undefined}
       >
