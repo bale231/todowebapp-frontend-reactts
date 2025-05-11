@@ -32,7 +32,10 @@ export async function login(username: string, password: string) {
 
 // 🔐 Recupero utente corrente tramite JWT
 export async function getCurrentUserJWT() {
-  const token = localStorage.getItem("accessToken");
+  const token =
+    sessionStorage.getItem("accessToken") ||
+    localStorage.getItem("accessToken");
+
   if (!token) return null;
 
   try {
