@@ -241,8 +241,8 @@ export default function ToDoListPage() {
 
       {/* MASTER CHECKBOX (solo in editMode) */}
       {editMode && (
-        <div className="mb-4 flex items-center gap-2">
-          {/* Checkbox stile Apple */}
+        <div className="mb-4 flex flex-col items-start gap-2">
+          {/* Checkbox finto stile Apple */}
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -270,10 +270,12 @@ export default function ToDoListPage() {
               Seleziona tutte le ToDo
             </span>
           </label>
+
+          {/* Bottone elimina selezionate, sotto checkbox */}
           {selectedIds.length > 0 && (
             <button
               onClick={() => setShowBulkConfirm(true)}
-              className="ml-auto px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             >
               Elimina selezionate ({selectedIds.length})
             </button>
