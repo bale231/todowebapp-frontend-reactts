@@ -30,33 +30,74 @@ export async function login(username: string, password: string) {
   }
 }
 
+async function refreshTokenIfNeeded(): Promise<string | null> {
+  const refresh =
+    sessionStorage.getItem("refreshToken") ||
+    localStorage.getItem("refreshToken");
+
+  if (!refresh) return null;
+
+  try {
+    const res = await fetch(`${API_URL}/token/refresh/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+
+    const storage =
+      sessionStorage.getItem("refreshToken") !== null
+        ? sessionStorage
+        : localStorage;
+
+    storage.setItem("accessToken", data.access);
+
+    return data.access;
+  } catch (err) {
+    console.error("Errore nel refresh del token:", err);
+    return null;
+  }
+}
+
+
 // 🔐 Recupero utente corrente tramite JWT
 export async function getCurrentUserJWT() {
-  const token =
+  let token =
     sessionStorage.getItem("accessToken") ||
     localStorage.getItem("accessToken");
 
   if (!token) return null;
 
-  try {
-    const res = await fetch(`${API_URL}/jwt-user/`, {
-      method: "GET",
+  let res = await fetch(`${API_URL}/jwt-user/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    console.warn("🔁 Token scaduto, provo a rinnovarlo...");
+    const newToken = await refreshTokenIfNeeded();
+
+    if (!newToken) return null;
+
+    token = newToken;
+    res = await fetch(`${API_URL}/jwt-user/`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log(res);
-
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    console.log("👤 User from JWT:", data);
-    return data;
-  } catch (err) {
-    console.error("Errore nel recupero dell'utente:", err);
-    return null;
   }
+
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  console.log("👤 Utente JWT:", data);
+  return data;
 }
 
 // 🔄 Logout locale
