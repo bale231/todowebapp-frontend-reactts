@@ -2,11 +2,19 @@
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
 export function getAuthHeaders() {
-  const token = localStorage.getItem("accessToken");
-  return {
-    Authorization: `Bearer ${token}`,
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken");
+
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  return headers;
 }
 
 // --- 📋 LISTE ---
