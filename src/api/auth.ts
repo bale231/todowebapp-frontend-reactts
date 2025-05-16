@@ -104,6 +104,8 @@ export async function getCurrentUserJWT() {
 export function logout() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  sessionStorage.removeItem("accessToken");
+  sessionStorage.removeItem("refreshToken");
 }
 
 // 📝 Register
@@ -128,7 +130,7 @@ export const updateProfile = async (formData: FormData) => {
   const res = await fetch(`${API_URL}/update-profile-jwt/`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
     },
     body: formData,
   });
@@ -140,7 +142,7 @@ export const resetPassword = async () => {
   const res = await fetch(`${API_URL}/reset-password/`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
       "Content-Type": "application/json",
     },
   });
@@ -166,7 +168,7 @@ export const sendVerificationEmail = async () => {
   const res = await fetch(`${API_URL}/send-verification-email/`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
       "Content-Type": "application/json",
     },
   });
@@ -178,7 +180,7 @@ export const deactivateAccount = async () => {
   const res = await fetch(`${API_URL}/delete-account/`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
       "Content-Type": "application/json",
     },
   });
@@ -190,7 +192,7 @@ export const updateTheme = async (theme: string) => {
   const res = await fetch(`${API_URL}/update-theme/`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ theme }),
