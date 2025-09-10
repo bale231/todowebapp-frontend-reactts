@@ -18,3 +18,10 @@ body, * {
 .invisible-scrollbar {
   scrollbar-width: none; /* Firefox */
 }
+
+@layer base {
+  html, body { height: 100%; }
+  /* colore base coerente anche quando non c'è ancora React */
+  html { background-color: #f3f4f6; }            /* gray-100 */
+  html.dark { background-color: #0f172a; }       /* gray-900 */
+}
