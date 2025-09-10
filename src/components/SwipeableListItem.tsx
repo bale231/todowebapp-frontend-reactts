@@ -154,7 +154,7 @@ export default function SwipeableListItem({
         {/* Contenuto swipeable */}
         <div
           ref={wrapperRef}
-          className="relative bg-white dark:bg-gray-800"
+          className="relative animate-[fadeIn_.25s_ease] bg-white dark:bg-gray-800"
           style={{ touchAction: "pan-y" }}
           onTouchStart={(e) => handleStart(e.touches[0].clientX)}
           onTouchMove={(e) => handleMove(e.touches[0].clientX)}

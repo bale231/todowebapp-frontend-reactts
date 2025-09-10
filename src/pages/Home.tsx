@@ -29,6 +29,8 @@ export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   // const { themeLoaded } = useTheme();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const prevCountRef = useRef<number>(6); // default 6 skeleton alla primissima volta
   const [lists, setLists] = useState<TodoList[]>([]);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
@@ -117,15 +119,22 @@ export default function Home() {
   }, [sortOption]);
 
   const fetchLists = async () => {
+    setIsLoading(true);
+    const started = Date.now();
     try {
       const data = await fetchAllLists();
       if (Array.isArray(data)) {
         setLists(data);
+        prevCountRef.current = data.length || prevCountRef.current || 6;
       } else {
         console.error("Formato risposta non valido:", data);
       }
     } catch (err) {
       console.error("Errore nel caricamento liste:", err);
+    } finally{
+      const elapsed = Date.now() - started;
+      const remain = Math.max(0, 500 - elapsed);
+      setTimeout(() => setIsLoading(false), remain);
     }
   };
 
@@ -173,6 +182,7 @@ export default function Home() {
         : "created";
 
     try {
+      setIsLoading(true);
       await fetch(`${API_URL}/lists/sort_order/`, {
         method: "PATCH",
         headers: {
@@ -235,7 +245,7 @@ export default function Home() {
           Ciao {user.username} 👋!! Crea le tue prime Liste e organizza il tuo
           tempo nel modo giusto!
         </h1>
-        {Array.isArray(sortedLists) && sortedLists.length === 0 && (
+        {!isLoading && Array.isArray(sortedLists) && sortedLists.length === 0 && (
           <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
             Qui andranno le tue liste ToDo animate 💫
           </p>
@@ -430,6 +440,13 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Fade-in animation style */}
+      <style>
+        {`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        `}
+      </style>
 
       {/* Wiggle animation style */}
       <style>
