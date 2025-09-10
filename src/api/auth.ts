@@ -106,6 +106,7 @@ export function logout() {
   localStorage.removeItem("refreshToken");
   sessionStorage.removeItem("accessToken");
   sessionStorage.removeItem("refreshToken");
+  localStorage.removeItem("theme");
 }
 
 // 📝 Register

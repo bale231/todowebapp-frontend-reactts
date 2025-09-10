@@ -22,16 +22,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <!-- script to set the theme before the app loads -->
     <script>
-      (function () {
-        try {
-          var saved = localStorage.getItem('theme');                // salva sempre qui quando l'utente cambia tema
-          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var theme = saved || (systemDark ? 'dark' : 'light');
-          var root = document.documentElement;
-          root.classList.remove('light','dark');
-          root.classList.add(theme);
-        } catch (e) {}
-      })();
+    (function () {
+      try {
+        var path = location.pathname.replace(/\/+$/,'');   // rimuove / finale
+        var isLogin = (path === '' || path === '/login');
+        var isRegister = (path === '/register');
+
+        var saved = localStorage.getItem('theme');
+        var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var fallback = saved || (systemDark ? 'dark' : 'light');
+
+        var theme = isLogin ? 'light' : (isRegister ? 'dark' : fallback);
+
+        var root = document.documentElement;
+        root.classList.remove('light','dark');
+        root.classList.add(theme);
+      } catch(e){}
+    })();
     </script>
 
     <!-- Title -->

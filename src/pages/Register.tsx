@@ -1,5 +1,5 @@
 // ✅ Register.tsx con controllo email e invio anche della mail
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth";
 import gsap from "gsap";
@@ -25,6 +25,12 @@ export default function Register() {
   const [emailValid, setEmailValid] = useState(true);
   const [emailTouched, setEmailTouched] = useState(false);
   const [confirmTouched, setConfirmTouched] = useState(false);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('light');
+    root.classList.add('dark');
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");

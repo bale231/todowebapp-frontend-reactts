@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, getCurrentUserJWT } from "../api/auth";
 import gsap from "gsap";
@@ -17,6 +17,13 @@ export default function Login() {
   const navigate = useNavigate();
   const [loginMode, setLoginMode] = useState<'username'|'email'>('username');
   const labelFlipRef = useRef<HTMLSpanElement>(null);
+
+  // forzo tema chiaro alla pagina di login
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('dark');
+    root.classList.add('light');
+  }, []);
 
   // piccola animazione quando cambi modalità
   useEffect(() => {
