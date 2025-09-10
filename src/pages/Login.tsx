@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, getCurrentUserJWT } from "../api/auth";
 import gsap from "gsap";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, User, AtSign } from "lucide-react";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -32,6 +32,19 @@ export default function Login() {
       }
     });
   };
+
+  
+  // piccola animazione quando cambi modalità
+  useEffect(() => {
+    if (!labelFlipRef.current) return;
+    gsap.to(labelFlipRef.current, {
+      rotateY: 90, duration: 0.15, ease: 'power1.in',
+      onComplete: () => {
+        gsap.set(labelFlipRef.current, { rotateY: -90 });
+        gsap.to(labelFlipRef.current, { rotateY: 0, duration: 0.15, ease: 'power1.out' });
+      }
+    });
+  }, [loginMode]);
 
   useEffect(() => {
     const checkAlreadyLoggedIn = async () => {
@@ -128,27 +141,52 @@ export default function Login() {
           </div>
         )}
 
+        <div className="mb-4">
+          <span className="block text-xs font-medium text-gray-500 mb-2">
+            Accedi con
+          </span>
+          <div className="inline-flex w-full bg-gray-200 dark:bg-gray-700 rounded-xl p-1">
+            <button
+              type="button"
+              onClick={() => setLoginMode('username')}
+              aria-pressed={loginMode === 'username'}
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition
+                ${loginMode === 'username'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow'
+                  : 'text-gray-700 dark:text-gray-300'}`}
+            >
+              <User size={16} />
+              <span className="text-sm font-medium">Username</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginMode('email')}
+              aria-pressed={loginMode === 'email'}
+              className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition
+                ${loginMode === 'email'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow'
+                  : 'text-gray-700 dark:text-gray-300'}`}
+            >
+              <AtSign size={16} />
+              <span className="text-sm font-medium">Email</span>
+            </button>
+          </div>
+        </div>
+        
         <div className="relative w-full mb-4">
           <input
-            // cambia type se sei in modalità email
-            type={loginMode === 'email' ? 'email' : 'text'}
             id="identifier"
+            type={loginMode === 'email' ? 'email' : 'text'}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="peer w-full px-4 pt-6 pb-2 border rounded text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder=" "
             autoComplete={loginMode === 'email' ? 'email' : 'username'}
-            inputMode={loginMode === 'email' ? 'email' as any : 'text' as any}
+            inputMode={loginMode === 'email' ? 'email' : 'text'}
           />
-
-          {/* Label "flippabile" */}
           <label
             htmlFor="identifier"
-            onClick={flipLabel}
-            role="button"
-            aria-pressed={loginMode === 'email'}
-            title="Clicca per usare Email/Username"
-            className="absolute left-4 top-2 text-sm text-gray-500 transition-all duration-200 cursor-pointer select-none
+            className="absolute left-4 top-2 text-sm text-gray-500 transition-all duration-200
                       peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
                       peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
             style={{ transformStyle: 'preserve-3d' }}
@@ -157,15 +195,7 @@ export default function Login() {
               {loginMode === 'email' ? 'Email' : 'Username'}
             </span>
           </label>
-
-          {/* Hint cliccabile (opzionale) */}
-          <div className="mt-1 text-xs text-gray-500">
-            <button type="button" onClick={flipLabel} className="underline">
-              {loginMode === 'email' ? 'Usa username' : 'Usa email'}
-            </button>
-          </div>
         </div>
-
 
         <div className="relative w-full mb-4">
           <input
