@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 // import { useTheme } from "../context/ThemeContext";
 import SwipeableListItem from "../components/SwipeableListItem";
-import SkeletonCard from "../components/SkeletonCard";
 
 interface TodoList {
   id: number;
@@ -51,7 +50,6 @@ export default function Home() {
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
-  const skeletonCount = prevCountRef.current || (lists.length || 6);
 
   useEffect(() => {
     const loadUserAndPref = async () => {
@@ -121,45 +119,38 @@ export default function Home() {
   }, [sortOption]);
 
   const fetchLists = async () => {
-    // mostra lo stesso numero di card che c'erano prima
-    prevCountRef.current = lists.length || prevCountRef.current || 6;
     setIsLoading(true);
-
     const started = Date.now();
     try {
       const data = await fetchAllLists();
       if (Array.isArray(data)) {
         setLists(data);
-        // prepara il numero per il prossimo giro
         prevCountRef.current = data.length || prevCountRef.current || 6;
       } else {
         console.error("Formato risposta non valido:", data);
       }
     } catch (err) {
       console.error("Errore nel caricamento liste:", err);
-    } finally {
+    } finally{
       const elapsed = Date.now() - started;
-      const remain = Math.max(0, 500 - elapsed); // minimo 500ms
+      const remain = Math.max(0, 500 - elapsed);
       setTimeout(() => setIsLoading(false), remain);
     }
   };
-
 
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
 
     if (editListId !== null) {
+      // ✅ MODIFICA LISTA
       await editList(editListId, newListName, newListColor);
       setEditListId(null);
     } else {
-      // anticipa una card in più e mostra skeleton
-      prevCountRef.current = (lists.length || 0) + 1;
-      setIsLoading(true);
-
+      // ✅ CREA LISTA
       const res = await fetch(`${API_URL}/lists/`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name: newListName, color: newListColor }),
@@ -167,11 +158,10 @@ export default function Home() {
       if (!res.ok) console.error("Errore creazione lista");
     }
 
-    await fetchLists();
+    fetchLists();
     setNewListName("");
     setShowForm(false);
   };
-
 
   const handleEditList = (list: TodoList) => {
     setEditListId(list.id);
@@ -180,26 +170,31 @@ export default function Home() {
     setShowForm(true);
   };
 
-const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
-  setSortOption(newOpt);
+  const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
+    setSortOption(newOpt);
 
-  const backendOrder =
-    newOpt === "name" ? "alphabetical" : newOpt === "complete" ? "complete" : "created";
+    // Mappatura interna → backend
+    const backendOrder =
+      newOpt === "name"
+        ? "alphabetical"
+        : newOpt === "complete"
+        ? "complete"
+        : "created";
 
-  try {
-    await fetch(`${API_URL}/lists/sort_order/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-      },
-      body: JSON.stringify({ sort_order: backendOrder }),
-    });
-    // niente isLoading qui: UX più fluida
-  } catch (err) {
-    console.error("Errore nel salvataggio ordinamento liste:", err);
-  }
-};
+    try {
+      setIsLoading(true);
+      await fetch(`${API_URL}/lists/sort_order/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ sort_order: backendOrder }),
+      });
+    } catch (err) {
+      console.error("Errore nel salvataggio ordinamento liste:", err);
+    }
+  };
 
   const handleDeleteList = async (id: number) => {
     gsap.fromTo(
@@ -212,12 +207,8 @@ const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
         duration: 0.1,
         onComplete: () => {
           (async () => {
-            // anticipa una card in meno e mostra skeleton
-            prevCountRef.current = Math.max(0, (lists.length || 1) - 1);
-            setIsLoading(true);
-
             await deleteList(id);
-            await fetchLists();
+            fetchLists();
             setShowDeleteConfirm(null);
           })();
         },
@@ -259,20 +250,12 @@ const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
             Qui andranno le tue liste ToDo animate 💫
           </p>
         )}
-        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[vh] invisible-scrollbar" aria-busy={isLoading}>
-          <div id="list-wrapper" className="grid max-h-[60vh] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoading ? (
-              // ✅ N skeleton = numero “precedente” (o 6)
-              Array.from({ length: skeletonCount }).map((_, i) => (
-                <SkeletonCard key={`sk-${i}`} />
-              ))
-            ) : sortedLists.length === 0 ? (
-              // ✅ nessuna lista → messaggio vuoto
-              <p className="mt-2 text-lg text-gray-700 dark:text-gray-300 col-span-full">
-                Qui andranno le tue liste ToDo animate 💫
-              </p>
-            ) : (
-              // ✅ liste reali (mantieni il tuo codice attuale)
+        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[vh] invisible-scrollbar">
+          <div
+            id="list-wrapper"
+            className="grid max-h-[60vh] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {Array.isArray(sortedLists) &&
               sortedLists.map((list) => {
                 const completed = list.todos.filter((t) => t.completed).length;
                 const pending = list.todos.length - completed;
@@ -289,38 +272,60 @@ const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
                         colorClasses[list.color]
                       } ${editMode ? "animate-wiggle" : ""}`}
                     >
+                      {/* Contenuto cliccabile */}
                       <Link to={`/lists/${list.id}`}>
                         <div className="cursor-pointer">
-                          <h3 className="text-xl font-semibold mb-2">{list.name}</h3>
+                          <h3 className="text-xl font-semibold mb-2">
+                            {list.name}
+                          </h3>
                           {list.todos.length === 0 ? (
-                            <p className="text-sm text-gray-500">Nessuna ToDo</p>
+                            <p className="text-sm text-gray-500">
+                              Nessuna ToDo
+                            </p>
                           ) : (
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              {pending} ToDo {list.name} da completare, {completed} completate.
+                              {pending} ToDo {list.name} da completare,{" "}
+                              {completed} completate.
                             </p>
                           )}
                         </div>
                       </Link>
 
+                      {/* Bottoni Modifica/Elimina (solo in editMode) */}
                       {editMode && (
                         <div className="absolute top-2 right-2 flex gap-2 z-10">
-                          <button onClick={() => handleEditList(list)} className="text-blue-500 hover:text-blue-700">
+                          <button
+                            onClick={() => handleEditList(list)}
+                            className="text-blue-500 hover:text-blue-700"
+                          >
                             <Edit size={25} />
                           </button>
-                          <button onClick={() => setShowDeleteConfirm(list.id)} className="text-red-500 hover:text-red-700">
+                          <button
+                            onClick={() => setShowDeleteConfirm(list.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
                             <Trash size={25} />
                           </button>
                         </div>
                       )}
 
+                      {/* Conferma eliminazione */}
                       {showDeleteConfirm === list.id && (
                         <div className="mt-4 text-lg">
-                          <p className="text-red-500 mb-2">Confermi eliminazione?</p>
+                          <p className="text-red-500 mb-2">
+                            Confermi eliminazione?
+                          </p>
                           <div className="flex gap-2">
-                            <button onClick={() => handleDeleteList(list.id)} className="px-2 py-1 bg-red-600 text-white text-lg rounded">
+                            <button
+                              onClick={() => handleDeleteList(list.id)}
+                              className="px-2 py-1 bg-red-600 text-white text-lg rounded"
+                            >
                               Sì
                             </button>
-                            <button onClick={() => setShowDeleteConfirm(null)} className="px-2 py-1 bg-gray-300 text-xs rounded">
+                            <button
+                              onClick={() => setShowDeleteConfirm(null)}
+                              className="px-2 py-1 bg-gray-300 text-xs rounded"
+                            >
                               No
                             </button>
                           </div>
@@ -329,8 +334,7 @@ const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
                     </div>
                   </SwipeableListItem>
                 );
-              })
-            )}
+              })}
           </div>
         </main>
       </div>
