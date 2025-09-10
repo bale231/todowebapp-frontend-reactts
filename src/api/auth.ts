@@ -1,14 +1,21 @@
 // ✅ src/api/auth.ts
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
+// --- helper unico per prendere il token da sessionStorage o localStorage
+export function authHeader(): Record<string,string> {
+  const token =
+    sessionStorage.getItem("accessToken") ||
+    localStorage.getItem("accessToken");
+
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 // 🔐 Funzione login con JWT
 export async function login(username: string, password: string) {
   try {
     const res = await fetch(`${API_URL}/token/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: {...authHeader()},
       body: JSON.stringify({ username, password }),
     });
 
@@ -40,9 +47,7 @@ async function refreshTokenIfNeeded(): Promise<string | null> {
   try {
     const res = await fetch(`${API_URL}/token/refresh/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: {...authHeader()},
       body: JSON.stringify({ refresh }),
     });
 
@@ -55,6 +60,9 @@ async function refreshTokenIfNeeded(): Promise<string | null> {
         ? sessionStorage
         : localStorage;
 
+    storage.setItem("accessToken", data.access);
+    localStorage.removeItem("accessToken");
+    sessionStorage.removeItem("accessToken");
     storage.setItem("accessToken", data.access);
 
     return data.access;
@@ -74,9 +82,7 @@ export async function getCurrentUserJWT() {
   if (!token) return null;
 
   let res = await fetch(`${API_URL}/jwt-user/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: {...authHeader()},
   });
 
   if (res.status === 401) {
@@ -87,9 +93,7 @@ export async function getCurrentUserJWT() {
 
     token = newToken;
     res = await fetch(`${API_URL}/jwt-user/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: {...authHeader()},
     });
   }
 
@@ -112,7 +116,7 @@ export function logout() {
 export const register = async (username: string, email: string, password: string) => {
   const res = await fetch(`${API_URL}/register/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...authHeader() },
     body: JSON.stringify({ username, email, password }),
   });
 
@@ -129,9 +133,7 @@ export const register = async (username: string, email: string, password: string
 export const updateProfile = async (formData: FormData) => {
   const res = await fetch(`${API_URL}/update-profile-jwt/`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-    },
+    headers: {...authHeader()},
     body: formData,
   });
   return res.json();
@@ -141,10 +143,7 @@ export const updateProfile = async (formData: FormData) => {
 export const resetPassword = async () => {
   const res = await fetch(`${API_URL}/reset-password/`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-      "Content-Type": "application/json",
-    },
+    headers: {...authHeader()},
   });
   return res.json();
 };
@@ -157,7 +156,7 @@ export const updatePassword = async (
 ) => {
   const res = await fetch(`${API_URL}/reset-password/${uid}/${token}/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...authHeader() },
     body: JSON.stringify({ password: newPassword }),
   });
   return res.json();
@@ -167,10 +166,7 @@ export const updatePassword = async (
 export const sendVerificationEmail = async () => {
   const res = await fetch(`${API_URL}/send-verification-email/`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-      "Content-Type": "application/json",
-    },
+    headers: {...authHeader()},
   });
   return res.json();
 };
@@ -179,10 +175,7 @@ export const sendVerificationEmail = async () => {
 export const deactivateAccount = async () => {
   const res = await fetch(`${API_URL}/delete-account/`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-      "Content-Type": "application/json",
-    },
+    headers: {...authHeader()},
   });
   return res.json();
 };
@@ -191,10 +184,7 @@ export const deactivateAccount = async () => {
 export const updateTheme = async (theme: string) => {
   const res = await fetch(`${API_URL}/update-theme/`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-      "Content-Type": "application/json",
-    },
+    headers: {...authHeader()},
     body: JSON.stringify({ theme }),
   });
   return res.json();

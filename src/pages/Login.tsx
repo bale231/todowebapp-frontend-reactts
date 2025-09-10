@@ -59,34 +59,42 @@ export default function Login() {
   const handleLogin = async () => {
     setIsLoading(true);
     setError("");
-  
+
     const result = await login(username, password);
 
-    if (result.success) {
-      const { accessToken, refreshToken } = result;
-      const storage = rememberMe ? localStorage : sessionStorage;
-    
-      storage.setItem("accessToken", accessToken);
-      storage.setItem("refreshToken", refreshToken);
-    
-      const user = await getCurrentUserJWT();
-      if (user) {
-        // se rememberMe=true, usa localStorage, altrimenti sessionStorage
-        const storage = rememberMe ? localStorage : sessionStorage;
-        storage.setItem("accessToken", result.accessToken);
-        storage.setItem("refreshToken", result.refreshToken);
-  
-        document.body.setAttribute("data-access-token", result.accessToken);
-        navigate("/home");
-      } else {
-        setError("Errore nel recupero dati utente");
-      }
-    } else {
+    if (!result.success) {
       setError(result.message);
+      setIsLoading(false);
+      return;
     }
-  
+
+    const { accessToken, refreshToken } = result;
+
+    // ✅ scegli lo storage UNA SOLA VOLTA
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem("accessToken", accessToken);
+    storage.setItem("refreshToken", refreshToken);
+
+    // ✅ opzionale: pulisci l'altro storage per evitare ambiguità
+    const other = rememberMe ? sessionStorage : localStorage;
+    other.removeItem("accessToken");
+    other.removeItem("refreshToken");
+
+    // ✅ ora fai la prima fetch utente (usa authHeader() dentro getCurrentUserJWT)
+    const user = await getCurrentUserJWT();
+    if (!user) {
+      setError("Errore nel recupero dati utente");
+      setIsLoading(false);
+      return;
+    }
+
+    // (se ti serve) salva qualcosa nel DOM
+    // document.body.setAttribute("data-access-token", accessToken);
+
+    navigate("/home");
     setIsLoading(false);
   };
+
   
 
   return (
