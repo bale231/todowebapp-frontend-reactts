@@ -139,7 +139,7 @@ export default function Home() {
       console.error("Errore nel caricamento liste:", err);
     } finally {
       const elapsed = Date.now() - started;
-      const remain = Math.max(0, 10000 - elapsed); // minimo 500ms
+      const remain = Math.max(0, 500 - elapsed); // minimo 500ms
       setTimeout(() => setIsLoading(false), remain);
     }
   };
