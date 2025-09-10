@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
-import { useTheme } from "../context/ThemeContext";
+// import { useTheme } from "../context/ThemeContext";
 import SwipeableListItem from "../components/SwipeableListItem";
 
 interface TodoList {
@@ -28,7 +28,7 @@ const colorClasses: Record<string, string> = {
 export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
-  const { themeLoaded } = useTheme();
+  // const { themeLoaded } = useTheme();
   const [lists, setLists] = useState<TodoList[]>([]);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
