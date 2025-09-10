@@ -19,21 +19,6 @@ export default function Login() {
   const [loginMode, setLoginMode] = useState<'username'|'email'>('username');
   const labelFlipRef = useRef<HTMLSpanElement>(null);
 
-  const flipLabel = () => {
-    if (!labelFlipRef.current) return;
-    gsap.to(labelFlipRef.current, {
-      rotateY: 90,
-      duration: 0.15,
-      ease: 'power1.in',
-      onComplete: () => {
-        setLoginMode(m => (m === 'username' ? 'email' : 'username'));
-        gsap.set(labelFlipRef.current, { rotateY: -90 });
-        gsap.to(labelFlipRef.current, { rotateY: 0, duration: 0.15, ease: 'power1.out' });
-      }
-    });
-  };
-
-  
   // piccola animazione quando cambi modalità
   useEffect(() => {
     if (!labelFlipRef.current) return;
