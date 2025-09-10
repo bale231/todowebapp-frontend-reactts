@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, getCurrentUserJWT } from "../api/auth";
@@ -15,6 +16,22 @@ export default function Login() {
   const formRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
   const navigate = useNavigate();
+  const [loginMode, setLoginMode] = useState<'username'|'email'>('username');
+  const labelFlipRef = useRef<HTMLSpanElement>(null);
+
+  const flipLabel = () => {
+    if (!labelFlipRef.current) return;
+    gsap.to(labelFlipRef.current, {
+      rotateY: 90,
+      duration: 0.15,
+      ease: 'power1.in',
+      onComplete: () => {
+        setLoginMode(m => (m === 'username' ? 'email' : 'username'));
+        gsap.set(labelFlipRef.current, { rotateY: -90 });
+        gsap.to(labelFlipRef.current, { rotateY: 0, duration: 0.15, ease: 'power1.out' });
+      }
+    });
+  };
 
   useEffect(() => {
     const checkAlreadyLoggedIn = async () => {
@@ -113,20 +130,42 @@ export default function Login() {
 
         <div className="relative w-full mb-4">
           <input
-            type="text"
-            id="username"
+            // cambia type se sei in modalità email
+            type={loginMode === 'email' ? 'email' : 'text'}
+            id="identifier"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="peer w-full px-4 pt-6 pb-2 border rounded text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder=" "
+            autoComplete={loginMode === 'email' ? 'email' : 'username'}
+            inputMode={loginMode === 'email' ? 'email' as any : 'text' as any}
           />
+
+          {/* Label "flippabile" */}
           <label
-            htmlFor="username"
-            className="absolute left-4 top-2 text-sm text-gray-500 transition-all duration-200 peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            htmlFor="identifier"
+            onClick={flipLabel}
+            role="button"
+            aria-pressed={loginMode === 'email'}
+            title="Clicca per usare Email/Username"
+            className="absolute left-4 top-2 text-sm text-gray-500 transition-all duration-200 cursor-pointer select-none
+                      peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                      peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-500"
+            style={{ transformStyle: 'preserve-3d' }}
           >
-            Username
+            <span ref={labelFlipRef} style={{ display: 'inline-block' }}>
+              {loginMode === 'email' ? 'Email' : 'Username'}
+            </span>
           </label>
+
+          {/* Hint cliccabile (opzionale) */}
+          <div className="mt-1 text-xs text-gray-500">
+            <button type="button" onClick={flipLabel} className="underline">
+              {loginMode === 'email' ? 'Usa username' : 'Usa email'}
+            </button>
+          </div>
         </div>
+
 
         <div className="relative w-full mb-4">
           <input
