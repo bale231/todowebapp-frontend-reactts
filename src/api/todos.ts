@@ -1,21 +1,31 @@
 // ✅ src/api/todos.ts - gestisce tutto ciò che riguarda liste e ToDo
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
+// Sostituisci getAuthHeaders con:
 export function getAuthHeaders() {
   const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken");
+    sessionStorage.getItem("accessToken") ||
+    localStorage.getItem("accessToken");
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
+
+async function jsonOrNull(res: Response) {
+  if (res.status === 204) return null;           // niente body
+  const ct = res.headers.get("content-type") ?? "";
+  if (!ct.includes("application/json")) {
+    const text = await res.text();
+    throw new Error(`${res.status} ${res.statusText}: ${text}`);
+  }
+  return res.json();
+}
+
+function assertOk(res: Response) {
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+}
+
 
 // --- 📋 LISTE ---
 export async function fetchAllLists() {
@@ -23,7 +33,8 @@ export async function fetchAllLists() {
     method: "GET",
     headers: getAuthHeaders(),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 export async function fetchListDetails(listId: number | string) {
@@ -39,7 +50,8 @@ export async function fetchListDetails(listId: number | string) {
     console.error("❌ RESPONSE TEXT:", text);
   }
 
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 export async function renameList(listId: number, newName: string) {
@@ -48,7 +60,8 @@ export async function renameList(listId: number, newName: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ name: newName }),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 // ✅ Modifica lista (PUT su /lists/:id/)
@@ -58,7 +71,8 @@ export async function editList(listId: number, name: string, color: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ name, color }),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 // ✅ Elimina lista (DELETE su /lists/:id/)
@@ -67,7 +81,8 @@ export async function deleteList(listId: number) {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 
@@ -78,7 +93,8 @@ export async function createTodo(listId: number | string, title: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ title }),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 export async function toggleTodo(todoId: number) {
@@ -86,7 +102,8 @@ export async function toggleTodo(todoId: number) {
     method: "PATCH",
     headers: getAuthHeaders(),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 export async function deleteTodo(todoId: number) {
@@ -94,7 +111,8 @@ export async function deleteTodo(todoId: number) {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 // ✅ PATCH modifica titolo di una ToDo
@@ -104,7 +122,8 @@ export async function updateTodo(todoId: number, title: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ title }),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 // ✅ POST per riordinare le ToDo
@@ -117,7 +136,8 @@ export async function reorderTodos(
     headers: getAuthHeaders(),
     body: JSON.stringify({ order }),
   });
-  return res.json();
+  assertOk(res);
+  return jsonOrNull(res);
 }
 
 // ✅ PATCH per modificare l'ordine
@@ -127,5 +147,8 @@ export async function updateSortOrder(listId: number | string, sortOrder: string
     headers: getAuthHeaders(),
     body: JSON.stringify({ sort_order: sortOrder }),
   });
-  return res.json(); // ritorna { sort_order: "..." }
+
+  assertOk(res);
+  return jsonOrNull(res);
+   // ritorna { sort_order: "..." }
 }

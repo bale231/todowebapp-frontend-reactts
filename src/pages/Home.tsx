@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUserJWT } from "../api/auth";
+import { getCurrentUserJWT, authHeader } from "../api/auth";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
@@ -57,9 +57,7 @@ export default function Home() {
 
       try {
         const res = await fetch(`${API_URL}/lists/sort_order/`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+          headers: {...authHeader()},
         });
         if (res.ok) {
           const { sort_order } = await res.json();
@@ -140,10 +138,7 @@ export default function Home() {
       // ✅ CREA LISTA
       const res = await fetch(`${API_URL}/lists/`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
-          "Content-Type": "application/json",
-        },
+        headers: {...authHeader(), "Content-Type": "application/json"},
         body: JSON.stringify({ name: newListName, color: newListColor }),
       });
       if (!res.ok) console.error("Errore creazione lista");
@@ -175,10 +170,7 @@ export default function Home() {
     try {
       await fetch(`${API_URL}/lists/sort_order/`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        headers: {...authHeader(), "Content-Type": "application/json"},
         body: JSON.stringify({ sort_order: backendOrder }),
       });
     } catch (err) {
