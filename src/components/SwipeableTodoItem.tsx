@@ -117,7 +117,7 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-xl">
+      <div className={`relative rounded-xl ${disabled ? '' : 'overflow-hidden'}`}>
         {/* Solo se NON disabled, mostra i bottoni di azione */}
         {!disabled && (
           <>
