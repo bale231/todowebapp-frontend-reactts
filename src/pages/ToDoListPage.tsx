@@ -45,19 +45,19 @@ interface Todo {
 }
 
 const colorThemes: Record<string, string> = {
-  blue: "bg-blue-100 dark:bg-blue-900",
-  green: "bg-green-100 dark:bg-green-900",
-  yellow: "bg-yellow-100 dark:bg-yellow-900",
-  red: "bg-red-100 dark:bg-red-900",
-  purple: "bg-purple-100 dark:bg-purple-900",
+  blue: "from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900",
+  green: "from-green-50 via-white to-blue-50 dark:from-green-900 dark:via-gray-800 dark:to-blue-900",
+  yellow: "from-yellow-50 via-white to-orange-50 dark:from-yellow-900 dark:via-gray-800 dark:to-orange-900",
+  red: "from-red-50 via-white to-pink-50 dark:from-red-900 dark:via-gray-800 dark:to-pink-900",
+  purple: "from-purple-50 via-white to-blue-50 dark:from-purple-900 dark:via-gray-800 dark:to-blue-900",
 };
 
 const colorMap: Record<string, string> = {
-  blue: "bg-blue-600 hover:bg-blue-700",
-  green: "bg-green-600 hover:bg-green-700",
-  yellow: "bg-yellow-500 hover:bg-yellow-600",
-  red: "bg-red-600 hover:bg-red-700",
-  purple: "bg-purple-600 hover:bg-purple-700",
+  blue: "bg-blue-600/80 hover:bg-blue-600/90 border-blue-300/30",
+  green: "bg-green-600/80 hover:bg-green-600/90 border-green-300/30",
+  yellow: "bg-yellow-500/80 hover:bg-yellow-500/90 border-yellow-300/30",
+  red: "bg-red-600/80 hover:bg-red-600/90 border-red-300/30",
+  purple: "bg-purple-600/80 hover:bg-purple-600/90 border-purple-300/30",
 };
 
 export default function ToDoListPage() {
@@ -74,9 +74,7 @@ export default function ToDoListPage() {
   const modalRef = useRef<HTMLDivElement>(null);
   const shouldAnimate = useRef(true);
   const wasModalClosed = useRef(true);
-  const [sortOption, setSortOption] = useState<"created" | "alphabetical">(
-    "created"
-  );
+  const [sortOption, setSortOption] = useState<"created" | "alphabetical">("created");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
@@ -177,11 +175,11 @@ export default function ToDoListPage() {
     if (!id) return;
 
     await updateSortOrder(id, newSort);
-    setSortOption(newSort); // 👈 Prima aggiorni lo stato local
-    fetchTodos(true); // 👈 Passi true per NON sovrascrivere
+    setSortOption(newSort);
+    fetchTodos(true);
   };
 
-  // Animazione GSAP per modale multi-delete
+  // Animazioni GSAP
   useEffect(() => {
     if (showBulkConfirm && bulkModalRef.current) {
       gsap.fromTo(
@@ -223,16 +221,14 @@ export default function ToDoListPage() {
   const displayedTodos = todos;
 
   return (
-    <div
-      className={`min-h-screen ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}
-    >
+    <div className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           {listName}
         </h1>
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-2 text-[#121212]-600 hover:text-black-800 dark:text-[#d3d3d3]-400 dark:hover:text-white-300 transition"
+          className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30 hover:bg-white/30 transition-all"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline text-lg">Torna alla Home</span>
@@ -241,8 +237,7 @@ export default function ToDoListPage() {
 
       {/* MASTER CHECKBOX (solo in editMode) */}
       {editMode && (
-        <div className="mb-4 flex flex-col items-start gap-2">
-          {/* Checkbox finto stile Apple */}
+        <div className="mb-4 p-4 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -253,7 +248,7 @@ export default function ToDoListPage() {
                 else setSelectedIds([]);
               }}
             />
-            <div className="w-6 h-6 border-2 border-gray-300 rounded-md bg-white dark:bg-gray-800 relative transition-all duration-200 ease-out peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-300">
+            <div className="w-6 h-6 border-2 border-gray-300 rounded-md bg-white/50 dark:bg-gray-800/50 relative transition-all duration-200 ease-out peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-300">
               <svg
                 className="absolute inset-0 m-auto w-4 h-4 text-white opacity-0 scale-50 transition-all duration-150 ease-out peer-checked:opacity-100 peer-checked:scale-100"
                 viewBox="0 0 24 24"
@@ -266,34 +261,32 @@ export default function ToDoListPage() {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <span className="ml-2 font-medium text-gray-700 dark:text-gray-300">
+            <span className="ml-2 font-medium">
               Seleziona tutte le ToDo
             </span>
           </label>
 
-          {/* Bottone elimina selezionate, sotto checkbox */}
           {selectedIds.length > 0 && (
             <button
               onClick={() => setShowBulkConfirm(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="mt-3 px-4 py-2 bg-red-600/80 backdrop-blur-sm border border-red-300/30 text-white rounded-lg hover:bg-red-600/90 transition-all"
             >
               Elimina selezionate ({selectedIds.length})
             </button>
           )}
         </div>
       )}
-      {/* ───────────────────────────────────────────→ */}
 
       <div className="mb-6 flex items-center gap-2">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Nuova ToDo..."
-          className="px-4 py-2 rounded border w-full dark:bg-gray-800"
+          className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl w-full placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
         />
         <button
           onClick={handleCreate}
-          className={`${colorMap[listColor]} text-white px-4 py-2 rounded`}
+          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all`}
         >
           <Plus size={18} />
         </button>
@@ -311,7 +304,7 @@ export default function ToDoListPage() {
           >
             <div
               ref={listRef}
-              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24 invisible-scrollbar"
+              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24"
             >
               {displayedTodos.map((todo) => (
                 <SortableTodo
@@ -331,7 +324,7 @@ export default function ToDoListPage() {
       ) : (
         <div
           ref={listRef}
-          className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24 invisible-scrollbar"
+          className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24"
         >
           {displayedTodos.map((todo) => (
             <SortableTodo
@@ -351,7 +344,7 @@ export default function ToDoListPage() {
       {/* Floating Menu */}
       <div className="fixed bottom-6 left-6 z-50">
         <div
-          className={`flex flex-col items-start space-y-2 mb-2 transition-all ${
+          className={`flex flex-col items-start space-y-2 mb-2 transition-all duration-200 ${
             menuOpen
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-2 pointer-events-none"
@@ -359,12 +352,12 @@ export default function ToDoListPage() {
         >
           <button
             onClick={() => setEditMode((prev) => !prev)}
-            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded"
+            className="flex items-center gap-2 bg-green-600/80 backdrop-blur-md border border-green-300/30 text-white px-4 py-2 rounded-xl hover:bg-green-600/90 transition-all"
           >
             <Pencil size={18} /> Modifica
           </button>
 
-          <div className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded">
+          <div className="flex items-center gap-2 bg-yellow-500/80 backdrop-blur-md border border-yellow-300/30 text-white px-4 py-2 rounded-xl hover:bg-yellow-500/90 transition-all">
             <ListFilter size={18} />
             <select
               value={sortOption}
@@ -380,12 +373,11 @@ export default function ToDoListPage() {
           onClick={() => {
             setMenuOpen((prev) => {
               const next = !prev;
-              // se sto chiudendo il menu (next === false), resetto editMode
               if (!next) setEditMode(false);
               return next;
             });
           }}
-          className={`w-14 h-14 flex items-center justify-center rounded-full transition-transform duration-300 ${
+          className={`w-14 h-14 flex items-center justify-center rounded-full backdrop-blur-md border transition-all duration-200 ${
             colorMap[listColor]
           } text-white ${menuOpen ? "rotate-45" : "rotate-0"}`}
         >
@@ -395,10 +387,10 @@ export default function ToDoListPage() {
 
       {/* Modale modifica ToDo */}
       {editedTodo && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div
             ref={modalRef}
-            className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80"
+            className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
           >
             <h2 className="text-xl font-semibold mb-4">Modifica ToDo</h2>
             <input
@@ -406,18 +398,18 @@ export default function ToDoListPage() {
               onChange={(e) =>
                 setEditedTodo({ ...editedTodo, title: e.target.value })
               }
-              className="w-full px-4 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
             />
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <button
                 onClick={() => setEditedTodo(null)}
-                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-white"
+                className="flex-1 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-all"
               >
                 Annulla
               </button>
               <button
                 onClick={handleEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="flex-1 px-4 py-2 bg-blue-600/80 backdrop-blur-sm border border-blue-300/30 text-white rounded-lg hover:bg-blue-600/90 transition-all"
               >
                 Salva
               </button>
@@ -428,21 +420,21 @@ export default function ToDoListPage() {
 
       {showBulkConfirm &&
         createPortal(
-          <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
             <div
               ref={bulkModalRef}
-              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80"
+              className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
             >
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              <h2 className="text-xl font-semibold mb-4">
                 Elimina {selectedIds.length} ToDo?
               </h2>
-              <p className="mb-6 text-gray-700 dark:text-gray-300">
+              <p className="mb-6">
                 Questa operazione è irreversibile.
               </p>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setShowBulkConfirm(false)}
-                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                  className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-all"
                 >
                   Annulla
                 </button>
@@ -453,7 +445,7 @@ export default function ToDoListPage() {
                     setSelectedIds([]);
                     fetchTodos();
                   }}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="px-4 py-2 bg-red-600/80 backdrop-blur-sm border border-red-300/30 text-white rounded-lg hover:bg-red-600/90 transition-all"
                 >
                   Conferma
                 </button>
@@ -500,14 +492,14 @@ function SortableTodo({
       <div
         ref={setNodeRef}
         style={style}
-        className="flex items-center justify-between bg-white dark:bg-gray-800 px-6 py-2 rounded shadow text-xl font-semibold"
+        className="flex items-center justify-between bg-white/30 dark:bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/40 dark:hover:bg-white/15 transition-all"
       >
         <div
-          className={`flex items-center gap-2 ${
+          className={`flex items-center gap-3 ${
             todo.completed ? "line-through text-gray-400" : ""
           }`}
         >
-          {/* ✅ Checkbox */}
+          {/* Checkbox */}
           {editMode && (
             <label className="inline-flex items-center cursor-pointer">
               <input
@@ -521,21 +513,9 @@ function SortableTodo({
                     setSelectedIds((ids) => ids.filter((i) => i !== todo.id));
                 }}
               />
-              <div
-                className="
-                w-6 h-6 border-2 border-gray-300 rounded-md
-                bg-white dark:bg-gray-800
-                relative transition-all duration-200 ease-out
-                peer-checked:border-blue-600 peer-checked:bg-blue-600
-                peer-focus:ring-2 peer-focus:ring-blue-300
-              "
-              >
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-md bg-white/50 dark:bg-gray-800/50 relative transition-all duration-200 ease-out peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-300">
                 <svg
-                  className="
-                    absolute inset-0 m-auto w-4 h-4 text-white
-                    opacity-0 scale-50 transition-all duration-150 ease-out
-                    peer-checked:opacity-100 peer-checked:scale-100
-                  "
+                  className="absolute inset-0 m-auto w-4 h-4 text-white opacity-0 scale-50 transition-all duration-150 ease-out peer-checked:opacity-100 peer-checked:scale-100"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -544,47 +524,46 @@ function SortableTodo({
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              {/* opzionale label: <span className="ml-2"> {todo.title} </span> */}
             </label>
           )}
 
-          {/* ✅ Check */}
+          {/* Check */}
           <button
             onClick={() => onCheck(todo.id)}
-            className="text-green-600 hover:text-green-800"
+            className="text-green-600 hover:text-green-800 transition-colors"
           >
             <CheckSquare size={20} />
           </button>
 
-          {/* ✅ Titolo */}
+          {/* Titolo */}
           <span>{todo.title}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* ✅ Drag handle */}
+          {/* Drag handle */}
           <span
             {...attributes}
             {...listeners}
-            className="cursor-grab text-gray-400 hover:text-gray-600 touch-none"
+            className="cursor-grab text-gray-400 hover:text-gray-600 touch-none transition-colors"
             title="Trascina"
           >
             ⠿
           </span>
 
-          {/* ✅ Pulsanti visibili solo in editMode */}
+          {/* Pulsanti visibili solo in editMode */}
           {editMode && (
             <>
               <button
                 onClick={onEdit}
-                className="text-blue-500 hover:text-blue-700"
+                className="p-1 bg-blue-500/20 backdrop-blur-sm rounded text-blue-600 hover:text-blue-700 hover:bg-blue-500/30 transition-all"
               >
-                <Pencil size={18} />
+                <Pencil size={16} />
               </button>
               <button
                 onClick={() => onDelete(todo.id)}
-                className="text-red-500 hover:text-red-700"
+                className="p-1 bg-red-500/20 backdrop-blur-sm rounded text-red-600 hover:text-red-700 hover:bg-red-500/30 transition-all"
               >
-                <Trash size={18} />
+                <Trash size={16} />
               </button>
             </>
           )}
