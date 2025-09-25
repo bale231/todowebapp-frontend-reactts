@@ -17,11 +17,11 @@ interface TodoList {
 }
 
 const colorClasses: Record<string, string> = {
-  blue: "border-blue-500",
-  green: "border-green-500",
-  yellow: "border-yellow-500",
-  red: "border-red-500",
-  purple: "border-purple-500",
+  blue: "border-l-blue-500 bg-blue-500/20",
+  green: "border-l-green-500 bg-green-500/20",
+  yellow: "border-l-yellow-500 bg-yellow-500/20",
+  red: "border-l-red-500 bg-red-500/20",
+  purple: "border-l-purple-500 bg-purple-500/20",
 };
 
 export default function Home() {
@@ -249,9 +249,9 @@ export default function Home() {
                 >
                   <div
                     id={`card-${list.id}`}
-                    className={`relative p-4 bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg hover:shadow-xl border-l-4 ${
+                    className={`relative p-4 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg hover:shadow-xl border-l-4 ${
                       colorClasses[list.color]
-                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200 hover:bg-white/40 dark:hover:bg-white/15`}
+                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200`}
                   >
                     <Link to={`/lists/${list.id}`}>
                       <div className="cursor-pointer">
