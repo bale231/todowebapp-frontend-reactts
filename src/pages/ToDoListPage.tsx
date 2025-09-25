@@ -16,7 +16,6 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  TouchSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -77,17 +76,16 @@ export default function ToDoListPage() {
   const [sortOption, setSortOption] = useState<"created" | "alphabetical">("created");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
-  const [isDragging, setIsDragging] = useState(false); // NUOVO: Track del drag&drop
+  const [isDragging, setIsDragging] = useState(false);
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
+  // 🔥 SENSORI CON ATTIVAZIONE RITARDATA - La chiave per separare drag e swipe!
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor, {
+    useSensor(PointerSensor, {
       activationConstraint: {
-        delay: 250,
-        tolerance: 5,
+        distance: 8, // Il drag parte solo dopo 8px di movimento
       },
     })
   );
@@ -155,15 +153,13 @@ export default function ToDoListPage() {
     }
   };
 
-  // NUOVO: Handler per inizio drag
   const handleDragStart = () => {
     setIsDragging(true);
   };
 
-  // AGGIORNATO: Handler per fine drag
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = async (event: any) => {
-    setIsDragging(false); // Fine drag
+    setIsDragging(false);
     if (sortOption === "alphabetical") return;
 
     const { active, over } = event;
@@ -187,7 +183,6 @@ export default function ToDoListPage() {
     fetchTodos(true);
   };
 
-  // Animazioni GSAP
   useEffect(() => {
     if (showBulkConfirm && bulkModalRef.current) {
       gsap.fromTo(
@@ -243,7 +238,6 @@ export default function ToDoListPage() {
         </button>
       </div>
 
-      {/* MASTER CHECKBOX (solo in editMode) */}
       {editMode && (
         <div className="mb-4 p-4 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
           <label className="inline-flex items-center cursor-pointer">
@@ -304,7 +298,7 @@ export default function ToDoListPage() {
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          onDragStart={handleDragStart} // NUOVO: Aggiungi handler inizio drag
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
@@ -325,7 +319,7 @@ export default function ToDoListPage() {
                   selectedIds={selectedIds}
                   setSelectedIds={setSelectedIds}
                   editMode={editMode}
-                  isDragging={isDragging} // NUOVO: Passa stato drag
+                  isDragging={isDragging}
                 />
               ))}
             </div>
@@ -346,13 +340,12 @@ export default function ToDoListPage() {
               editMode={editMode}
               selectedIds={selectedIds}
               setSelectedIds={setSelectedIds}
-              isDragging={false} // NUOVO: Passa false quando non in drag context
+              isDragging={false}
             />
           ))}
         </div>
       )}
 
-      {/* Floating Menu */}
       <div className="fixed bottom-6 left-6 z-50">
         <div
           className={`flex flex-col items-start space-y-2 mb-2 transition-all duration-200 ${
@@ -396,7 +389,6 @@ export default function ToDoListPage() {
         </button>
       </div>
 
-      {/* Modale modifica ToDo */}
       {editedTodo && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div
@@ -466,22 +458,19 @@ export default function ToDoListPage() {
           document.body
         )}
 
-      {/* CSS per nascondere scrollbar */}
       <style>
         {`
-          /* Nascondi scrollbar per Chrome, Safari e altri browser WebKit */
+          * {
+            -webkit-tap-highlight-color: transparent;
+          }
+          
           .overflow-y-auto::-webkit-scrollbar {
             display: none;
           }
           
-          /* Nascondi scrollbar per Firefox */
           .overflow-y-auto {
             scrollbar-width: none;
             -ms-overflow-style: none;
-          }
-
-          * {
-              -webkit-tap-highlight-color: transparent !important;
           }
         `}
       </style>
@@ -497,7 +486,7 @@ function SortableTodo({
   editMode,
   selectedIds,
   setSelectedIds,
-  isDragging, // NUOVO: Ricevi stato drag
+  isDragging,
 }: {
   todo: Todo;
   onCheck: (id: number) => void;
@@ -506,14 +495,21 @@ function SortableTodo({
   editMode: boolean;
   selectedIds: number[];
   setSelectedIds: React.Dispatch<React.SetStateAction<number[]>>;
-  isDragging: boolean; // NUOVO: Tipo per isDragging
+  isDragging: boolean;
 }) {
-  const { setNodeRef, attributes, listeners, transform, transition } =
-    useSortable({ id: todo.id });
+  const { 
+    setNodeRef, 
+    attributes, 
+    listeners, 
+    transform, 
+    transition,
+    isDragging: isThisItemDragging 
+  } = useSortable({ id: todo.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isThisItemDragging ? 0.5 : 1,
   };
 
   return (
@@ -521,7 +517,7 @@ function SortableTodo({
       onEdit={onEdit}
       label={todo.title}
       onDelete={() => onDelete(todo.id)}
-      disabled={isDragging} // NUOVO: Disabilita swipe durante drag
+      disabled={isDragging}
     >
       <div
         ref={setNodeRef}
@@ -533,7 +529,6 @@ function SortableTodo({
             todo.completed ? "line-through text-gray-400" : ""
           }`}
         >
-          {/* Checkbox */}
           {editMode && (
             <label className="inline-flex items-center cursor-pointer">
               <input
@@ -561,7 +556,6 @@ function SortableTodo({
             </label>
           )}
 
-          {/* Check */}
           <button
             onClick={() => onCheck(todo.id)}
             className="text-green-600 hover:text-green-800 transition-colors"
@@ -569,22 +563,19 @@ function SortableTodo({
             <CheckSquare size={20} />
           </button>
 
-          {/* Titolo */}
           <span>{todo.title}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Drag handle */}
           <span
             {...attributes}
             {...listeners}
-            className="cursor-grab text-gray-400 hover:text-gray-600 touch-none transition-colors"
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none transition-colors select-none"
             title="Trascina"
           >
             ⠿
           </span>
 
-          {/* Pulsanti visibili solo in editMode */}
           {editMode && (
             <>
               <button
