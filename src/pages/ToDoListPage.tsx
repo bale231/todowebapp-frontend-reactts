@@ -479,6 +479,10 @@ export default function ToDoListPage() {
             scrollbar-width: none;
             -ms-overflow-style: none;
           }
+
+          * {
+              -webkit-tap-highlight-color: transparent !important;
+          }
         `}
       </style>
     </div>
