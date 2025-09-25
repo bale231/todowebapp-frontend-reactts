@@ -9,11 +9,12 @@ interface SwipeableTodoItemProps {
   label: string;
   onEdit: () => void;
   onDelete: () => void;
+  disabled?: boolean;
 }
 
 const ACTION_WIDTH = 60;
 
-export default function SwipeableTodoItem({ children, label, onEdit, onDelete }: SwipeableTodoItemProps) {
+export default function SwipeableTodoItem({ children, label, onEdit, onDelete, disabled = false }: SwipeableTodoItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -43,6 +44,7 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete }:
   }, [showConfirm]);
 
   const handleStart = (x: number) => {
+    if (disabled) return; // Non iniziare swipe se disabled
     startXRef.current = x;
     currentXRef.current = x;
     movedRef.current = false;
@@ -50,7 +52,7 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete }:
   };
 
   const handleMove = (x: number) => {
-    if (!dragging) return;
+    if (!dragging || disabled) return; // Non muovere se disabled
     const dx = x - startXRef.current;
     if (Math.abs(dx) > 5) movedRef.current = true;
     currentXRef.current = x;
@@ -59,6 +61,7 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete }:
   };
 
   const handleEnd = () => {
+    if (disabled) return; // Non finire swipe se disabled
     setDragging(false);
     const dx = currentXRef.current - startXRef.current;
     const target = dx < -ACTION_WIDTH ? -ACTION_WIDTH : dx > ACTION_WIDTH ? ACTION_WIDTH : 0;

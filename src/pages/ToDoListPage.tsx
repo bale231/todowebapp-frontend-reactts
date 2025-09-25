@@ -77,6 +77,7 @@ export default function ToDoListPage() {
   const [sortOption, setSortOption] = useState<"created" | "alphabetical">("created");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [isDragging, setIsDragging] = useState(false); // NUOVO: Track del drag&drop
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
@@ -154,8 +155,15 @@ export default function ToDoListPage() {
     }
   };
 
+  // NUOVO: Handler per inizio drag
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  // AGGIORNATO: Handler per fine drag
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = async (event: any) => {
+    setIsDragging(false); // Fine drag
     if (sortOption === "alphabetical") return;
 
     const { active, over } = event;
@@ -296,6 +304,7 @@ export default function ToDoListPage() {
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart} // NUOVO: Aggiungi handler inizio drag
           onDragEnd={handleDragEnd}
         >
           <SortableContext
@@ -316,6 +325,7 @@ export default function ToDoListPage() {
                   selectedIds={selectedIds}
                   setSelectedIds={setSelectedIds}
                   editMode={editMode}
+                  isDragging={isDragging} // NUOVO: Passa stato drag
                 />
               ))}
             </div>
@@ -336,6 +346,7 @@ export default function ToDoListPage() {
               editMode={editMode}
               selectedIds={selectedIds}
               setSelectedIds={setSelectedIds}
+              isDragging={false} // NUOVO: Passa false quando non in drag context
             />
           ))}
         </div>
@@ -454,6 +465,22 @@ export default function ToDoListPage() {
           </div>,
           document.body
         )}
+
+      {/* CSS per nascondere scrollbar */}
+      <style>
+        {`
+          /* Nascondi scrollbar per Chrome, Safari e altri browser WebKit */
+          .overflow-y-auto::-webkit-scrollbar {
+            display: none;
+          }
+          
+          /* Nascondi scrollbar per Firefox */
+          .overflow-y-auto {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+        `}
+      </style>
     </div>
   );
 }
@@ -466,6 +493,7 @@ function SortableTodo({
   editMode,
   selectedIds,
   setSelectedIds,
+  isDragging, // NUOVO: Ricevi stato drag
 }: {
   todo: Todo;
   onCheck: (id: number) => void;
@@ -474,6 +502,7 @@ function SortableTodo({
   editMode: boolean;
   selectedIds: number[];
   setSelectedIds: React.Dispatch<React.SetStateAction<number[]>>;
+  isDragging: boolean; // NUOVO: Tipo per isDragging
 }) {
   const { setNodeRef, attributes, listeners, transform, transition } =
     useSortable({ id: todo.id });
@@ -488,6 +517,7 @@ function SortableTodo({
       onEdit={onEdit}
       label={todo.title}
       onDelete={() => onDelete(todo.id)}
+      disabled={isDragging} // NUOVO: Disabilita swipe durante drag
     >
       <div
         ref={setNodeRef}
@@ -568,21 +598,6 @@ function SortableTodo({
             </>
           )}
         </div>
-        {/* CSS per nascondere scrollbar */}
-        <style>
-          {`
-            /* Nascondi scrollbar per Chrome, Safari e altri browser WebKit */
-            .overflow-y-auto::-webkit-scrollbar {
-              display: none;
-            }
-            
-            /* Nascondi scrollbar per Firefox */
-            .overflow-y-auto {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-          `}
-        </style>
       </div>
     </SwipeableTodoItem>
   );
