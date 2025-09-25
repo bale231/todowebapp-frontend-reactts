@@ -107,23 +107,28 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete }:
 
   return (
     <>
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden rounded-xl">
+        {/* Azione Sinistra - MODIFICA */}
         <div
-          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm"
+          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
           style={{ width: ACTION_WIDTH, transform: "translateX(-100%)" }}
         >
-          <button onClick={onEdit} className="text-white p-2">
+          <button onClick={onEdit} className="text-white p-2 hover:scale-110 transition-transform">
             <Pencil size={20} />
           </button>
         </div>
+        
+        {/* Azione Destra - ELIMINA */}
         <div
-          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm"
+          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl"
           style={{ width: ACTION_WIDTH, transform: "translateX(100%)" }}
         >
-          <button onClick={() => setShowConfirm(true)} className="text-white p-2">
+          <button onClick={() => setShowConfirm(true)} className="text-white p-2 hover:scale-110 transition-transform">
             <Trash size={20} />
           </button>
         </div>
+        
+        {/* Contenuto principale swipeable */}
         <div
           ref={wrapperRef}
           onMouseDown={(e) => handleStart(e.clientX)}
@@ -134,6 +139,7 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete }:
           onTouchMove={(e) => handleMove(e.touches[0].clientX)}
           onTouchEnd={handleEnd}
           onClick={onClickWrapper}
+          className="relative z-10 cursor-grab active:cursor-grabbing"
         >
           {children}
         </div>
