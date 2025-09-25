@@ -77,11 +77,12 @@ export default function Login() {
     }
   }, []);
 
+  // Funzione di gestione del login
   const handleLogin = async () => {
     setIsLoading(true);
     setError("");
-  
-    const result = await login(username, password);
+
+    const result = await login(username, password, rememberMe); // Passa rememberMe
 
     if (result.success) {
       const { accessToken, refreshToken } = result;
@@ -92,11 +93,6 @@ export default function Login() {
     
       const user = await getCurrentUserJWT();
       if (user) {
-        // se rememberMe=true, usa localStorage, altrimenti sessionStorage
-        const storage = rememberMe ? localStorage : sessionStorage;
-        storage.setItem("accessToken", result.accessToken);
-        storage.setItem("refreshToken", result.refreshToken);
-  
         document.body.setAttribute("data-access-token", result.accessToken);
         navigate("/home");
       } else {
@@ -105,7 +101,7 @@ export default function Login() {
     } else {
       setError(result.message);
     }
-  
+
     setIsLoading(false);
   };
   

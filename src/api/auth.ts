@@ -2,33 +2,36 @@
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
 // 🔐 Funzione login con JWT
-export async function login(username: string, password: string) {
+export const login = async (username: string, password: string, rememberMe: boolean = false) => {
   try {
-    const res = await fetch(`${API_URL}/token/`, {
+    const response = await fetch(`${API_URL}/login/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        username, 
+        password,
+        remember_me: rememberMe  // Invia il flag
+      }),
     });
 
-    if (!res.ok) {
-      const data = await res.json();
-      return { success: false, message: data.message || "Credenziali errate" };
+    const data = await response.json();
+    
+    if (response.ok) {
+      return {
+        success: true,
+        accessToken: data.access,
+        refreshToken: data.refresh,
+        user: data.user,
+        rememberMe: data.remember_me
+      };
     }
-
-    const data = await res.json();
-
-    // ✅ NON salvare qui — lascialo decidere al frontend
-    return {
-      success: true,
-      accessToken: data.access,
-      refreshToken: data.refresh,
-    };
-  } catch (err) {
-    return { success: false, message: "Errore di rete: " + err };
+    
+    return { success: false, message: data.message };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return { success: false, message: "Errore di connessione" };
   }
-}
+};
 
 async function refreshTokenIfNeeded(): Promise<string | null> {
   const refresh =
