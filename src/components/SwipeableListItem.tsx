@@ -108,20 +108,20 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
   return (
     <>
       <div className="relative overflow-hidden rounded-xl">
-        {/* Azione Sinistra - MODIFICA */}
+        {/* Azione Sinistra - MODIFICA (nascosta inizialmente, rivelata quando swipe destro) */}
         <div
-          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl z-5"
-          style={{ width: ACTION_WIDTH, transform: "translateX(-100%)" }}
+          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
+          style={{ width: ACTION_WIDTH }}
         >
           <button onClick={onEdit} className="text-white p-2 hover:scale-110 transition-transform">
             <Pencil size={20} />
           </button>
         </div>
         
-        {/* Azione Destra - ELIMINA */}
+        {/* Azione Destra - ELIMINA (nascosta inizialmente, rivelata quando swipe sinistro) */}
         <div
-          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl z-5"
-          style={{ width: ACTION_WIDTH, transform: "translateX(100%)" }}
+          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl"
+          style={{ width: ACTION_WIDTH }}
         >
           <button onClick={() => setShowConfirm(true)} className="text-white p-2 hover:scale-110 transition-transform">
             <Trash size={20} />
@@ -139,7 +139,8 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
           onTouchMove={(e) => handleMove(e.touches[0].clientX)}
           onTouchEnd={handleEnd}
           onClick={onClickWrapper}
-          className="relative z-1 cursor-grab active:cursor-grabbing"
+          className="relative bg-white dark:bg-gray-800 cursor-grab active:cursor-grabbing"
+          style={{ zIndex: 10 }}
         >
           {children}
         </div>
