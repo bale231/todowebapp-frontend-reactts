@@ -6,7 +6,6 @@ import gsap from "gsap";
 import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
-// import { useTheme } from "../context/ThemeContext";
 import SwipeableListItem from "../components/SwipeableListItem";
 
 interface TodoList {
@@ -28,23 +27,17 @@ const colorClasses: Record<string, string> = {
 export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
-  // const { themeLoaded } = useTheme();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const prevCountRef = useRef<number>(6); // default 6 skeleton alla primissima volta
   const [lists, setLists] = useState<TodoList[]>([]);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editListId, setEditListId] = useState<number | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
-    null
-  );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
-    "created"
-  );
-  // url API
+  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">("created");
+  const [hasAnimated, setHasAnimated] = useState(false); // Per controllare se animare o no
+  
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
   const titleRef = useRef(null);
@@ -65,7 +58,6 @@ export default function Home() {
         });
         if (res.ok) {
           const { sort_order } = await res.json();
-          // mappa da backend → frontend
           setSortOption(
             sort_order === "alphabetical"
               ? "name"
@@ -84,57 +76,47 @@ export default function Home() {
   useEffect(() => {
     if (user) {
       fetchLists();
-      gsap.from(titleRef.current, {
-        y: -50,
-        opacity: 0,
-        duration: 1,
-        ease: "power2.out",
-      });
-      gsap.from(boxRef.current, {
-        opacity: 0,
-        y: 40,
-        delay: 0.4,
-        duration: 1,
-        ease: "power2.out",
-      });
+      
+      // Anima solo la prima volta
+      if (!hasAnimated) {
+        gsap.from(titleRef.current, {
+          y: -30,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        });
+        gsap.from(boxRef.current, {
+          opacity: 0,
+          y: 20,
+          delay: 0.2,
+          duration: 0.8,
+          ease: "power2.out",
+        });
+        setHasAnimated(true);
+      }
     }
-  }, [user]);
+  }, [user, hasAnimated]);
 
   useEffect(() => {
     if (showForm && modalRef.current) {
       gsap.fromTo(
         modalRef.current,
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" }
+        { scale: 0.9, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
       );
     }
   }, [showForm]);
 
-  useEffect(() => {
-    gsap.fromTo(
-      "#list-wrapper",
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-    );
-  }, [sortOption]);
-
   const fetchLists = async () => {
-    setIsLoading(true);
-    const started = Date.now();
     try {
       const data = await fetchAllLists();
       if (Array.isArray(data)) {
         setLists(data);
-        prevCountRef.current = data.length || prevCountRef.current || 6;
       } else {
         console.error("Formato risposta non valido:", data);
       }
     } catch (err) {
       console.error("Errore nel caricamento liste:", err);
-    } finally{
-      const elapsed = Date.now() - started;
-      const remain = Math.max(0, 500 - elapsed);
-      setTimeout(() => setIsLoading(false), remain);
     }
   };
 
@@ -142,11 +124,11 @@ export default function Home() {
     if (!newListName.trim()) return;
 
     if (editListId !== null) {
-      // ✅ MODIFICA LISTA
+      // MODIFICA LISTA
       await editList(editListId, newListName, newListColor);
       setEditListId(null);
     } else {
-      // ✅ CREA LISTA
+      // CREA LISTA
       const res = await fetch(`${API_URL}/lists/`, {
         method: "POST",
         headers: {
@@ -173,7 +155,6 @@ export default function Home() {
   const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
     setSortOption(newOpt);
 
-    // Mappatura interna → backend
     const backendOrder =
       newOpt === "name"
         ? "alphabetical"
@@ -182,7 +163,6 @@ export default function Home() {
         : "created";
 
     try {
-      setIsLoading(true);
       await fetch(`${API_URL}/lists/sort_order/`, {
         method: "PATCH",
         headers: {
@@ -199,10 +179,10 @@ export default function Home() {
   const handleDeleteList = async (id: number) => {
     gsap.fromTo(
       `#card-${id}`,
-      { x: -5 },
+      { x: -3 },
       {
-        x: 5,
-        repeat: 3,
+        x: 3,
+        repeat: 2,
         yoyo: true,
         duration: 0.1,
         onComplete: () => {
@@ -233,108 +213,105 @@ export default function Home() {
   });
 
   if (!user) {
-    // shell scura per evitare flash
-    return <div className="min-h-screen bg-gray-100 dark:bg-gray-900" />;
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-500">Caricamento...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 text-gray-900 dark:text-white transition">
       <Navbar />
       <div className="p-6" ref={boxRef}>
         <h1 ref={titleRef} className="text-xl sm:text-3xl font-bold">
-          Ciao {user.username} 👋!! Crea le tue prime Liste e organizza il tuo
+          Ciao {user.username}! Crea le tue prime Liste e organizza il tuo
           tempo nel modo giusto!
         </h1>
-        {!isLoading && Array.isArray(sortedLists) && sortedLists.length === 0 && (
-          <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
-            Qui andranno le tue liste ToDo animate 💫
-          </p>
+        {sortedLists.length === 0 && (
+          <div className="mt-6 p-6 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
+            <p className="text-lg text-gray-700 dark:text-gray-300 text-center">
+              Qui andranno le tue liste ToDo animate ✨
+            </p>
+          </div>
         )}
-        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[vh] invisible-scrollbar">
-          <div
-            id="list-wrapper"
-            className="grid max-h-[60vh] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {Array.isArray(sortedLists) &&
-              sortedLists.map((list) => {
-                const completed = list.todos.filter((t) => t.completed).length;
-                const pending = list.todos.length - completed;
+        <main className="flex-1 mt-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedLists.map((list) => {
+              const completed = list.todos.filter((t) => t.completed).length;
+              const pending = list.todos.length - completed;
 
-                return (
-                  <SwipeableListItem
-                    key={list.id}
-                    onEdit={() => handleEditList(list)}
-                    onDelete={() => handleDeleteList(list.id)}
+              return (
+                <SwipeableListItem
+                  key={list.id}
+                  onEdit={() => handleEditList(list)}
+                  onDelete={() => handleDeleteList(list.id)}
+                >
+                  <div
+                    id={`card-${list.id}`}
+                    className={`relative p-4 bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg hover:shadow-xl border-l-4 ${
+                      colorClasses[list.color]
+                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200 hover:bg-white/40 dark:hover:bg-white/15`}
                   >
-                    <div
-                      id={`card-${list.id}`}
-                      className={`relative p-4 bg-white dark:bg-gray-800 rounded shadow border-l-4 ${
-                        colorClasses[list.color]
-                      } ${editMode ? "animate-wiggle" : ""}`}
-                    >
-                      {/* Contenuto cliccabile */}
-                      <Link to={`/lists/${list.id}`}>
-                        <div className="cursor-pointer">
-                          <h3 className="text-xl font-semibold mb-2">
-                            {list.name}
-                          </h3>
-                          {list.todos.length === 0 ? (
-                            <p className="text-sm text-gray-500">
-                              Nessuna ToDo
-                            </p>
-                          ) : (
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              {pending} ToDo {list.name} da completare,{" "}
-                              {completed} completate.
-                            </p>
-                          )}
-                        </div>
-                      </Link>
-
-                      {/* Bottoni Modifica/Elimina (solo in editMode) */}
-                      {editMode && (
-                        <div className="absolute top-2 right-2 flex gap-2 z-10">
-                          <button
-                            onClick={() => handleEditList(list)}
-                            className="text-blue-500 hover:text-blue-700"
-                          >
-                            <Edit size={25} />
-                          </button>
-                          <button
-                            onClick={() => setShowDeleteConfirm(list.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash size={25} />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Conferma eliminazione */}
-                      {showDeleteConfirm === list.id && (
-                        <div className="mt-4 text-lg">
-                          <p className="text-red-500 mb-2">
-                            Confermi eliminazione?
+                    <Link to={`/lists/${list.id}`}>
+                      <div className="cursor-pointer">
+                        <h3 className="text-xl font-semibold mb-2">
+                          {list.name}
+                        </h3>
+                        {list.todos.length === 0 ? (
+                          <p className="text-sm text-gray-500">
+                            Nessuna ToDo
                           </p>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleDeleteList(list.id)}
-                              className="px-2 py-1 bg-red-600 text-white text-lg rounded"
-                            >
-                              Sì
-                            </button>
-                            <button
-                              onClick={() => setShowDeleteConfirm(null)}
-                              className="px-2 py-1 bg-gray-300 text-xs rounded"
-                            >
-                              No
-                            </button>
-                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {pending} ToDo da completare, {completed} completate.
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+
+                    {editMode && (
+                      <div className="absolute top-2 right-2 flex gap-2 z-10">
+                        <button
+                          onClick={() => handleEditList(list)}
+                          className="p-2 bg-blue-500/20 backdrop-blur-sm rounded-lg border border-blue-300/30 text-blue-600 hover:text-blue-700 hover:bg-blue-500/30 transition-all"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => setShowDeleteConfirm(list.id)}
+                          className="p-2 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-300/30 text-red-600 hover:text-red-700 hover:bg-red-500/30 transition-all"
+                        >
+                          <Trash size={18} />
+                        </button>
+                      </div>
+                    )}
+
+                    {showDeleteConfirm === list.id && (
+                      <div className="mt-4 p-3 bg-red-500/10 backdrop-blur-sm rounded-lg border border-red-300/30">
+                        <p className="text-red-600 dark:text-red-400 mb-2 text-sm font-medium">
+                          Confermi eliminazione?
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleDeleteList(list.id)}
+                            className="px-3 py-1 bg-red-600/80 backdrop-blur-sm text-white text-sm rounded-lg hover:bg-red-600 transition-all"
+                          >
+                            Sì
+                          </button>
+                          <button
+                            onClick={() => setShowDeleteConfirm(null)}
+                            className="px-3 py-1 bg-white/30 backdrop-blur-sm text-gray-700 dark:text-gray-300 text-sm rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+                          >
+                            No
+                          </button>
                         </div>
-                      )}
-                    </div>
-                  </SwipeableListItem>
-                );
-              })}
+                      </div>
+                    )}
+                  </div>
+                </SwipeableListItem>
+              );
+            })}
           </div>
         </main>
       </div>
@@ -342,7 +319,7 @@ export default function Home() {
       {/* Floating action button menu */}
       <div className="fixed bottom-6 left-6 z-50">
         <div
-          className={`flex flex-col items-start space-y-2 mb-2 transition-all ${
+          className={`flex flex-col items-start space-y-2 mb-2 transition-all duration-200 ${
             menuOpen
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-2 pointer-events-none"
@@ -350,23 +327,23 @@ export default function Home() {
         >
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+            className="flex items-center gap-2 bg-blue-600/80 backdrop-blur-md text-white px-4 py-2 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 transition-all"
           >
             <Plus size={18} /> Nuova Lista
           </button>
           <button
             onClick={() => setEditMode((prev) => !prev)}
-            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
+            className="flex items-center gap-2 bg-green-600/80 backdrop-blur-md text-white px-4 py-2 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 transition-all"
           >
             <Pencil size={18} /> Modifica Liste
           </button>
-          <div className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded shadow hover:bg-yellow-600">
+          <div className="flex items-center gap-2 bg-yellow-500/80 backdrop-blur-md text-white px-4 py-2 rounded-xl border border-yellow-300/30 shadow-lg hover:bg-yellow-500/90 transition-all">
             <ListFilter size={18} />
             <select
               value={sortOption}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(e) => handleSortChange(e.target.value as any)}
-              className="bg-transparent text-[black] text-sm"
+              className="bg-transparent text-black text-sm"
             >
               <option value="created">Più recente</option>
               <option value="name">Alfabetico</option>
@@ -378,14 +355,13 @@ export default function Home() {
           onClick={() => {
             setMenuOpen((prev) => {
               const next = !prev;
-              // se sto chiudendo il menu (next === false), resetto editMode
               if (!next) setEditMode(false);
               return next;
             });
           }}
-          className={`w-14 h-14 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform duration-300 ${
+          className={`w-14 h-14 flex items-center justify-center rounded-full bg-blue-600/80 backdrop-blur-md text-white shadow-lg border border-blue-300/30 transition-all duration-200 ${
             menuOpen ? "rotate-45" : ""
-          }`}
+          } hover:bg-blue-600/90`}
         >
           <Plus size={28} />
         </button>
@@ -393,10 +369,10 @@ export default function Home() {
 
       {/* Modal creazione/modifica lista */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div
             ref={modalRef}
-            className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-80"
+            className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
           >
             <h2 className="text-xl font-semibold mb-4">
               {editListId !== null ? "Modifica Lista" : "Nuova Lista"}
@@ -406,12 +382,12 @@ export default function Home() {
               placeholder="Nome della lista"
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
-              className="w-full px-4 py-2 border rounded mb-3 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg mb-3 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
             />
             <select
               value={newListColor}
               onChange={(e) => setNewListColor(e.target.value)}
-              className="w-full px-4 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
             >
               <option value="blue">Blu</option>
               <option value="green">Verde</option>
@@ -419,20 +395,20 @@ export default function Home() {
               <option value="red">Rosso</option>
               <option value="purple">Viola</option>
             </select>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <button
                 onClick={() => {
                   setShowForm(false);
                   setEditListId(null);
                   setNewListName("");
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-white"
+                className="flex-1 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white/30 transition-all"
               >
                 Annulla
               </button>
               <button
                 onClick={handleCreateList}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="flex-1 px-4 py-2 bg-blue-600/80 backdrop-blur-sm border border-blue-300/30 text-white rounded-lg hover:bg-blue-600/90 transition-all"
               >
                 {editListId !== null ? "Salva" : "Crea"}
               </button>
@@ -441,20 +417,13 @@ export default function Home() {
         </div>
       )}
 
-      {/* Fade-in animation style */}
-      <style>
-        {`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        `}
-      </style>
-
       {/* Wiggle animation style */}
       <style>
         {`
           @keyframes wiggle {
-            0% { transform: rotate(-1deg); }
-            50% { transform: rotate(1deg); }
-            100% { transform: rotate(-1deg); }
+            0% { transform: rotate(-0.5deg); }
+            50% { transform: rotate(0.5deg); }
+            100% { transform: rotate(-0.5deg); }
           }
           .animate-wiggle {
             animation: wiggle 0.3s ease-in-out infinite;
