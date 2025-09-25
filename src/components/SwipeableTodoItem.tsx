@@ -43,6 +43,13 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
     }
   }, [showConfirm]);
 
+  // NUOVO: Resetta posizione quando disabled diventa true
+  useEffect(() => {
+    if (disabled && wrapperRef.current) {
+      gsap.set(wrapperRef.current, { x: 0 }); // Forza posizione 0
+    }
+  }, [disabled]);
+
   const handleStart = (x: number) => {
     if (disabled) return; // Non iniziare swipe se disabled
     startXRef.current = x;
@@ -111,37 +118,42 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
   return (
     <>
       <div className="relative overflow-hidden rounded-xl">
-        {/* Azione Sinistra - MODIFICA (nascosta inizialmente, rivelata quando swipe destro) */}
-        <div
-          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
-          style={{ width: ACTION_WIDTH }}
-        >
-          <button onClick={onEdit} className="text-white p-2 hover:scale-110 transition-transform">
-            <Pencil size={20} />
-          </button>
-        </div>
-        
-        {/* Azione Destra - ELIMINA (nascosta inizialmente, rivelata quando swipe sinistro) */}
-        <div
-          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl"
-          style={{ width: ACTION_WIDTH }}
-        >
-          <button onClick={() => setShowConfirm(true)} className="text-white p-2 hover:scale-110 transition-transform">
-            <Trash size={20} />
-          </button>
-        </div>
+        {/* Solo se NON disabled, mostra i bottoni di azione */}
+        {!disabled && (
+          <>
+            {/* Azione Sinistra - MODIFICA */}
+            <div
+              className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
+              style={{ width: ACTION_WIDTH }}
+            >
+              <button onClick={onEdit} className="text-white p-2 hover:scale-110 transition-transform">
+                <Pencil size={20} />
+              </button>
+            </div>
+            
+            {/* Azione Destra - ELIMINA */}
+            <div
+              className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl"
+              style={{ width: ACTION_WIDTH }}
+            >
+              <button onClick={() => setShowConfirm(true)} className="text-white p-2 hover:scale-110 transition-transform">
+                <Trash size={20} />
+              </button>
+            </div>
+          </>
+        )}
         
         {/* Contenuto principale swipeable */}
         <div
           ref={wrapperRef}
-          onMouseDown={(e) => handleStart(e.clientX)}
-          onMouseMove={(e) => handleMove(e.clientX)}
-          onMouseUp={handleEnd}
-          onMouseLeave={handleEnd}
-          onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-          onTouchMove={(e) => handleMove(e.touches[0].clientX)}
-          onTouchEnd={handleEnd}
-          onClick={onClickWrapper}
+          onMouseDown={disabled ? undefined : (e) => handleStart(e.clientX)}
+          onMouseMove={disabled ? undefined : (e) => handleMove(e.clientX)}
+          onMouseUp={disabled ? undefined : handleEnd}
+          onMouseLeave={disabled ? undefined : handleEnd}
+          onTouchStart={disabled ? undefined : (e) => handleStart(e.touches[0].clientX)}
+          onTouchMove={disabled ? undefined : (e) => handleMove(e.touches[0].clientX)}
+          onTouchEnd={disabled ? undefined : handleEnd}
+          onClick={disabled ? undefined : onClickWrapper}
           className="relative bg-white dark:bg-gray-800 cursor-grab active:cursor-grabbing"
           style={{ zIndex: 10 }}
         >
