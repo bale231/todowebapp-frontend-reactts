@@ -221,7 +221,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 text-gray-900 dark:text-white transition">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition">
       <Navbar />
       <div className="p-6" ref={boxRef}>
         <h1 ref={titleRef} className="text-xl sm:text-3xl font-bold">
@@ -229,13 +229,13 @@ export default function Home() {
           tempo nel modo giusto!
         </h1>
         {sortedLists.length === 0 && (
-          <div className="mt-6 p-6 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg">
+          <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
             <p className="text-lg text-gray-700 dark:text-gray-300 text-center">
-              Qui andranno le tue liste ToDo animate ✨
+              Qui andranno le tue liste ToDo animate
             </p>
           </div>
         )}
-        <main className="flex-1 mt-8 mb-8">
+        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[60vh] pr-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedLists.map((list) => {
               const completed = list.todos.filter((t) => t.completed).length;
@@ -245,13 +245,14 @@ export default function Home() {
                 <SwipeableListItem
                   key={list.id}
                   onEdit={() => handleEditList(list)}
-                  onDelete={() => handleDeleteList(list.id)}
+                  onDelete={() => handleDeleteList(list.id)} 
+                  label={""}
                 >
                   <div
                     id={`card-${list.id}`}
-                    className={`relative p-4 backdrop-blur-md rounded-xl border border-white/30 dark:border-white/20 shadow-lg hover:shadow-xl border-l-4 ${
+                    className={`relative p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-l-4 ${
                       colorClasses[list.color]
-                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200`}
+                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200 hover:shadow-xl`}
                   >
                     <Link to={`/lists/${list.id}`}>
                       <div className="cursor-pointer">
@@ -274,13 +275,13 @@ export default function Home() {
                       <div className="absolute top-2 right-2 flex gap-2 z-10">
                         <button
                           onClick={() => handleEditList(list)}
-                          className="p-2 bg-blue-500/20 backdrop-blur-sm rounded-lg border border-blue-300/30 text-blue-600 hover:text-blue-700 hover:bg-blue-500/30 transition-all"
+                          className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition-all"
                         >
                           <Edit size={18} />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(list.id)}
-                          className="p-2 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-300/30 text-red-600 hover:text-red-700 hover:bg-red-500/30 transition-all"
+                          className="p-2 bg-red-100 dark:bg-red-900 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800 transition-all"
                         >
                           <Trash size={18} />
                         </button>

@@ -2,21 +2,18 @@
 import { ReactNode, useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
-import { Edit, Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 
-interface SwipeableListItemProps {
+export interface SwipeableListItemProps {
   children: ReactNode;
+  label: string;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-const ACTION_WIDTH = 80;
+const ACTION_WIDTH = 60;
 
-export default function SwipeableListItem({
-  children,
-  onEdit,
-  onDelete,
-}: SwipeableListItemProps) {
+export default function SwipeableListItem({ children, label, onEdit, onDelete }: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -57,70 +54,49 @@ export default function SwipeableListItem({
     const dx = x - startXRef.current;
     if (Math.abs(dx) > 5) movedRef.current = true;
     currentXRef.current = x;
-    const clamped = Math.max(
-      -ACTION_WIDTH * 1.2,
-      Math.min(ACTION_WIDTH * 1.2, dx)
-    );
+    const clamped = Math.max(-ACTION_WIDTH * 1.2, Math.min(ACTION_WIDTH * 1.2, dx));
     xTo.current(clamped);
   };
 
   const handleEnd = () => {
     setDragging(false);
     const dx = currentXRef.current - startXRef.current;
-    let target = 0;
-    if (dx < -ACTION_WIDTH) target = -ACTION_WIDTH;
-    else if (dx > ACTION_WIDTH) target = ACTION_WIDTH;
+    const target = dx < -ACTION_WIDTH ? -ACTION_WIDTH : dx > ACTION_WIDTH ? ACTION_WIDTH : 0;
     xTo.current(target);
-  };
-
-  const closeSwipe = () => {
-    xTo.current(0);
-  };
-
-  const confirmDelete = () => {
-    setShowConfirm(true);
-    closeSwipe();
-  };
-
-  const handleConfirmYes = () => {
-    onDelete();
-    setShowConfirm(false);
-  };
-
-  const handleConfirmNo = () => {
-    setShowConfirm(false);
   };
 
   const onClickWrapper = (e: React.MouseEvent) => {
     if (movedRef.current) {
+      e.preventDefault();
       e.stopPropagation();
-      movedRef.current = false;
     }
   };
 
   const modalJSX = (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         ref={modalInnerRef}
-        className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
+        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl p-8 max-w-sm w-full border border-white/20 shadow-2xl"
       >
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Conferma Eliminazione
-        </h2>
-        <p className="mb-6 text-gray-700 dark:text-gray-300">
-          Sei sicuro di voler eliminare questa lista? Questa operazione non può
-          essere annullata.
+        <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+          Elimina Lista
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          Sei sicuro di voler eliminare "<strong>{label}</strong>"?
         </p>
-        <div className="flex justify-end gap-4">
+        <div className="flex gap-3">
           <button
-            onClick={handleConfirmNo}
-            className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white/30 transition-all"
+            onClick={() => setShowConfirm(false)}
+            className="flex-1 px-4 py-2 bg-gray-100/80 hover:bg-gray-200/80 dark:bg-gray-700/80 dark:hover:bg-gray-600/80 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-xl transition-all font-medium"
           >
             Annulla
           </button>
           <button
-            onClick={handleConfirmYes}
-            className="px-4 py-2 bg-red-600/80 backdrop-blur-sm border border-red-300/30 text-white rounded-lg hover:bg-red-600/90 transition-all"
+            onClick={() => {
+              onDelete();
+              setShowConfirm(false);
+            }}
+            className="flex-1 px-4 py-2 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm text-white rounded-xl transition-all font-medium"
           >
             Elimina
           </button>
@@ -131,48 +107,37 @@ export default function SwipeableListItem({
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-xl">
-        {/* Azione modifica */}
-        <div className="absolute left-0 top-0 bottom-0 w-[80px] flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm z-0 rounded-l-xl">
-          <button
-            onClick={() => {
-              onEdit();
-              closeSwipe();
-            }}
-            className="text-white hover:text-yellow-100 transition-colors"
-          >
-            <Edit size={24} />
+      <div className="relative overflow-hidden">
+        <div
+          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm"
+          style={{ width: ACTION_WIDTH, transform: "translateX(-100%)" }}
+        >
+          <button onClick={onEdit} className="text-white p-2">
+            <Pencil size={20} />
           </button>
         </div>
-
-        {/* Azione elimina */}
-        <div className="absolute right-0 top-0 bottom-0 w-[80px] flex items-center justify-center bg-red-500/80 backdrop-blur-sm z-0 rounded-r-xl">
-          <button 
-            onClick={confirmDelete}
-            className="text-white hover:text-red-100 transition-colors"
-          >
-            <Trash size={24} />
+        <div
+          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm"
+          style={{ width: ACTION_WIDTH, transform: "translateX(100%)" }}
+        >
+          <button onClick={() => setShowConfirm(true)} className="text-white p-2">
+            <Trash size={20} />
           </button>
         </div>
-
-        {/* Contenuto swipeable */}
         <div
           ref={wrapperRef}
-          className="relative animate-[fadeIn_.25s_ease] bg-transparent"
-          style={{ touchAction: "pan-y" }}
+          onMouseDown={(e) => handleStart(e.clientX)}
+          onMouseMove={(e) => handleMove(e.clientX)}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
           onTouchStart={(e) => handleStart(e.touches[0].clientX)}
           onTouchMove={(e) => handleMove(e.touches[0].clientX)}
           onTouchEnd={handleEnd}
-          onMouseDown={(e) => handleStart(e.clientX)}
-          onMouseMove={(e) => dragging && handleMove(e.clientX)}
-          onMouseUp={handleEnd}
-          onMouseLeave={dragging ? handleEnd : undefined}
           onClick={onClickWrapper}
         >
           {children}
         </div>
       </div>
-
       {showConfirm && createPortal(modalJSX, document.body)}
     </>
   );
