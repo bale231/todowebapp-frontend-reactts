@@ -568,6 +568,21 @@ function SortableTodo({
             </>
           )}
         </div>
+        {/* CSS per nascondere scrollbar */}
+        <style>
+          {`
+            /* Nascondi scrollbar per Chrome, Safari e altri browser WebKit */
+            .overflow-y-auto::-webkit-scrollbar {
+              display: none;
+            }
+            
+            /* Nascondi scrollbar per Firefox */
+            .overflow-y-auto {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+          `}
+        </style>
       </div>
     </SwipeableTodoItem>
   );
