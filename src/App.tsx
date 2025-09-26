@@ -10,8 +10,13 @@ import LoginRedirect from './components/LoginRedirect'
 import { ThemeProvider } from './context/ThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
 import NotificationPopup from './components/NotificationPopup'
+import { useEffect } from 'react'
+import { registerServiceWorker } from './api/registerServiceWorker'
 
 function App() {
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   return (
     <Router>
