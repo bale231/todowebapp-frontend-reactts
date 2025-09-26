@@ -145,7 +145,7 @@ export default function Navbar() {
           <div
             ref={dropdownRef}
             style={{ display: "none" }}
-            className="absolute right-0 mt-2 w-40 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-white/20 rounded-lg shadow-lg p-2 text-sm z-50"
+            className="absolute right-0 mt-2 w-40 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-lg shadow-2xl p-2 text-sm z-[100]"
           >
             <Link
               to="/profile"
