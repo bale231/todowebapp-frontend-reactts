@@ -22,8 +22,14 @@ self.addEventListener('message', (event) => {
 
 async function checkForUpdates() {
   try {
-    const response = await fetch('/version.json', { cache: 'no-store' });
+    
+    // Aggiungi timestamp per evitare cache
+    const response = await fetch(`/version.json?t=${Date.now()}`, { 
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     const newVersion = await response.json();
+    console.log('📦 Versione ricevuta:', newVersion);
     
     // Invia messaggio a tutti i client
     const clients = await self.clients.matchAll();
