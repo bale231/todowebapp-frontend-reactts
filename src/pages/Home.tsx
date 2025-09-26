@@ -17,11 +17,11 @@ interface TodoList {
 }
 
 const colorClasses: Record<string, string> = {
-  blue: "border-l-blue-500 bg-blue-500/20",
-  green: "border-l-green-500 bg-green-500/20",
-  yellow: "border-l-yellow-500 bg-yellow-500/20",
-  red: "border-l-red-500 bg-red-500/20",
-  purple: "border-l-purple-500 bg-purple-500/20",
+  blue: "border-l-blue-500 bg-blue-500/20 dark:bg-blue-500/20",
+  green: "border-l-green-500 bg-green-500/20 dark:bg-green-500/20",
+  yellow: "border-l-yellow-500 bg-yellow-500/20 dark:bg-yellow-500/20",
+  red: "border-l-red-500 bg-red-500/20 dark:bg-red-500/20",
+  purple: "border-l-purple-500 bg-purple-500/20 dark:bg-purple-500/20",
 };
 
 export default function Home() {
@@ -36,7 +36,7 @@ export default function Home() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [sortOption, setSortOption] = useState<"created" | "name" | "complete">("created");
-  const [hasAnimated, setHasAnimated] = useState(false); // Per controllare se animare o no
+  const [hasAnimated, setHasAnimated] = useState(false);
   
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -77,7 +77,6 @@ export default function Home() {
     if (user) {
       fetchLists();
       
-      // Anima solo la prima volta
       if (!hasAnimated) {
         gsap.from(titleRef.current, {
           y: -30,
@@ -124,11 +123,9 @@ export default function Home() {
     if (!newListName.trim()) return;
 
     if (editListId !== null) {
-      // MODIFICA LISTA
       await editList(editListId, newListName, newListColor);
       setEditListId(null);
     } else {
-      // CREA LISTA
       const res = await fetch(`${API_URL}/lists/`, {
         method: "POST",
         headers: {
@@ -229,7 +226,7 @@ export default function Home() {
           tempo nel modo giusto!
         </h1>
         {sortedLists.length === 0 && (
-          <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="mt-6 p-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg">
             <p className="text-lg text-gray-700 dark:text-gray-300 text-center">
               Qui andranno le tue liste ToDo animate
             </p>
@@ -250,9 +247,9 @@ export default function Home() {
                 >
                   <div
                     id={`card-${list.id}`}
-                    className={`relative p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-l-4 ${
+                    className={`relative p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg border-l-4 ${
                       colorClasses[list.color]
-                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200 hover:shadow-xl`}
+                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200 hover:shadow-xl hover:bg-white/80 dark:hover:bg-gray-800/80`}
                   >
                     <Link to={`/lists/${list.id}`}>
                       <div className="cursor-pointer">
@@ -275,13 +272,13 @@ export default function Home() {
                       <div className="absolute top-2 right-2 flex gap-2 z-10">
                         <button
                           onClick={() => handleEditList(list)}
-                          className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition-all"
+                          className="p-2 bg-blue-100/80 dark:bg-blue-900/80 backdrop-blur-sm rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200/80 dark:hover:bg-blue-800/80 transition-all"
                         >
                           <Edit size={18} />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(list.id)}
-                          className="p-2 bg-red-100 dark:bg-red-900 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800 transition-all"
+                          className="p-2 bg-red-100/80 dark:bg-red-900/80 backdrop-blur-sm rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200/80 dark:hover:bg-red-800/80 transition-all"
                         >
                           <Trash size={18} />
                         </button>
@@ -289,7 +286,7 @@ export default function Home() {
                     )}
 
                     {showDeleteConfirm === list.id && (
-                      <div className="mt-4 p-3 bg-red-500/10 backdrop-blur-sm rounded-lg border border-red-300/30">
+                      <div className="mt-4 p-3 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-300/50">
                         <p className="text-red-600 dark:text-red-400 mb-2 text-sm font-medium">
                           Confermi eliminazione?
                         </p>
@@ -302,7 +299,7 @@ export default function Home() {
                           </button>
                           <button
                             onClick={() => setShowDeleteConfirm(null)}
-                            className="px-3 py-1 bg-white/30 backdrop-blur-sm text-gray-700 dark:text-gray-300 text-sm rounded-lg border border-white/30 hover:bg-white/40 transition-all"
+                            className="px-3 py-1 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-700 dark:text-gray-300 text-sm rounded-lg border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-700/70 transition-all"
                           >
                             No
                           </button>
@@ -370,10 +367,10 @@ export default function Home() {
 
       {/* Modal creazione/modifica lista */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div
             ref={modalRef}
-            className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
+            className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 p-6 rounded-xl shadow-2xl w-80"
           >
             <h2 className="text-xl font-semibold mb-4">
               {editListId !== null ? "Modifica Lista" : "Nuova Lista"}
@@ -383,12 +380,12 @@ export default function Home() {
               placeholder="Nome della lista"
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
-              className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg mb-3 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+              className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg mb-3 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
             />
             <select
               value={newListColor}
               onChange={(e) => setNewListColor(e.target.value)}
-              className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+              className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
             >
               <option value="blue">Blu</option>
               <option value="green">Verde</option>
@@ -403,7 +400,7 @@ export default function Home() {
                   setEditListId(null);
                   setNewListName("");
                 }}
-                className="flex-1 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white/30 transition-all"
+                className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
               >
                 Annulla
               </button>

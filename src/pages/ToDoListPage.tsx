@@ -81,11 +81,10 @@ export default function ToDoListPage() {
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
-  // 🔥 SENSORI CON ATTIVAZIONE RITARDATA - La chiave per separare drag e swipe!
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Il drag parte solo dopo 8px di movimento
+        distance: 8,
       },
     })
   );
@@ -231,7 +230,7 @@ export default function ToDoListPage() {
         </h1>
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30 hover:bg-white/30 transition-all"
+          className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-4 py-2 rounded-xl border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
         >
           <ArrowLeft size={20} />
           <span className="hidden sm:inline text-lg">Torna alla Home</span>
@@ -239,7 +238,7 @@ export default function ToDoListPage() {
       </div>
 
       {editMode && (
-        <div className="mb-4 p-4 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+        <div className="mb-4 p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg rounded-xl border border-gray-200/50 dark:border-white/20">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -284,7 +283,7 @@ export default function ToDoListPage() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Nuova ToDo..."
-          className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl w-full placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+          className="px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-gray-200/50 dark:border-white/20 rounded-xl w-full placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
         />
         <button
           onClick={handleCreate}
@@ -390,10 +389,10 @@ export default function ToDoListPage() {
       </div>
 
       {editedTodo && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div
             ref={modalRef}
-            className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
+            className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl p-6 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-80"
           >
             <h2 className="text-xl font-semibold mb-4">Modifica ToDo</h2>
             <input
@@ -401,12 +400,12 @@ export default function ToDoListPage() {
               onChange={(e) =>
                 setEditedTodo({ ...editedTodo, title: e.target.value })
               }
-              className="w-full px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+              className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
             />
             <div className="flex justify-between gap-3">
               <button
                 onClick={() => setEditedTodo(null)}
-                className="flex-1 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-all"
+                className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
               >
                 Annulla
               </button>
@@ -423,10 +422,10 @@ export default function ToDoListPage() {
 
       {showBulkConfirm &&
         createPortal(
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
             <div
               ref={bulkModalRef}
-              className="bg-white/20 dark:bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/30 dark:border-white/20 shadow-2xl w-80"
+              className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl p-6 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-80"
             >
               <h2 className="text-xl font-semibold mb-4">
                 Elimina {selectedIds.length} ToDo?
@@ -437,7 +436,7 @@ export default function ToDoListPage() {
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setShowBulkConfirm(false)}
-                  className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-all"
+                  className="px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
                 >
                   Annulla
                 </button>
@@ -522,7 +521,7 @@ function SortableTodo({
       <div
         ref={setNodeRef}
         style={style}
-        className="flex items-center justify-between bg-white/30 dark:bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/40 dark:hover:bg-white/15 transition-all"
+        className="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-6 py-3 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
       >
         <div
           className={`flex items-center gap-3 ${
@@ -573,7 +572,7 @@ function SortableTodo({
             className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none transition-colors select-none"
             title="Trascina"
           >
-            ⠿
+            ☰
           </span>
 
           {editMode && (
