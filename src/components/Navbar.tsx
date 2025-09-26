@@ -6,7 +6,6 @@ import { useTheme } from "../context/ThemeContext";
 import { getCurrentUserJWT } from "../api/auth";
 import { logout } from "../api/auth";
 import NotificationBadge from "./NotificationBadge";
-import NotificationPopup from "./NotificationPopup";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -173,9 +172,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* 📬 POPUP NOTIFICHE */}
-      <NotificationPopup />
     </nav>
   );
 }

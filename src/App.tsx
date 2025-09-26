@@ -9,6 +9,7 @@ import ToDoListPage from './pages/ToDoListPage'
 import LoginRedirect from './components/LoginRedirect'
 import { ThemeProvider } from './context/ThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
+import NotificationPopup from './components/NotificationPopup'
 
 function App() {
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+          <NotificationPopup />
         </NotificationProvider>
       </ThemeProvider>
     </Router>
