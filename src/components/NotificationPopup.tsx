@@ -46,12 +46,12 @@ export default function NotificationPopup() {
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold">Notifiche</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Notifiche</h3>
           <div className="flex items-center gap-2">
             {notifications.length > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="p-2 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-lg transition"
+                className="p-2 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-lg transition text-gray-700 dark:text-gray-300"
                 title="Segna tutte come lette"
               >
                 <Check size={18} />
@@ -59,7 +59,7 @@ export default function NotificationPopup() {
             )}
             <button
               onClick={() => setShowPopup(false)}
-              className="p-2 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-lg transition"
+              className="p-2 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-lg transition text-gray-700 dark:text-gray-300"
             >
               <X size={18} />
             </button>
@@ -69,7 +69,7 @@ export default function NotificationPopup() {
         {/* Lista notifiche */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-2">
           {notifications.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <AlertCircle size={48} className="mx-auto mb-3 opacity-50" />
               <p>Nessuna notifica</p>
             </div>
@@ -89,13 +89,13 @@ export default function NotificationPopup() {
                       {getNotificationIcon(notif.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm mb-1">
+                      <h4 className="font-semibold text-sm mb-1 text-gray-900 dark:text-white">
                         {notif.title}
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
                         {notif.message}
                       </p>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         {new Date(notif.created_at).toLocaleString("it-IT")}
                       </p>
                     </div>
@@ -104,7 +104,7 @@ export default function NotificationPopup() {
                     {!notif.read && (
                       <button
                         onClick={() => markAsRead(notif.id)}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition"
+                        className="p-1.5 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition text-gray-700 dark:text-gray-300"
                         title="Segna come letta"
                       >
                         <Check size={16} />
