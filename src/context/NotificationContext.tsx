@@ -1,4 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { 
+  fetchNotifications as fetchNotificationsAPI,
+  markNotificationAsRead as markNotificationAsReadAPI,
+  markAllNotificationsAsRead as markAllNotificationsAsReadAPI,
+  deleteNotification as deleteNotificationAPI
+} from "../api/notifications";
 
 export interface Notification {
   id: number;
@@ -48,8 +54,6 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   const [showPopup, setShowPopup] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
 
-  const API_URL = "https://bale231.pythonanywhere.com/api";
-
   // Controlla i permessi notifiche all'avvio
   useEffect(() => {
     if ("Notification" in window) {
@@ -78,19 +82,8 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   // Fetch notifiche dal backend
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
-
-      const res = await fetch(`${API_URL}/notifications/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
-      }
+      const data = await fetchNotificationsAPI();
+      setNotifications(data);
     } catch (error) {
       console.error("Errore nel caricamento notifiche:", error);
     }
@@ -99,15 +92,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   // Marca come letta
   const markAsRead = async (id: number) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      await fetch(`${API_URL}/notifications/${id}/read/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
+      await markNotificationAsReadAPI(id);
       setNotifications((prev) =>
         prev.map((notif) =>
           notif.id === id ? { ...notif, read: true } : notif
@@ -121,14 +106,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   // Marca tutte come lette
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      await fetch(`${API_URL}/notifications/mark_all_read/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await markAllNotificationsAsReadAPI();
       setNotifications((prev) =>
         prev.map((notif) => ({ ...notif, read: true }))
       );
@@ -140,14 +118,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   // Elimina notifica
   const deleteNotification = async (id: number) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      await fetch(`${API_URL}/notifications/${id}/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await deleteNotificationAPI(id);
       setNotifications((prev) => prev.filter((notif) => notif.id !== id));
     } catch (error) {
       console.error("Errore nell'eliminazione notifica:", error);
