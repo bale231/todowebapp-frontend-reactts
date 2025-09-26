@@ -54,10 +54,10 @@ export default function NotificationPopup() {
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+      <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none p-4">
         <div
           ref={modalRef}
-          className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-2xl w-[90%] max-w-lg max-h-[70vh] flex flex-col pointer-events-auto"
+          className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col pointer-events-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-white/20">
