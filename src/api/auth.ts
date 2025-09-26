@@ -203,3 +203,16 @@ export const updateTheme = async (theme: string) => {
   });
   return res.json();
 };
+
+// 🔔 Aggiorna preferenze notifiche push
+export const updateNotificationPreferences = async (pushEnabled: boolean) => {
+  const res = await fetch(`${API_URL}/notifications/preferences/`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ push_notifications_enabled: pushEnabled }),
+  });
+  return res.json();
+};

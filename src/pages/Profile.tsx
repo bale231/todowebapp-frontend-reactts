@@ -5,7 +5,9 @@ import {
   getCurrentUserJWT,
   updateProfile,
   deactivateAccount,
+  updateNotificationPreferences,
 } from "../api/auth";
+import { Bell, BellOff } from "lucide-react";
 
 export default function Profile() {
   const formRef = useRef(null);
@@ -24,6 +26,7 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
 
   useEffect(() => {
     const calcStrength = () => {
@@ -65,6 +68,7 @@ export default function Profile() {
       setUsername(user.username);
       setEmail(user.email);
       setAvatar(user.profile_picture);
+      setPushNotificationsEnabled(user.push_notifications_enabled ?? true);
     }
   };
 
@@ -177,6 +181,24 @@ export default function Profile() {
       setTimeout(() => (window.location.href = "/"), 2000);
     } else {
       showAlert("Errore nella disattivazione dell'account", "error");
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    const newValue = !pushNotificationsEnabled;
+    setPushNotificationsEnabled(newValue);
+
+    const res = await updateNotificationPreferences(newValue);
+    if (res.message === "Preferences updated") {
+      showAlert(
+        newValue
+          ? "Notifiche push attivate"
+          : "Notifiche push disattivate (notifiche in-app sempre attive)",
+        "success"
+      );
+    } else {
+      showAlert("Errore nell'aggiornamento preferenze", "error");
+      setPushNotificationsEnabled(!newValue);
     }
   };
 
@@ -318,6 +340,44 @@ export default function Profile() {
                 {editMode ? "Annulla modifica" : "Modifica profilo"}
               </span>
             </button>
+          </div>
+
+          {/* SEZIONE NOTIFICHE PUSH */}
+          <div className="p-4 bg-blue-50/30 dark:bg-blue-900/20 backdrop-blur-sm border border-blue-200/50 dark:border-blue-500/30 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {pushNotificationsEnabled ? (
+                  <Bell size={20} className="text-blue-600 dark:text-blue-400" />
+                ) : (
+                  <BellOff size={20} className="text-gray-500 dark:text-gray-400" />
+                )}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
+                    Notifiche Push
+                  </h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    {pushNotificationsEnabled
+                      ? "Ricevi notifiche sul dispositivo"
+                      : "Solo notifiche in-app"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleNotifications}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  pushNotificationsEnabled
+                    ? "bg-blue-600"
+                    : "bg-gray-300 dark:bg-gray-600"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    pushNotificationsEnabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col relative">
