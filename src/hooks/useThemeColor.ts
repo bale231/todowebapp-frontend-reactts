@@ -15,25 +15,41 @@ export function useThemeColor(listColor?: string) {
 
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const metaAppleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
     
-    if (!metaThemeColor) return;
+    // Determina il colore da usare
+    let themeColor: string;
+    let appleStyle: string;
 
-    // Se c'è un colore specifico della lista, usalo
     if (listColor && colorThemeMap[listColor]) {
-      const themeColor = theme === 'dark' 
+      themeColor = theme === 'dark' 
         ? colorThemeMap[listColor].dark 
         : colorThemeMap[listColor].light;
-      metaThemeColor.setAttribute('content', themeColor);
+      
+      // Per iOS: usa "default" per colori chiari, "black-translucent" per colori scuri
+      appleStyle = theme === 'dark' ? 'black-translucent' : 'default';
     } else {
-      // Altrimenti usa il colore di default (home page)
-      const defaultColor = theme === 'dark' ? '#1f2937' : '#3b82f6';
-      metaThemeColor.setAttribute('content', defaultColor);
+      // Colore di default (home page)
+      themeColor = theme === 'dark' ? '#1f2937' : '#3b82f6';
+      appleStyle = theme === 'dark' ? 'black-translucent' : 'default';
+    }
+
+    // Aggiorna entrambi i meta tag
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', themeColor);
+    }
+    
+    if (metaAppleStatusBar) {
+      metaAppleStatusBar.setAttribute('content', appleStyle);
     }
 
     // Cleanup: ripristina quando esci dalla pagina
     return () => {
       const defaultColor = theme === 'dark' ? '#1f2937' : '#3b82f6';
+      const defaultAppleStyle = theme === 'dark' ? 'black-translucent' : 'default';
+      
       metaThemeColor?.setAttribute('content', defaultColor);
+      metaAppleStatusBar?.setAttribute('content', defaultAppleStyle);
     };
   }, [listColor, theme]);
 }

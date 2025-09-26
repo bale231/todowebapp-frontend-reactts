@@ -7,22 +7,28 @@ import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
 import ToDoListPage from './pages/ToDoListPage'
 import LoginRedirect from './components/LoginRedirect'
+import { ThemeProvider } from './context/ThemeContext'
+import { NotificationProvider } from './context/NotificationContext'
 
 function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
-        <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
-        <Route path="/lists/:id" element={<ToDoListPage />} />
-        <Route path="/login-success" element={<LoginRedirect />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <ThemeProvider>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+            <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
+            <Route path="/lists/:id" element={<ToDoListPage />} />
+            <Route path="/login-success" element={<LoginRedirect />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </NotificationProvider>
+      </ThemeProvider>
     </Router>
   )
 }

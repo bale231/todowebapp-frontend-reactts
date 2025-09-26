@@ -5,6 +5,8 @@ import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getCurrentUserJWT } from "../api/auth";
 import { logout } from "../api/auth";
+import NotificationBadge from "./NotificationBadge";
+import NotificationPopup from "./NotificationPopup";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -110,6 +112,9 @@ export default function Navbar() {
 
       <div className="flex items-center gap-4">
         <ThemeToggle />
+        
+        {/* 🔔 BADGE NOTIFICHE */}
+        <NotificationBadge />
 
         <div className="relative">
           <button
@@ -168,6 +173,9 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* 📬 POPUP NOTIFICHE */}
+      <NotificationPopup />
     </nav>
   );
 }
