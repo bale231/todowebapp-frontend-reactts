@@ -36,6 +36,7 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import { createPortal } from "react-dom";
+import { useThemeColor } from "../hooks/useThemeColor";
 
 interface Todo {
   id: number;
@@ -80,6 +81,9 @@ export default function ToDoListPage() {
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
+
+  // 🎨 Hook per cambiare il theme-color in base al colore della lista
+  useThemeColor(listColor);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

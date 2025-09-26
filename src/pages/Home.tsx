@@ -7,6 +7,7 @@ import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
+import { useThemeColor } from "../hooks/useThemeColor";
 
 interface TodoList {
   id: number;
@@ -43,6 +44,9 @@ export default function Home() {
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
+
+  // 🎨 Hook per ripristinare il theme-color di default nella home
+  useThemeColor();
 
   useEffect(() => {
     const loadUserAndPref = async () => {
