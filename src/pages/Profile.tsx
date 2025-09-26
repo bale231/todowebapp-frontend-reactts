@@ -196,10 +196,10 @@ export default function Profile() {
       </div>
 
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div
             ref={modalRef}
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-80"
+            className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 p-6 rounded-lg shadow-2xl w-80"
           >
             <h3 className="text-lg font-semibold text-center mb-4">
               Conferma disattivazione
@@ -207,16 +207,16 @@ export default function Profile() {
             <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-6">
               Sei sicuro di voler disattivare il tuo account?
             </p>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-500"
+                className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 text-gray-800 dark:text-white rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
               >
                 Annulla
               </button>
               <button
                 onClick={handleDeactivate}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className="flex-1 px-4 py-2 bg-red-600/80 backdrop-blur-sm border border-red-300/30 text-white rounded-lg hover:bg-red-600/90 transition-all"
               >
                 Conferma
               </button>
@@ -225,17 +225,17 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto p-4">
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="rounded-xl p-4 space-y-6"
+          className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl p-6 space-y-6 shadow-2xl"
         >
           <h2 className="text-2xl font-bold text-center">Profilo</h2>
 
           <div className="flex flex-col items-center gap-2">
             <label htmlFor="avatar">
-              <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-700 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm border-2 border-gray-200/50 dark:border-white/20 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 flex items-center justify-center">
                 {avatar ? (
                   <img
                     src={`https://bale231.pythonanywhere.com${avatar}`}
@@ -274,7 +274,7 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="flex items-center gap-2 text-xs text-white dark:text-white bg-red-600 px-4 py-2 border border-red-600 hover:bg-transparent transition-all rounded-[6px] group"
+                className="flex items-center gap-2 text-xs text-white bg-red-600/80 backdrop-blur-sm px-4 py-2 border border-red-300/30 hover:bg-red-600/90 transition-all rounded-lg group"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -296,7 +296,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-xs text-white dark:text-white bg-blue-600 px-4 py-2 rounded-[6px] border border-blue-600 transition-all hover:bg-transparent flex items-center gap-2 group"
+              className="text-xs text-white bg-blue-600/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-300/30 hover:bg-blue-600/90 transition-all flex items-center gap-2 group"
             >
               <span className="relative w-4 h-4">
                 <svg
@@ -325,7 +325,7 @@ export default function Profile() {
               disabled={!editMode}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white transition duration-300 focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+              className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60"
               placeholder="Username"
             />
             <label
@@ -343,7 +343,7 @@ export default function Profile() {
               disabled={!editMode}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white transition duration-300 focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+              className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60"
               placeholder="Email"
             />
             <label
@@ -361,7 +361,7 @@ export default function Profile() {
                 type="password"
                 disabled
                 value="********"
-                className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white transition duration-300"
+                className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 disabled:opacity-60"
               />
               <label
                 htmlFor="password"
@@ -378,7 +378,7 @@ export default function Profile() {
                   placeholder="Vecchia password"
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white focus:ring-2 focus:ring-blue-500/50"
                 />
                 <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
                   Vecchia password
@@ -391,11 +391,11 @@ export default function Profile() {
                   placeholder="Nuova password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white focus:ring-2 focus:ring-blue-500/50"
                 />
-                <div className="mt-2 h-2 w-full bg-gray-300 rounded">
+                <div className="mt-2 h-2 w-full bg-gray-300/50 backdrop-blur-sm rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded transition-all duration-300"
+                    className="h-full rounded-full transition-all duration-300"
                     ref={(el) => {
                       if (el) {
                         const width = ["0%", "33%", "66%", "100%"][
@@ -429,7 +429,7 @@ export default function Profile() {
                   placeholder="Conferma nuova password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="peer w-full px-4 pt-6 pb-2 rounded border dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white focus:ring-2 focus:ring-blue-500/50"
                 />
                 <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
                   Conferma password
@@ -441,10 +441,10 @@ export default function Profile() {
           <button
             type="submit"
             disabled={!editMode}
-            className={`w-full py-2 rounded border transition duration-300 ${
+            className={`w-full py-2 rounded-lg transition duration-300 ${
               editMode
-                ? "bg-green-600 hover:bg-transparent border-green-600 text-white hover:text-green-600"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-green-600/80 backdrop-blur-sm hover:bg-green-600/90 border border-green-300/30 text-white"
+                : "bg-gray-300/50 backdrop-blur-sm border border-gray-200/50 text-gray-500 cursor-not-allowed"
             }`}
           >
             Salva modifiche
@@ -453,12 +453,22 @@ export default function Profile() {
           <button
             type="button"
             onClick={() => setShowConfirmModal(true)}
-            className="w-full text-sm text-white dark:text-white bg-red-600 px-4 py-2 transition-all hover:bg-transparent border border-red-600 rounded-[6px] mt-2"
+            className="w-full text-sm text-white bg-red-600/80 backdrop-blur-sm px-4 py-2 transition-all hover:bg-red-600/90 border border-red-300/30 rounded-lg mt-2"
           >
             Disattiva il mio account
           </button>
         </form>
       </div>
+
+      <style>
+        {`
+          @keyframes wiggle {
+            0% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+            100% { transform: rotate(-5deg); }
+          }
+        `}
+      </style>
     </div>
   );
 }
