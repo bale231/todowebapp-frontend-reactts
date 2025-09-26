@@ -274,7 +274,7 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="flex items-center gap-2 text-xs text-white bg-red-600/80 backdrop-blur-sm px-4 py-2 border border-red-300/30 hover:bg-red-600/90 transition-all rounded-lg group"
+                className="flex items-center gap-2 text-xs text-white bg-red-500/20 dark:bg-red-600/20 backdrop-blur-md px-4 py-2 border border-red-400/30 dark:border-red-500/30 hover:bg-red-500/30 dark:hover:bg-red-600/30 hover:border-red-400/50 transition-all rounded-lg group shadow-lg"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -282,7 +282,7 @@ export default function Profile() {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-4 h-4 group-hover:rotate-[90deg] transition-transform duration-300"
+                  className="w-4 h-4 text-red-600 dark:text-red-400 group-hover:rotate-[90deg] transition-transform duration-300"
                 >
                   <path
                     strokeLinecap="round"
@@ -290,13 +290,13 @@ export default function Profile() {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-                Rimuovi immagine
+                <span className="text-red-600 dark:text-red-400">Rimuovi immagine</span>
               </button>
             )}
             <button
               type="button"
               onClick={() => setEditMode((prev) => !prev)}
-              className="text-xs text-white bg-blue-600/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-300/30 hover:bg-blue-600/90 transition-all flex items-center gap-2 group"
+              className="text-xs bg-blue-500/20 dark:bg-blue-600/20 backdrop-blur-md px-4 py-2 rounded-lg border border-blue-400/30 dark:border-blue-500/30 hover:bg-blue-500/30 dark:hover:bg-blue-600/30 hover:border-blue-400/50 transition-all flex items-center gap-2 group shadow-lg"
             >
               <span className="relative w-4 h-4">
                 <svg
@@ -305,7 +305,7 @@ export default function Profile() {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-4 h-4 absolute top-0 left-0 group-hover:animate-[wiggle_0.3s_ease-in-out_1]"
+                  className="w-4 h-4 text-blue-600 dark:text-blue-400 absolute top-0 left-0 group-hover:animate-[wiggle_0.3s_ease-in-out_1]"
                 >
                   <path
                     strokeLinecap="round"
@@ -314,7 +314,9 @@ export default function Profile() {
                   />
                 </svg>
               </span>
-              {editMode ? "Annulla modifica" : "Modifica profilo"}
+              <span className="text-blue-600 dark:text-blue-400">
+                {editMode ? "Annulla modifica" : "Modifica profilo"}
+              </span>
             </button>
           </div>
 
@@ -441,9 +443,9 @@ export default function Profile() {
           <button
             type="submit"
             disabled={!editMode}
-            className={`w-full py-2 rounded-lg transition duration-300 ${
+            className={`w-full py-2 rounded-lg transition duration-300 shadow-lg ${
               editMode
-                ? "bg-green-600/80 backdrop-blur-sm hover:bg-green-600/90 border border-green-300/30 text-white"
+                ? "bg-green-500/20 dark:bg-green-600/20 backdrop-blur-md hover:bg-green-500/30 dark:hover:bg-green-600/30 border border-green-400/30 dark:border-green-500/30 hover:border-green-400/50 text-green-600 dark:text-green-400 font-medium"
                 : "bg-gray-300/50 backdrop-blur-sm border border-gray-200/50 text-gray-500 cursor-not-allowed"
             }`}
           >
@@ -453,7 +455,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={() => setShowConfirmModal(true)}
-            className="w-full text-sm text-white bg-red-600/80 backdrop-blur-sm px-4 py-2 transition-all hover:bg-red-600/90 border border-red-300/30 rounded-lg mt-2"
+            className="w-full text-sm bg-red-500/20 dark:bg-red-600/20 backdrop-blur-md px-4 py-2 transition-all hover:bg-red-500/30 dark:hover:bg-red-600/30 border border-red-400/30 dark:border-red-500/30 hover:border-red-400/50 rounded-lg mt-2 shadow-lg text-red-600 dark:text-red-400 font-medium"
           >
             Disattiva il mio account
           </button>
