@@ -8,6 +8,7 @@ import { useTheme } from "../context/ThemeContext";
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sentRequests, setSentRequests] = useState<number[]>([]); // ✅ Nuovo state
   const navigate = useNavigate();
   const { themeLoaded } = useTheme();
 
@@ -29,9 +30,9 @@ export default function UsersPage() {
   const handleSendRequest = async (userId: number) => {
     try {
       await sendFriendRequest(userId);
-      setUsers(users.filter((u) => u.id !== userId));
-      alert("Richiesta inviata!");
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      setSentRequests([...sentRequests, userId]); // ✅ Aggiungi all'array
+      // Non rimuovere più l'utente dalla lista
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       alert("Errore nell'invio della richiesta");
     }
@@ -60,15 +61,23 @@ export default function UsersPage() {
         </p>
       ) : (
         <div className="space-y-3 pb-8">
-          {users.map((user) => (
-            <UserCard
-              key={user.id}
-              user={user}
-              buttonText="Aggiungi"
-              buttonColor="bg-blue-600/80 hover:bg-blue-600/90"
-              onAction={() => handleSendRequest(user.id)}
-            />
-          ))}
+          {users.map((user) => {
+            const requestSent = sentRequests.includes(user.id); // ✅ Controlla se richiesta inviata
+            
+            return (
+              <UserCard
+                key={user.id}
+                user={user}
+                buttonText={requestSent ? "Richiesta Inviata" : "Aggiungi"} // ✅ Cambia testo
+                buttonColor={
+                  requestSent
+                    ? "bg-gray-400 cursor-not-allowed" // ✅ Grigio se inviata
+                    : "bg-blue-600/80 hover:bg-blue-600/90"
+                }
+                onAction={() => !requestSent && handleSendRequest(user.id)} // ✅ Disabilita se già inviata
+              />
+            );
+          })}
         </div>
       )}
     </div>
