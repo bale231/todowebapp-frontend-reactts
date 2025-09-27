@@ -11,11 +11,38 @@ import { ThemeProvider } from './context/ThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
 import NotificationPopup from './components/NotificationPopup'
 import { useEffect } from 'react'
-import { registerServiceWorker } from './api/registerServiceWorker'
 
 function App() {
+  // Controllo versione app
   useEffect(() => {
-    registerServiceWorker();
+    const checkVersion = async () => {
+      try {
+        const res = await fetch('/version.json?t=' + Date.now(), { 
+          cache: 'no-store' 
+        });
+        
+        if (!res.ok) return;
+        
+        const data = await res.json();
+        const current = localStorage.getItem('app_version') || '1.0.0';
+        
+        if (data.version !== current) {
+          localStorage.setItem('app_version', data.version);
+          
+          const msg = data.type === 'important' 
+            ? 'Elimina e reinserisci il segnalibro dalla home!' 
+            : 'Chiudi e riapri l\'app per aggiornare!';
+          
+          alert(`Nuova versione ${data.version}: ${msg}`);
+        }
+      } catch (err) {
+        console.error('Errore check versione:', err);
+      }
+    };
+    
+    checkVersion();
+    const interval = setInterval(checkVersion, 120000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
