@@ -78,7 +78,7 @@ export default function ToDoListPage() {
   const modalRef = useRef<HTMLDivElement>(null);
   const shouldAnimate = useRef(true);
   const wasModalClosed = useRef(true);
-  const [sortOption, setSortOption] = useState<"created" | "alphabetical">("created");
+  const [sortOption, setSortOption] = useState<"created" | "alphabetical" | "completed">("created");  
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -202,7 +202,7 @@ export default function ToDoListPage() {
   };
 
   const handleSortChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSort = e.target.value as "created" | "alphabetical";
+    const newSort = e.target.value as "created" | "alphabetical" | "completed";
     if (!id) return;
 
     await updateSortOrder(id, newSort);
@@ -406,6 +406,7 @@ export default function ToDoListPage() {
             >
               <option value="created">Per Creazione</option>
               <option value="alphabetical">Alfabetico</option>
+              <option value="completed">Per Completezza</option>
             </select>
           </div>
         </div>

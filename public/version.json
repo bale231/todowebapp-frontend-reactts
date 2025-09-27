@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3",
-  "type": "important",
-  "message": "Aggiunta possibilita di spostare le ToDo tra liste diverse. Elimina e riaggiungi segnalibro per vedere la funzione in azione!",
+  "version": "1.0.4",
+  "type": "normal",
+  "message": "Aggiunta possibilità di riordinare le ToDo in base alla completezza. Correzioni di bug minori.",
   "timestamp": "2025-09-27T16:28:00Z"
 }
