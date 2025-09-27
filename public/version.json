@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "important",
   "message": "Aggiunta possibilita di spostare le ToDo tra liste diverse. Elimina e riaggiungi segnalibro per vedere la funzione in azione!",
   "timestamp": "2025-09-27T16:28:00Z"
