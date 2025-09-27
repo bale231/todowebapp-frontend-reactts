@@ -31,7 +31,7 @@ export default function UsersPage() {
       await sendFriendRequest(userId);
       setUsers(users.filter((u) => u.id !== userId));
       alert("Richiesta inviata!");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       alert("Errore nell'invio della richiesta");
     }
@@ -40,7 +40,7 @@ export default function UsersPage() {
   if (!themeLoaded) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900 text-gray-900 dark:text-white p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900 text-gray-900 dark:text-white p-6 pb-24">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Utenti</h1>
         <button
@@ -59,7 +59,7 @@ export default function UsersPage() {
           Nessun utente disponibile
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 pb-8">
           {users.map((user) => (
             <UserCard
               key={user.id}

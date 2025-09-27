@@ -16,7 +16,7 @@ export default function UserCard({
   showButton = true,
 }: UserCardProps) {
   return (
-    <div className="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg p-4 rounded-xl border border-gray-200/50 dark:border-white/20">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg p-4 rounded-xl border border-gray-200/50 dark:border-white/20 gap-3">
       <div className="flex items-center gap-3">
         {user.profile_picture ? (
           <img
@@ -39,7 +39,7 @@ export default function UserCard({
       {showButton && (
         <button
           onClick={onAction}
-          className={`px-4 py-2 rounded-lg text-white transition-all ${buttonColor}`}
+          className={`w-full sm:w-auto px-4 py-2 rounded-lg text-white transition-all ${buttonColor}`}
         >
           {buttonText}
         </button>
