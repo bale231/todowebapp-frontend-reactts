@@ -1,6 +1,6 @@
 {
-  "version": "1.0.4",
-  "type": "normal",
-  "message": "Aggiunta possibilità di riordinare le ToDo in base alla completezza. Correzioni di bug minori.",
+  "version": "1.0.5",
+  "type": "important",
+  "message": "Aggiunta funzionalità di gestione amici: invio, accettazione e rifiuto richieste. Correzioni di bug minori.",
   "timestamp": "2025-09-27T16:28:00Z"
 }

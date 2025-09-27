@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUserJWT } from "../api/auth";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
-import { Plus, Pencil, ListFilter, Trash, Edit } from "lucide-react";
+import { Plus, Pencil, ListFilter, Trash, Edit, Users, UserPlus, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
@@ -229,6 +229,34 @@ export default function Home() {
           Ciao {user.username}! Crea le tue prime Liste e organizza il tuo
           tempo nel modo giusto!
         </h1>
+
+          {/* Bottoni per navigare alle pagine amicizie */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+            <button
+              onClick={() => navigate("/users")}
+              className="flex items-center justify-center gap-2 bg-blue-600/80 backdrop-blur-md text-white px-4 py-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 transition-all"
+            >
+              <Users size={20} />
+              <span className="font-semibold">Trova Utenti</span>
+            </button>
+
+            <button
+              onClick={() => navigate("/friend-requests")}
+              className="flex items-center justify-center gap-2 bg-green-600/80 backdrop-blur-md text-white px-4 py-3 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 transition-all"
+            >
+              <UserPlus size={20} />
+              <span className="font-semibold">Richieste</span>
+            </button>
+
+            <button
+              onClick={() => navigate("/friends")}
+              className="flex items-center justify-center gap-2 bg-purple-600/80 backdrop-blur-md text-white px-4 py-3 rounded-xl border border-purple-300/30 shadow-lg hover:bg-purple-600/90 transition-all"
+            >
+              <UserCheck size={20} />
+              <span className="font-semibold">I Miei Amici</span>
+            </button>
+          </div>
+
         {sortedLists.length === 0 && (
           <div className="mt-6 p-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg">
             <p className="text-lg text-gray-700 dark:text-gray-300 text-center">

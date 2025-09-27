@@ -11,6 +11,9 @@ import { ThemeProvider } from './context/ThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
 import NotificationPopup from './components/NotificationPopup'
 import VersionChecker from './components/VersionChecker'
+import UsersPage from './pages/UsersPage'
+import FriendsPage from './pages/FriendsPage'
+import FriendRequestsPage from './pages/FriendRequestsPage'
 
 function App() {
 
@@ -29,6 +32,9 @@ function App() {
             <Route path="/login-success" element={<LoginRedirect />} />
             <Route path="/home" element={<Home />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/friends" element={<FriendsPage />} />
+            <Route path="/friend-requests" element={<FriendRequestsPage />} />
           </Routes>
           <NotificationPopup />
         </NotificationProvider>
