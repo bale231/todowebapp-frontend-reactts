@@ -231,7 +231,7 @@ export default function Home() {
         </h1>
 
           {/* Bottoni per navigare alle pagine amicizie */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 pt-6">
             <button
               onClick={() => navigate("/users")}
               className="flex items-center justify-center gap-2 bg-blue-600/80 backdrop-blur-md text-white px-4 py-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 transition-all"
