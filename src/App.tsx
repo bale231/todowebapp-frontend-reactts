@@ -34,6 +34,29 @@ function App() {
             : 'Chiudi e riapri l\'app per aggiornare!';
           
           alert(`Nuova versione ${data.version}: ${msg}`);
+          
+          // 🔔 CREA NOTIFICA IN-APP
+          const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+          
+          if (token) {
+            try {
+              await fetch('https://bale231.pythonanywhere.com/api/notifications/update/', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  version: data.version,
+                  type: data.type,
+                  message: data.message
+                })
+              });
+              console.log('✅ Notifica in-app creata');
+            } catch (error) {
+              console.error('❌ Errore creazione notifica:', error);
+            }
+          }
         }
       } catch (err) {
         console.error('Errore check versione:', err);
