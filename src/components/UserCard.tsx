@@ -15,12 +15,21 @@ export default function UserCard({
   onAction,
   showButton = true,
 }: UserCardProps) {
+  // ✅ Funzione per costruire URL completo
+  const getImageUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url; // URL già completo
+    return `https://bale231.pythonanywhere.com${url}`; // Aggiungi dominio
+  };
+
+  const profilePictureUrl = getImageUrl(user.profile_picture);
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg p-4 rounded-xl border border-gray-200/50 dark:border-white/20 gap-3">
       <div className="flex items-center gap-3">
-        {user.profile_picture ? (
+        {profilePictureUrl ? (
           <img
-            src={user.profile_picture}
+            src={profilePictureUrl}
             alt={user.full_name}
             className="w-12 h-12 rounded-full object-cover"
           />
