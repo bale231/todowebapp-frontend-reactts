@@ -129,3 +129,13 @@ export async function updateSortOrder(listId: number | string, sortOrder: string
   });
   return res.json(); // ritorna { sort_order: "..." }
 }
+
+// ✅ PATCH per spostare una ToDo in un'altra lista
+export async function moveTodo(todoId: number, newListId: number) {
+  const res = await fetch(`${API_URL}/todos/${todoId}/move/`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ new_list_id: newListId }),
+  });
+  return res.json();
+}

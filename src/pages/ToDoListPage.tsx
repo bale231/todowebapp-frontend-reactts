@@ -7,6 +7,7 @@ import {
   Trash,
   ListFilter,
   ArrowLeft,
+  ArrowRightLeft,
 } from "lucide-react";
 import { getAuthHeaders } from "../api/todos";
 import gsap from "gsap";
@@ -32,9 +33,12 @@ import {
   toggleTodo,
   reorderTodos,
   updateSortOrder,
+  moveTodo,
+  fetchAllLists,
 } from "../api/todos";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
+import MoveTodoModal from "../components/MoveTodoModal";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -78,11 +82,15 @@ export default function ToDoListPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Nuovi state per la modale Sposta
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [todoToMove, setTodoToMove] = useState<Todo | null>(null);
+  const [allLists, setAllLists] = useState<{ id: number; name: string; color: string }[]>([]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
-  // 🎨 Hook per cambiare il theme-color in base al colore della lista
   useThemeColor(listColor);
 
   const sensors = useSensors(
@@ -130,6 +138,12 @@ export default function ToDoListPage() {
     [id]
   );
 
+  // Carica tutte le liste per la modale Sposta
+  const loadAllLists = async () => {
+    const lists = await fetchAllLists();
+    setAllLists(lists);
+  };
+
   const handleCreate = async () => {
     if (!title.trim()) return;
     await createTodo(Number(id), title);
@@ -154,6 +168,16 @@ export default function ToDoListPage() {
       shouldAnimate.current = false;
       fetchTodos();
     }
+  };
+
+  // Gestisce lo spostamento della todo
+  const handleMoveTodo = async (newListId: number) => {
+    if (!todoToMove) return;
+    
+    await moveTodo(todoToMove.id, newListId);
+    setShowMoveModal(false);
+    setTodoToMove(null);
+    fetchTodos();
   };
 
   const handleDragStart = () => {
@@ -212,6 +236,7 @@ export default function ToDoListPage() {
   useEffect(() => {
     shouldAnimate.current = true;
     fetchTodos();
+    loadAllLists();
   }, [fetchTodos]);
 
   useEffect(() => {
@@ -319,6 +344,10 @@ export default function ToDoListPage() {
                   onCheck={handleToggle}
                   onDelete={handleDelete}
                   onEdit={() => setEditedTodo(todo)}
+                  onMove={() => {
+                    setTodoToMove(todo);
+                    setShowMoveModal(true);
+                  }}
                   selectedIds={selectedIds}
                   setSelectedIds={setSelectedIds}
                   editMode={editMode}
@@ -340,6 +369,10 @@ export default function ToDoListPage() {
               onCheck={handleToggle}
               onDelete={handleDelete}
               onEdit={() => setEditedTodo(todo)}
+              onMove={() => {
+                setTodoToMove(todo);
+                setShowMoveModal(true);
+              }}
               editMode={editMode}
               selectedIds={selectedIds}
               setSelectedIds={setSelectedIds}
@@ -461,6 +494,21 @@ export default function ToDoListPage() {
           document.body
         )}
 
+      {showMoveModal && todoToMove && (
+        <MoveTodoModal
+          isOpen={showMoveModal}
+          onClose={() => {
+            setShowMoveModal(false);
+            setTodoToMove(null);
+          }}
+          todoTitle={todoToMove.title}
+          currentListId={Number(id)}
+          currentListName={listName}
+          allLists={allLists}
+          onMove={handleMoveTodo}
+        />
+      )}
+
       <style>
         {`
           * {
@@ -486,6 +534,7 @@ function SortableTodo({
   onCheck,
   onDelete,
   onEdit,
+  onMove,
   editMode,
   selectedIds,
   setSelectedIds,
@@ -495,6 +544,7 @@ function SortableTodo({
   onCheck: (id: number) => void;
   onDelete: (id: number) => void;
   onEdit: () => void;
+  onMove: () => void;
   editMode: boolean;
   selectedIds: number[];
   setSelectedIds: React.Dispatch<React.SetStateAction<number[]>>;
@@ -581,6 +631,12 @@ function SortableTodo({
 
           {editMode && (
             <>
+              <button
+                onClick={onMove}
+                className="p-1 bg-purple-500/20 backdrop-blur-sm rounded text-purple-600 hover:text-purple-700 hover:bg-purple-500/30 transition-all"
+              >
+                <ArrowRightLeft size={16} />
+              </button>
               <button
                 onClick={onEdit}
                 className="p-1 bg-blue-500/20 backdrop-blur-sm rounded text-blue-600 hover:text-blue-700 hover:bg-blue-500/30 transition-all"

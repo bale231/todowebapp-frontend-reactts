@@ -1,6 +1,6 @@
 {
-  "version": "1.0.1",
-  "type": "normal",
-  "message": "Da oggi in poi ricevere notifiche su nuovi aggiornamenti e nuove funzionalita!",
-  "timestamp": "2025-09-27T16:12:00Z"
+  "version": "1.0.2",
+  "type": "important",
+  "message": "Aggiunta possibilita di spostare le ToDo tra liste diverse. Elimina e riaggiungi segnalibro per vedere la funzione in azione!",
+  "timestamp": "2025-09-27T16:28:00Z"
 }
