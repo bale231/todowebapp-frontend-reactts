@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "normal",
-  "message": "Ridotto intervallo per la ricezione delle notifiche.",
+  "message": "Aggiunto componente per la gestione delle notifiche.",
   "timestamp": "2025-09-26T20:00:00Z"
 }
