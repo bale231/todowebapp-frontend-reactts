@@ -1,6 +1,6 @@
 {
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "important",
-  "message": "Aggiunta funzionalità di gestione amici: invio, accettazione e rifiuto richieste. Correzioni di bug minori.",
+  "message": "Aggiunto pop-up per abilitare le notifiche push. Ora puoi ricevere promemoria e aggiornamenti direttamente sul tuo dispositivo!",
   "timestamp": "2025-09-27T16:28:00Z"
 }
