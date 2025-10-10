@@ -4,13 +4,19 @@ import { ArrowLeft } from "lucide-react";
 import { fetchUsers, sendFriendRequest, User } from "../api/friends";
 import UserCard from "../components/UserCard";
 import { useTheme } from "../context/ThemeContext";
+import AnimatedAlert from "../components/AnimatedAlert";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sentRequests, setSentRequests] = useState<number[]>([]); // ✅ Nuovo state
   const navigate = useNavigate();
   const { themeLoaded } = useTheme();
+  
+  // ✅ State per l'alert
+  const [alert, setAlert] = useState<{
+    type: "success" | "error" | "warning";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -30,11 +36,56 @@ export default function UsersPage() {
   const handleSendRequest = async (userId: number) => {
     try {
       await sendFriendRequest(userId);
-      setSentRequests([...sentRequests, userId]); // ✅ Aggiungi all'array
-      // Non rimuovere più l'utente dalla lista
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      alert("Errore nell'invio della richiesta");
+      loadUsers();
+      // ✅ Mostra alert di successo
+      setAlert({
+        type: "success",
+        message: "Richiesta inviata con successo!"
+      });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Errore completo:", error);
+      // ✅ Mostra alert di errore
+      setAlert({
+        type: "error",
+        message: error.message || "Errore nell'invio della richiesta"
+      });
+    }
+  };
+
+  const getButtonConfig = (status?: string) => {
+    switch (status) {
+      case "friends":
+        return {
+          text: "Amici ✓",
+          color: "bg-green-600/80 cursor-not-allowed",
+          disabled: true
+        };
+      case "pending_sent":
+        return {
+          text: "Richiesta Inviata",
+          color: "bg-gray-400 cursor-not-allowed",
+          disabled: true
+        };
+      case "pending_received":
+        return {
+          text: "Rispondi",
+          color: "bg-orange-600/80 hover:bg-orange-600/90",
+          disabled: false,
+          action: "respond"
+        };
+      case "rejected":
+        return {
+          text: "Richiesta Rifiutata",
+          color: "bg-red-600/80 cursor-not-allowed",
+          disabled: true
+        };
+      default:
+        return {
+          text: "Aggiungi",
+          color: "bg-blue-600/80 hover:bg-blue-600/90",
+          disabled: false
+        };
     }
   };
 
@@ -42,6 +93,15 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900 text-gray-900 dark:text-white p-6 pb-24">
+      {/* ✅ Mostra alert se presente */}
+      {alert && (
+        <AnimatedAlert
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Utenti</h1>
         <button
@@ -62,19 +122,21 @@ export default function UsersPage() {
       ) : (
         <div className="space-y-3 pb-8">
           {users.map((user) => {
-            const requestSent = sentRequests.includes(user.id); // ✅ Controlla se richiesta inviata
+            const buttonConfig = getButtonConfig(user.friendship_status);
             
             return (
               <UserCard
                 key={user.id}
                 user={user}
-                buttonText={requestSent ? "Richiesta Inviata" : "Aggiungi"} // ✅ Cambia testo
-                buttonColor={
-                  requestSent
-                    ? "bg-gray-400 cursor-not-allowed" // ✅ Grigio se inviata
-                    : "bg-blue-600/80 hover:bg-blue-600/90"
-                }
-                onAction={() => !requestSent && handleSendRequest(user.id)} // ✅ Disabilita se già inviata
+                buttonText={buttonConfig.text}
+                buttonColor={buttonConfig.color}
+                onAction={() => {
+                  if (buttonConfig.action === "respond") {
+                    navigate("/friend-requests");
+                  } else if (!buttonConfig.disabled) {
+                    handleSendRequest(user.id);
+                  }
+                }}
               />
             );
           })}

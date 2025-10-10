@@ -7,6 +7,7 @@ export interface User {
   username: string;
   full_name: string;
   profile_picture: string | null;
+  friendship_status?: "none" | "pending_sent" | "pending_received" | "rejected" | "friends";
 }
 
 export interface FriendRequest {
