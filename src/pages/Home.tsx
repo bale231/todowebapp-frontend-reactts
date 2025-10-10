@@ -1,24 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUserJWT } from "../api/auth";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
-import {
-  Plus,
-  Pencil,
-  ListFilter,
-  Trash,
-  Edit,
-  Users,
-  UserPlus,
-  UserCheck,
-} from "lucide-react";
+import { Plus, Pencil, ListFilter, Trash, Edit, Users, UserPlus, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
+import AnimatedAlert from "../components/AnimatedAlert";
 
 interface TodoList {
   id: number;
@@ -46,29 +39,25 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [lists, setLists] = useState<TodoList[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
   const [newListCategory, setNewListCategory] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editListId, setEditListId] = useState<number | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
-    null
-  );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
-    "created"
-  );
+  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">("created");
   const [categorySortAlpha, setCategorySortAlpha] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-
-  // Categoria states
   const [showCatForm, setShowCatForm] = useState(false);
   const [catName, setCatName] = useState("");
   const [editCatId, setEditCatId] = useState<number | null>(null);
+  const [alert, setAlert] = useState<{
+    type: "success" | "error" | "warning";
+    message: string;
+  } | null>(null);
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -78,7 +67,6 @@ export default function Home() {
 
   useThemeColor();
 
-  // Carica utente e ordinamento
   useEffect(() => {
     const loadUserAndPref = async () => {
       const resUser = await getCurrentUserJWT();
@@ -86,7 +74,6 @@ export default function Home() {
       setUser(resUser);
 
       try {
-        // Carica preferenza ordinamento liste
         const res = await fetch(`${API_URL}/lists/sort_order/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -103,7 +90,6 @@ export default function Home() {
           );
         }
 
-        // ✅ NUOVO: Carica preferenza ordine alfabetico categorie
         const catRes = await fetch(`${API_URL}/categories/sort_preference/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -120,7 +106,6 @@ export default function Home() {
     loadUserAndPref();
   }, [navigate]);
 
-  // Fetch lists e categorie
   useEffect(() => {
     if (user) {
       fetchLists();
@@ -184,33 +169,42 @@ export default function Home() {
     }
   };
 
-  // Crea/modifica lista con categoria
   const handleCreateList = async () => {
-    if (!newListName.trim()) return;
-    const payload = {
-      name: newListName,
-      color: newListColor,
-      category: newListCategory,
-    };
-    if (editListId !== null) {
-      await editList(editListId, newListName, newListColor, newListCategory);
-      setEditListId(null);
-    } else {
-      const res = await fetch(`${API_URL}/lists/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) console.error("Errore creazione lista");
+    if (!newListName.trim()) {
+      setAlert({ type: "warning", message: "Inserisci un nome per la lista" });
+      return;
     }
-    fetchLists();
-    setNewListName("");
-    setNewListColor("blue");
-    setShowForm(false);
-    setNewListCategory(null);
+
+    const payload = { name: newListName, color: newListColor, category: newListCategory };
+
+    try {
+      if (editListId !== null) {
+        await editList(editListId, newListName, newListColor, newListCategory);
+        setAlert({ type: "success", message: "Lista modificata con successo!" });
+        setEditListId(null);
+      } else {
+        const res = await fetch(`${API_URL}/lists/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          setAlert({ type: "error", message: "Errore nella creazione della lista" });
+          return;
+        }
+        setAlert({ type: "success", message: "Lista creata con successo!" });
+      }
+      fetchLists();
+      setNewListName("");
+      setNewListColor("blue");
+      setShowForm(false);
+      setNewListCategory(null);
+    } catch (err) {
+      setAlert({ type: "error", message: "Errore di connessione" });
+    }
   };
 
   const handleEditList = (list: TodoList) => {
@@ -229,6 +223,15 @@ export default function Home() {
         : newOpt === "complete"
         ? "complete"
         : "created";
+
+    const messages = {
+      created: "Ordinamento: Più recente",
+      name: "Ordinamento: Alfabetico",
+      complete: "Ordinamento: Per completezza",
+    };
+
+    setAlert({ type: "success", message: messages[newOpt] });
+
     try {
       await fetch(`${API_URL}/lists/sort_order/`, {
         method: "PATCH",
@@ -240,6 +243,17 @@ export default function Home() {
       });
     } catch (err) {
       console.error("Errore salvataggio ordinamento:", err);
+    }
+  };
+
+  const deleteListAsync = async (id: number) => {
+    try {
+      await deleteList(id);
+      fetchLists();
+      setShowDeleteConfirm(null);
+      setAlert({ type: "success", message: "Lista eliminata" });
+    } catch (err) {
+      setAlert({ type: "error", message: "Errore nell'eliminazione" });
     }
   };
 
@@ -255,12 +269,7 @@ export default function Home() {
           yoyo: true,
           duration: 0.1,
           onComplete: () => {
-            // ✅ Usa una IIFE per gestire async
-            (async () => {
-              await deleteList(id);
-              fetchLists();
-              setShowDeleteConfirm(null);
-            })();
+            deleteListAsync(id);
           },
         }
       );
@@ -268,16 +277,21 @@ export default function Home() {
       await deleteList(id);
       fetchLists();
       setShowDeleteConfirm(null);
+      setAlert({ type: "success", message: "Lista eliminata" });
     }
   };
 
-  // Categorie CRUD
   const handleCreateOrEditCat = async () => {
-    if (!catName.trim()) return;
+    if (!catName.trim()) {
+      setAlert({ type: "warning", message: "Inserisci un nome per la categoria" });
+      return;
+    }
+
     const url = editCatId
       ? `${API_URL}/categories/${editCatId}/`
       : `${API_URL}/categories/`;
     const method = editCatId ? "PATCH" : "POST";
+
     try {
       const res = await fetch(url, {
         method,
@@ -287,13 +301,22 @@ export default function Home() {
         },
         body: JSON.stringify({ name: catName }),
       });
-      if (!res.ok) throw new Error("Errore categoria");
+
+      if (!res.ok) {
+        setAlert({ type: "error", message: "Errore nella gestione della categoria" });
+        return;
+      }
+
       fetchCategories();
       setShowCatForm(false);
       setEditCatId(null);
       setCatName("");
+      setAlert({
+        type: "success",
+        message: editCatId ? "Categoria modificata!" : "Categoria creata!",
+      });
     } catch (err) {
-      console.error("Errore creazione/modifica categoria:", err);
+      setAlert({ type: "error", message: "Errore di connessione" });
     }
   };
 
@@ -303,12 +326,10 @@ export default function Home() {
     setShowCatForm(true);
   };
 
-  // Filtra per categoria
   const filteredLists = selectedCategory
     ? lists.filter((l) => l.category && l.category.id === selectedCategory.id)
     : lists;
 
-  // Ordina le liste
   const sortedLists = [...filteredLists].sort((a, b) => {
     if (sortOption === "name") {
       return a.name.localeCompare(b.name);
@@ -325,20 +346,14 @@ export default function Home() {
     }
   });
 
-  // ✅ RAGGRUPPA PER CATEGORIA SE "TUTTE LE CATEGORIE"
   const groupedLists: { categoryName: string; lists: TodoList[] }[] = [];
 
   if (!selectedCategory) {
-    // Liste senza categoria
     const uncategorized = sortedLists.filter((l) => !l.category);
     if (uncategorized.length > 0) {
-      groupedLists.push({
-        categoryName: "Senza categoria",
-        lists: uncategorized,
-      });
+      groupedLists.push({ categoryName: "Senza categoria", lists: uncategorized });
     }
 
-    // Liste con categoria
     const categoriesWithLists = categories
       .map((cat) => {
         const listsInCat = sortedLists.filter(
@@ -348,20 +363,13 @@ export default function Home() {
       })
       .filter((group) => group.lists.length > 0);
 
-    // Ordina alfabeticamente le categorie se richiesto
     if (categorySortAlpha) {
-      categoriesWithLists.sort((a, b) =>
-        a.categoryName.localeCompare(b.categoryName)
-      );
+      categoriesWithLists.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
     }
 
     groupedLists.push(...categoriesWithLists);
   } else {
-    // Se filtrato per categoria specifica, mostra solo quella
-    groupedLists.push({
-      categoryName: selectedCategory.name,
-      lists: sortedLists,
-    });
+    groupedLists.push({ categoryName: selectedCategory.name, lists: sortedLists });
   }
 
   if (!user) {
@@ -377,8 +385,15 @@ export default function Home() {
       <Navbar />
       <NotificationPrompt />
 
+      {alert && (
+        <AnimatedAlert
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+        />
+      )}
+
       <div className="p-6" ref={boxRef}>
-        {/* Bottoni pagine amicizie */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 pt-6">
           <button
             onClick={() => navigate("/users")}
@@ -403,7 +418,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Filtro categoria */}
         <div className="flex items-center gap-4 mb-6 flex-wrap">
           <button
             onClick={() => {
@@ -419,7 +433,13 @@ export default function Home() {
             value={selectedCategory?.id || ""}
             onChange={(e) => {
               const id = Number(e.target.value);
-              setSelectedCategory(categories.find((c) => c.id === id) || null);
+              const cat = categories.find((c) => c.id === id) || null;
+              setSelectedCategory(cat);
+
+              setAlert({
+                type: "success",
+                message: cat ? `Filtro: ${cat.name}` : "Filtro: Tutte le categorie",
+              });
             }}
             className="bg-white/80 dark:bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700"
           >
@@ -439,41 +459,6 @@ export default function Home() {
               <Pencil size={16} />
             </button>
           )}
-          {/* ✅ TOGGLE ORDINE ALFABETICO CATEGORIE */}
-          {!selectedCategory && (
-            <button
-              onClick={async () => {
-                const newValue = !categorySortAlpha;
-                setCategorySortAlpha(newValue);
-
-                // ✅ Salva sul backend
-                try {
-                  await fetch(`${API_URL}/categories/sort_preference/`, {
-                    method: "PATCH",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem(
-                        "accessToken"
-                      )}`,
-                    },
-                    body: JSON.stringify({ category_sort_alpha: newValue }),
-                  });
-                } catch (err) {
-                  console.error(
-                    "Errore nel salvataggio preferenza categoria:",
-                    err
-                  );
-                }
-              }}
-              className={`px-3 py-2 rounded-lg font-medium transition ${
-                categorySortAlpha
-                  ? "bg-green-500/80 text-white"
-                  : "bg-gray-300/80 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Ordine A-Z
-            </button>
-          )}
         </div>
 
         {sortedLists.length === 0 && (
@@ -484,7 +469,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* ✅ VISUALIZZAZIONE RAGGRUPPATA */}
         <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[60vh] pr-2">
           {groupedLists.map((group, groupIdx) => (
             <div key={groupIdx} className="mb-8">
@@ -493,9 +477,7 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {group.lists.map((list) => {
-                  const completed = list.todos.filter(
-                    (t) => t.completed
-                  ).length;
+                  const completed = list.todos.filter((t) => t.completed).length;
                   const pending = list.todos.length - completed;
                   return (
                     <SwipeableListItem
@@ -518,13 +500,10 @@ export default function Home() {
                               {list.name}
                             </h3>
                             {list.todos.length === 0 ? (
-                              <p className="text-sm text-gray-500">
-                                Nessuna ToDo
-                              </p>
+                              <p className="text-sm text-gray-500">Nessuna ToDo</p>
                             ) : (
                               <p className="text-sm text-gray-600 dark:text-gray-300">
-                                {pending} ToDo da completare, {completed}{" "}
-                                completate.
+                                {pending} ToDo da completare, {completed} completate.
                               </p>
                             )}
                           </div>
@@ -588,9 +567,8 @@ export default function Home() {
         </main>
       </div>
 
-      {/* FAB con layout circolare */}
-      <div className="fixed bottom-6 left-6 z-50">
-        {/* Bottoni circolari disposti a ventaglio */}
+      {/* FAB con layout circolare e effetto vetro */}
+      <div className="fixed bottom-8 left-8 z-50">
         <div className="relative">
           {/* Nuova Lista */}
           <button
@@ -600,39 +578,47 @@ export default function Home() {
               setNewListName("");
               setNewListColor("blue");
               setNewListCategory(null);
+              setMenuOpen(false);
             }}
-            className={`absolute w-14 h-14 flex items-center justify-center rounded-full bg-blue-600/90 text-white shadow-lg border border-blue-300/30 transition-all duration-300 hover:scale-110 ${
+            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-blue-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-blue-500/90 ${
               menuOpen
                 ? "opacity-100 translate-x-0 translate-y-0"
                 : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
             }`}
             style={{
-              transform: menuOpen ? "translate(0px, -80px)" : "translate(0, 0)",
-              transition: "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+              transform: menuOpen ? "translate(0px, -90px)" : "translate(0, 0)",
+              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
             }}
             title="Nuova Lista"
           >
-            <Plus size={24} />
+            <Plus size={26} />
           </button>
 
           {/* Modifica Liste */}
           <button
-            onClick={() => setEditMode((prev) => !prev)}
-            className={`absolute w-14 h-14 flex items-center justify-center rounded-full bg-green-600/90 text-white shadow-lg border border-green-300/30 transition-all duration-300 hover:scale-110 ${
+            onClick={() => {
+              const newMode = !editMode;
+              setEditMode(newMode);
+              setMenuOpen(false);
+              setAlert({
+                type: newMode ? "warning" : "success",
+                message: newMode
+                  ? "Modalità modifica attivata"
+                  : "Modalità modifica disattivata",
+              });
+            }}
+            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-green-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-green-500/90 ${
               menuOpen
                 ? "opacity-100 translate-x-0 translate-y-0"
                 : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
             }`}
             style={{
-              transform: menuOpen
-                ? "translate(56px, -56px)"
-                : "translate(0, 0)",
-              transition:
-                "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s",
+              transform: menuOpen ? "translate(64px, -64px)" : "translate(0, 0)",
+              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s",
             }}
             title="Modifica Liste"
           >
-            <Pencil size={20} />
+            <Pencil size={22} />
           </button>
 
           {/* Filtro ordinamento */}
@@ -646,16 +632,16 @@ export default function Home() {
               const currentIndex = options.indexOf(sortOption);
               const nextIndex = (currentIndex + 1) % options.length;
               handleSortChange(options[nextIndex]);
+              setMenuOpen(false);
             }}
-            className={`absolute w-14 h-14 flex items-center justify-center rounded-full bg-yellow-500/90 text-white shadow-lg border border-yellow-300/30 transition-all duration-300 hover:scale-110 ${
+            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-yellow-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-yellow-500/90 ${
               menuOpen
                 ? "opacity-100 translate-x-0 translate-y-0"
                 : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
             }`}
             style={{
-              transform: menuOpen ? "translate(80px, 0px)" : "translate(0, 0)",
-              transition:
-                "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s",
+              transform: menuOpen ? "translate(90px, 0px)" : "translate(0, 0)",
+              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s",
             }}
             title={`Ordina: ${
               sortOption === "created"
@@ -665,7 +651,7 @@ export default function Home() {
                 : "Per completezza"
             }`}
           >
-            <ListFilter size={20} />
+            <ListFilter size={22} />
           </button>
 
           {/* Ordine alfabetico categorie */}
@@ -674,63 +660,90 @@ export default function Home() {
               onClick={async () => {
                 const newValue = !categorySortAlpha;
                 setCategorySortAlpha(newValue);
+                setMenuOpen(false);
+
+                setAlert({
+                  type: "success",
+                  message: newValue ? "Ordine A-Z attivato" : "Ordine A-Z disattivato",
+                });
 
                 try {
                   await fetch(`${API_URL}/categories/sort_preference/`, {
                     method: "PATCH",
                     headers: {
                       "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem(
-                        "accessToken"
-                      )}`,
+                      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                     },
                     body: JSON.stringify({ category_sort_alpha: newValue }),
                   });
                 } catch (err) {
-                  console.error(
-                    "Errore nel salvataggio preferenza categoria:",
-                    err
-                  );
+                  console.error("Errore nel salvataggio preferenza categoria:", err);
                 }
               }}
-              className={`absolute w-14 h-14 flex items-center justify-center rounded-full shadow-lg border transition-all duration-300 hover:scale-110 ${
+              className={`absolute w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-xl shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 ${
                 categorySortAlpha
-                  ? "bg-purple-600/90 border-purple-300/30"
-                  : "bg-gray-500/90 border-gray-300/30"
+                  ? "bg-purple-500/80 hover:bg-purple-500/90"
+                  : "bg-gray-600/80 hover:bg-gray-600/90"
               } text-white ${
                 menuOpen
                   ? "opacity-100 translate-x-0 translate-y-0"
                   : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
               }`}
               style={{
-                transform: menuOpen
-                  ? "translate(56px, 56px)"
-                  : "translate(0, 0)",
-                transition:
-                  "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s",
+                transform: menuOpen ? "translate(64px, 64px)" : "translate(0, 0)",
+                transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s",
               }}
-              title={
-                categorySortAlpha ? "Ordine A-Z attivo" : "Ordine A-Z disattivo"
-              }
+              title={categorySortAlpha ? "Ordine A-Z attivo" : "Ordine A-Z disattivo"}
             >
-              <span className="text-xl font-bold">A-Z</span>
+              <span className="text-lg font-bold tracking-tight">A-Z</span>
             </button>
           )}
+
+          {/* Bottone Close (X) */}
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              setEditMode(false);
+            }}
+            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-red-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-red-500/90 ${
+              menuOpen
+                ? "opacity-100 translate-x-0 translate-y-0"
+                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
+            }`}
+            style={{
+              transform: menuOpen ? "translate(0px, 90px)" : "translate(0, 0)",
+              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s",
+            }}
+            title="Chiudi"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
 
           {/* Bottone principale */}
           <button
             onClick={() => {
-              setMenuOpen((prev) => {
-                const next = !prev;
-                if (!next) setEditMode(false);
-                return next;
-              });
+              setMenuOpen((prev) => !prev);
             }}
-            className={`w-16 h-16 flex items-center justify-center rounded-full bg-blue-600/90 text-white shadow-2xl border border-blue-300/30 transition-all duration-300 ${
-              menuOpen ? "rotate-45 scale-110" : "rotate-0 scale-100"
-            } hover:bg-blue-600 hover:scale-105 relative z-10`}
+            className={`w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/90 backdrop-blur-xl text-white shadow-2xl border-2 border-white/30 transition-all duration-300 ${
+              menuOpen
+                ? "rotate-45 scale-95 bg-blue-700/90"
+                : "rotate-0 scale-100"
+            } hover:scale-105 hover:shadow-3xl relative z-10`}
           >
-            <Plus size={32} />
+            <Plus size={36} strokeWidth={2.5} />
           </button>
         </div>
       </div>
@@ -766,9 +779,7 @@ export default function Home() {
             <select
               value={newListCategory || ""}
               onChange={(e) =>
-                setNewListCategory(
-                  e.target.value ? Number(e.target.value) : null
-                )
+                setNewListCategory(e.target.value ? Number(e.target.value) : null)
               }
               className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 rounded-lg mb-4"
             >
