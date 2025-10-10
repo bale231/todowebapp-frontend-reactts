@@ -5,7 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUserJWT } from "../api/auth";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
-import { Plus, Pencil, ListFilter, Trash, Edit, Users, UserPlus, UserCheck } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  ListFilter,
+  Trash,
+  Edit,
+  Users,
+  UserPlus,
+  UserCheck,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
@@ -39,16 +48,22 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [lists, setLists] = useState<TodoList[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
   const [newListCategory, setNewListCategory] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editListId, setEditListId] = useState<number | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
+    null
+  );
   const [editMode, setEditMode] = useState(false);
-  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">("created");
+  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
+    "created"
+  );
   const [categorySortAlpha, setCategorySortAlpha] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [showCatForm, setShowCatForm] = useState(false);
@@ -175,24 +190,36 @@ export default function Home() {
       return;
     }
 
-    const payload = { name: newListName, color: newListColor, category: newListCategory };
+    const payload = {
+      name: newListName,
+      color: newListColor,
+      category: newListCategory,
+    };
 
     try {
       if (editListId !== null) {
         await editList(editListId, newListName, newListColor, newListCategory);
-        setAlert({ type: "success", message: "Lista modificata con successo!" });
+        setAlert({
+          type: "success",
+          message: "Lista modificata con successo!",
+        });
         setEditListId(null);
       } else {
         const res = await fetch(`${API_URL}/lists/`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
+            Authorization: `Bearer ${
+              localStorage.getItem("accessToken") || ""
+            }`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
         });
         if (!res.ok) {
-          setAlert({ type: "error", message: "Errore nella creazione della lista" });
+          setAlert({
+            type: "error",
+            message: "Errore nella creazione della lista",
+          });
           return;
         }
         setAlert({ type: "success", message: "Lista creata con successo!" });
@@ -283,7 +310,10 @@ export default function Home() {
 
   const handleCreateOrEditCat = async () => {
     if (!catName.trim()) {
-      setAlert({ type: "warning", message: "Inserisci un nome per la categoria" });
+      setAlert({
+        type: "warning",
+        message: "Inserisci un nome per la categoria",
+      });
       return;
     }
 
@@ -303,7 +333,10 @@ export default function Home() {
       });
 
       if (!res.ok) {
-        setAlert({ type: "error", message: "Errore nella gestione della categoria" });
+        setAlert({
+          type: "error",
+          message: "Errore nella gestione della categoria",
+        });
         return;
       }
 
@@ -351,7 +384,10 @@ export default function Home() {
   if (!selectedCategory) {
     const uncategorized = sortedLists.filter((l) => !l.category);
     if (uncategorized.length > 0) {
-      groupedLists.push({ categoryName: "Senza categoria", lists: uncategorized });
+      groupedLists.push({
+        categoryName: "Senza categoria",
+        lists: uncategorized,
+      });
     }
 
     const categoriesWithLists = categories
@@ -364,12 +400,17 @@ export default function Home() {
       .filter((group) => group.lists.length > 0);
 
     if (categorySortAlpha) {
-      categoriesWithLists.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
+      categoriesWithLists.sort((a, b) =>
+        a.categoryName.localeCompare(b.categoryName)
+      );
     }
 
     groupedLists.push(...categoriesWithLists);
   } else {
-    groupedLists.push({ categoryName: selectedCategory.name, lists: sortedLists });
+    groupedLists.push({
+      categoryName: selectedCategory.name,
+      lists: sortedLists,
+    });
   }
 
   if (!user) {
@@ -438,7 +479,9 @@ export default function Home() {
 
               setAlert({
                 type: "success",
-                message: cat ? `Filtro: ${cat.name}` : "Filtro: Tutte le categorie",
+                message: cat
+                  ? `Filtro: ${cat.name}`
+                  : "Filtro: Tutte le categorie",
               });
             }}
             className="bg-white/80 dark:bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700"
@@ -477,7 +520,9 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {group.lists.map((list) => {
-                  const completed = list.todos.filter((t) => t.completed).length;
+                  const completed = list.todos.filter(
+                    (t) => t.completed
+                  ).length;
                   const pending = list.todos.length - completed;
                   return (
                     <SwipeableListItem
@@ -500,10 +545,13 @@ export default function Home() {
                               {list.name}
                             </h3>
                             {list.todos.length === 0 ? (
-                              <p className="text-sm text-gray-500">Nessuna ToDo</p>
+                              <p className="text-sm text-gray-500">
+                                Nessuna ToDo
+                              </p>
                             ) : (
                               <p className="text-sm text-gray-600 dark:text-gray-300">
-                                {pending} ToDo da completare, {completed} completate.
+                                {pending} ToDo da completare, {completed}{" "}
+                                completate.
                               </p>
                             )}
                           </div>
@@ -567,9 +615,15 @@ export default function Home() {
         </main>
       </div>
 
-      {/* FAB con layout circolare e effetto vetro */}
+      {/* FAB con bottoni verticali verso l'alto */}
       <div className="fixed bottom-8 left-8 z-50">
-        <div className="relative">
+        <div
+          className={`flex flex-col items-start space-y-3 mb-3 transition-all duration-300 ${
+            menuOpen
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4 pointer-events-none"
+          }`}
+        >
           {/* Nuova Lista */}
           <button
             onClick={() => {
@@ -580,18 +634,11 @@ export default function Home() {
               setNewListCategory(null);
               setMenuOpen(false);
             }}
-            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-blue-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-blue-500/90 ${
-              menuOpen
-                ? "opacity-100 translate-x-0 translate-y-0"
-                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
-            }`}
-            style={{
-              transform: menuOpen ? "translate(0px, -90px)" : "translate(0, 0)",
-              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-            }}
+            className="flex items-center gap-3 bg-blue-500/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-blue-500/90 hover:scale-105 transition-all"
             title="Nuova Lista"
           >
-            <Plus size={26} />
+            <Plus size={20} />{" "}
+            <span className="font-semibold">Nuova Lista</span>
           </button>
 
           {/* Modifica Liste */}
@@ -607,18 +654,11 @@ export default function Home() {
                   : "Modalità modifica disattivata",
               });
             }}
-            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-green-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-green-500/90 ${
-              menuOpen
-                ? "opacity-100 translate-x-0 translate-y-0"
-                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
-            }`}
-            style={{
-              transform: menuOpen ? "translate(64px, -64px)" : "translate(0, 0)",
-              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s",
-            }}
+            className="flex items-center gap-3 bg-green-500/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-green-500/90 hover:scale-105 transition-all"
             title="Modifica Liste"
           >
-            <Pencil size={22} />
+            <Pencil size={20} />{" "}
+            <span className="font-semibold">Modifica Liste</span>
           </button>
 
           {/* Filtro ordinamento */}
@@ -634,15 +674,7 @@ export default function Home() {
               handleSortChange(options[nextIndex]);
               setMenuOpen(false);
             }}
-            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-yellow-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-yellow-500/90 ${
-              menuOpen
-                ? "opacity-100 translate-x-0 translate-y-0"
-                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
-            }`}
-            style={{
-              transform: menuOpen ? "translate(90px, 0px)" : "translate(0, 0)",
-              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s",
-            }}
+            className="flex items-center gap-3 bg-yellow-500/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-yellow-500/90 hover:scale-105 transition-all"
             title={`Ordina: ${
               sortOption === "created"
                 ? "Più recente"
@@ -651,7 +683,14 @@ export default function Home() {
                 : "Per completezza"
             }`}
           >
-            <ListFilter size={22} />
+            <ListFilter size={20} />
+            <span className="font-semibold">
+              {sortOption === "created"
+                ? "Più recente"
+                : sortOption === "name"
+                ? "Alfabetico"
+                : "Per completezza"}
+            </span>
           </button>
 
           {/* Ordine alfabetico categorie */}
@@ -664,7 +703,9 @@ export default function Home() {
 
                 setAlert({
                   type: "success",
-                  message: newValue ? "Ordine A-Z attivato" : "Ordine A-Z disattivato",
+                  message: newValue
+                    ? "Ordine A-Z attivato"
+                    : "Ordine A-Z disattivato",
                 });
 
                 try {
@@ -672,80 +713,51 @@ export default function Home() {
                     method: "PATCH",
                     headers: {
                       "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                      Authorization: `Bearer ${localStorage.getItem(
+                        "accessToken"
+                      )}`,
                     },
                     body: JSON.stringify({ category_sort_alpha: newValue }),
                   });
                 } catch (err) {
-                  console.error("Errore nel salvataggio preferenza categoria:", err);
+                  console.error(
+                    "Errore nel salvataggio preferenza categoria:",
+                    err
+                  );
                 }
               }}
-              className={`absolute w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-xl shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 ${
+              className={`flex items-center gap-3 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:scale-105 transition-all ${
                 categorySortAlpha
                   ? "bg-purple-500/80 hover:bg-purple-500/90"
                   : "bg-gray-600/80 hover:bg-gray-600/90"
-              } text-white ${
-                menuOpen
-                  ? "opacity-100 translate-x-0 translate-y-0"
-                  : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
               }`}
-              style={{
-                transform: menuOpen ? "translate(64px, 64px)" : "translate(0, 0)",
-                transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s",
-              }}
-              title={categorySortAlpha ? "Ordine A-Z attivo" : "Ordine A-Z disattivo"}
+              title={
+                categorySortAlpha ? "Ordine A-Z attivo" : "Ordine A-Z disattivo"
+              }
             >
-              <span className="text-lg font-bold tracking-tight">A-Z</span>
+              <span className="text-lg font-bold">A-Z</span>
+              <span className="font-semibold">
+                {categorySortAlpha ? "Ordine A-Z attivo" : "Ordine A-Z"}
+              </span>
             </button>
           )}
-
-          {/* Bottone Close (X) */}
-          <button
-            onClick={() => {
-              setMenuOpen(false);
-              setEditMode(false);
-            }}
-            className={`absolute w-16 h-16 flex items-center justify-center rounded-full bg-red-500/80 backdrop-blur-xl text-white shadow-2xl border border-white/20 transition-all duration-300 hover:scale-110 hover:bg-red-500/90 ${
-              menuOpen
-                ? "opacity-100 translate-x-0 translate-y-0"
-                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
-            }`}
-            style={{
-              transform: menuOpen ? "translate(0px, 90px)" : "translate(0, 0)",
-              transition: "all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s",
-            }}
-            title="Chiudi"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-
-          {/* Bottone principale */}
-          <button
-            onClick={() => {
-              setMenuOpen((prev) => !prev);
-            }}
-            className={`w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/90 backdrop-blur-xl text-white shadow-2xl border-2 border-white/30 transition-all duration-300 ${
-              menuOpen
-                ? "rotate-45 scale-95 bg-blue-700/90"
-                : "rotate-0 scale-100"
-            } hover:scale-105 hover:shadow-3xl relative z-10`}
-          >
-            <Plus size={36} strokeWidth={2.5} />
-          </button>
         </div>
+
+        {/* Bottone principale */}
+        <button
+          onClick={() => {
+            setMenuOpen((prev) => {
+              const next = !prev;
+              if (!next) setEditMode(false);
+              return next;
+            });
+          }}
+          className={`w-16 h-16 flex items-center justify-center rounded-full bg-blue-600/90 backdrop-blur-xl text-white shadow-2xl border-2 border-white/30 transition-all duration-300 ${
+            menuOpen ? "rotate-45 scale-110" : "rotate-0 scale-100"
+          } hover:scale-105 relative z-10`}
+        >
+          <Plus size={32} strokeWidth={2.5} />
+        </button>
       </div>
 
       {/* Modale creazione/modifica lista */}
@@ -779,7 +791,9 @@ export default function Home() {
             <select
               value={newListCategory || ""}
               onChange={(e) =>
-                setNewListCategory(e.target.value ? Number(e.target.value) : null)
+                setNewListCategory(
+                  e.target.value ? Number(e.target.value) : null
+                )
               }
               className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 rounded-lg mb-4"
             >
