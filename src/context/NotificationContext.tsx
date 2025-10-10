@@ -127,8 +127,6 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   // Polling ogni 30 secondi (aumentato da 5 secondi)
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // ✅ 30 secondi invece di 5
-    return () => clearInterval(interval);
   }, []);
 
   // ✅ Mostra notifica browser SOLO per notifiche NUOVE
