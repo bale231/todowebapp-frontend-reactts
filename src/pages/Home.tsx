@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUserJWT } from "../api/auth";
@@ -33,7 +34,6 @@ const colorClasses: Record<string, string> = {
 };
 
 export default function Home() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const [lists, setLists] = useState<TodoList[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -47,7 +47,9 @@ export default function Home() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [sortOption, setSortOption] = useState<"created" | "name" | "complete">("created");
+  const [categorySortAlpha, setCategorySortAlpha] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
+  
   // Categoria states
   const [showCatForm, setShowCatForm] = useState(false);
   const [catName, setCatName] = useState("");
@@ -175,6 +177,7 @@ export default function Home() {
     }
     fetchLists();
     setNewListName("");
+    setNewListColor("blue");
     setShowForm(false);
     setNewListCategory(null);
   };
@@ -210,24 +213,33 @@ export default function Home() {
   };
 
   const handleDeleteList = async (id: number) => {
-    gsap.fromTo(
-      `#card-${id}`,
-      { x: -3 },
-      {
-        x: 3,
-        repeat: 2,
-        yoyo: true,
-        duration: 0.1,
-        onComplete: () => {
-          (async () => {
-            await deleteList(id);
-            fetchLists();
-            setShowDeleteConfirm(null);
-          })();
-        },
-      }
-    );
+    const cardEl = document.getElementById(`card-${id}`);
+    if (cardEl) {
+      gsap.fromTo(
+        cardEl,
+        { x: -3 },
+        {
+          x: 3,
+          repeat: 2,
+          yoyo: true,
+          duration: 0.1,
+          onComplete: () => {
+            // ✅ Usa una IIFE per gestire async
+            (async () => {
+              await deleteList(id);
+              fetchLists();
+              setShowDeleteConfirm(null);
+            })();
+          },
+        }
+      );
+    } else {
+      await deleteList(id);
+      fetchLists();
+      setShowDeleteConfirm(null);
+    }
   };
+
 
   // Categorie CRUD
   const handleCreateOrEditCat = async () => {
@@ -262,12 +274,11 @@ export default function Home() {
   };
 
   // Filtra per categoria
-  const filteredLists =
-    selectedCategory
-      ? lists.filter(l => l.category && l.category.id === selectedCategory.id)
-      : lists;
+  const filteredLists = selectedCategory
+    ? lists.filter((l) => l.category && l.category.id === selectedCategory.id)
+    : lists;
 
-  // Ordina come già presente
+  // Ordina le liste
   const sortedLists = [...filteredLists].sort((a, b) => {
     if (sortOption === "name") {
       return a.name.localeCompare(b.name);
@@ -283,6 +294,37 @@ export default function Home() {
       );
     }
   });
+
+  // ✅ RAGGRUPPA PER CATEGORIA SE "TUTTE LE CATEGORIE"
+  const groupedLists: { categoryName: string; lists: TodoList[] }[] = [];
+
+  if (!selectedCategory) {
+    // Liste senza categoria
+    const uncategorized = sortedLists.filter((l) => !l.category);
+    if (uncategorized.length > 0) {
+      groupedLists.push({ categoryName: "Senza categoria", lists: uncategorized });
+    }
+
+    // Liste con categoria
+    const categoriesWithLists = categories
+      .map((cat) => {
+        const listsInCat = sortedLists.filter(
+          (l) => l.category && l.category.id === cat.id
+        );
+        return { categoryName: cat.name, lists: listsInCat };
+      })
+      .filter((group) => group.lists.length > 0);
+
+    // Ordina alfabeticamente le categorie se richiesto
+    if (categorySortAlpha) {
+      categoriesWithLists.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
+    }
+
+    groupedLists.push(...categoriesWithLists);
+  } else {
+    // Se filtrato per categoria specifica, mostra solo quella
+    groupedLists.push({ categoryName: selectedCategory.name, lists: sortedLists });
+  }
 
   if (!user) {
     return (
@@ -324,23 +366,27 @@ export default function Home() {
         </div>
 
         {/* Filtro categoria */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-6 flex-wrap">
           <button
-            onClick={() => { setShowCatForm(true); setEditCatId(null); setCatName(""); }}
-            className="bg-yellow-500/80 text-white px-3 py-1 rounded flex items-center gap-2 font-medium"
+            onClick={() => {
+              setShowCatForm(true);
+              setEditCatId(null);
+              setCatName("");
+            }}
+            className="bg-yellow-500/80 text-white px-3 py-2 rounded-lg flex items-center gap-2 font-medium shadow hover:bg-yellow-500/90 transition"
           >
             <Plus size={16} /> Nuova Categoria
           </button>
           <select
             value={selectedCategory?.id || ""}
-            onChange={e => {
+            onChange={(e) => {
               const id = Number(e.target.value);
-              setSelectedCategory(categories.find(c => c.id === id) || null);
+              setSelectedCategory(categories.find((c) => c.id === id) || null);
             }}
-            className="bg-white/80 dark:bg-gray-800/80 px-3 py-1 rounded border border-gray-200 dark:border-gray-700"
+            className="bg-white/80 dark:bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700"
           >
             <option value="">Tutte le categorie</option>
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
@@ -349,10 +395,23 @@ export default function Home() {
           {selectedCategory && (
             <button
               onClick={() => handleEditCat(selectedCategory)}
-              className="bg-blue-200 dark:bg-blue-900 px-2 py-1 rounded hover:bg-blue-300 dark:hover:bg-blue-800 transition"
+              className="bg-blue-200 dark:bg-blue-900 px-2 py-2 rounded-lg hover:bg-blue-300 dark:hover:bg-blue-800 transition"
               title="Modifica categoria"
             >
               <Pencil size={16} />
+            </button>
+          )}
+          {/* ✅ TOGGLE ORDINE ALFABETICO CATEGORIE */}
+          {!selectedCategory && (
+            <button
+              onClick={() => setCategorySortAlpha((prev) => !prev)}
+              className={`px-3 py-2 rounded-lg font-medium transition ${
+                categorySortAlpha
+                  ? "bg-green-500/80 text-white"
+                  : "bg-gray-300/80 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300"
+              }`}
+            >
+              Ordine A-Z
             </button>
           )}
         </div>
@@ -365,83 +424,102 @@ export default function Home() {
           </div>
         )}
 
+        {/* ✅ VISUALIZZAZIONE RAGGRUPPATA */}
         <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[60vh] pr-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedLists.map((list) => {
-              const completed = list.todos.filter((t) => t.completed).length;
-              const pending = list.todos.length - completed;
-              return (
-                <SwipeableListItem
-                  key={list.id}
-                  onEdit={() => handleEditList(list)}
-                  onDelete={() => handleDeleteList(list.id)}
-                  label={""}
-                >
-                  <div
-                    id={`card-${list.id}`}
-                    className={`relative p-4 bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg border-l-4 ${
-                      colorClasses[list.color]
-                    } ${editMode ? "animate-wiggle" : ""} transition-all duration-200 hover:shadow-xl hover:bg-white/80 dark:hover:bg-gray-800/80`}
-                  >
-                    <Link to={`/lists/${list.id}`}>
-                      <div className="cursor-pointer">
-                        <h3 className="text-xl font-semibold mb-2">
-                          {list.name}
-                        </h3>
-                        <div className="mb-1 text-sm text-gray-500 dark:text-gray-300 font-medium">
-                          {list.category ? `Categoria: ${list.category.name}` : ""}
-                        </div>
-                        {list.todos.length === 0 ? (
-                          <p className="text-sm text-gray-500">Nessuna ToDo</p>
-                        ) : (
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {pending} ToDo da completare, {completed} completate.
-                          </p>
+          {groupedLists.map((group, groupIdx) => (
+            <div key={groupIdx} className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+                {group.categoryName}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {group.lists.map((list) => {
+                  const completed = list.todos.filter((t) => t.completed).length;
+                  const pending = list.todos.length - completed;
+                  return (
+                    <SwipeableListItem
+                      key={list.id}
+                      onEdit={() => handleEditList(list)}
+                      onDelete={() => handleDeleteList(list.id)}
+                      label={""}
+                    >
+                      <div
+                        id={`card-${list.id}`}
+                        className={`relative p-4 bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg border-l-4 ${
+                          colorClasses[list.color]
+                        } ${
+                          editMode ? "animate-wiggle" : ""
+                        } transition-all duration-200 hover:shadow-xl hover:bg-white/80 dark:hover:bg-gray-800/80`}
+                      >
+                        <Link to={`/lists/${list.id}`}>
+                          <div className="cursor-pointer">
+                            <h3 className="text-xl font-semibold mb-2">
+                              {list.name}
+                            </h3>
+                            {list.todos.length === 0 ? (
+                              <p className="text-sm text-gray-500">Nessuna ToDo</p>
+                            ) : (
+                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                                {pending} ToDo da completare, {completed} completate.
+                              </p>
+                            )}
+                          </div>
+                        </Link>
+                        {editMode && (
+                          <div className="absolute top-2 right-2 flex gap-2 z-10">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditList(list);
+                              }}
+                              className="p-2 bg-blue-100/80 dark:bg-blue-900/80 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200/80 dark:hover:bg-blue-800/80 transition-all"
+                            >
+                              <Edit size={18} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowDeleteConfirm(list.id);
+                              }}
+                              className="p-2 bg-red-100/80 dark:bg-red-900/80 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200/80 dark:hover:bg-red-800/80 transition-all"
+                            >
+                              <Trash size={18} />
+                            </button>
+                          </div>
+                        )}
+                        {showDeleteConfirm === list.id && (
+                          <div className="mt-4 p-3 bg-red-500/20 rounded-lg border border-red-300/50">
+                            <p className="text-red-600 dark:text-red-400 mb-2 text-sm font-medium">
+                              Confermi eliminazione?
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteList(list.id);
+                                }}
+                                className="px-3 py-1 bg-red-600/80 text-white text-sm rounded-lg hover:bg-red-600 transition-all"
+                              >
+                                Sì
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowDeleteConfirm(null);
+                                }}
+                                className="px-3 py-1 bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 text-sm rounded-lg border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-700/70 transition-all"
+                              >
+                                No
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
-                    </Link>
-                    {editMode && (
-                      <div className="absolute top-2 right-2 flex gap-2 z-10">
-                        <button
-                          onClick={() => handleEditList(list)}
-                          className="p-2 bg-blue-100/80 dark:bg-blue-900/80 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200/80 dark:hover:bg-blue-800/80 transition-all"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => setShowDeleteConfirm(list.id)}
-                          className="p-2 bg-red-100/80 dark:bg-red-900/80 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200/80 dark:hover:bg-red-800/80 transition-all"
-                        >
-                          <Trash size={18} />
-                        </button>
-                      </div>
-                    )}
-                    {showDeleteConfirm === list.id && (
-                      <div className="mt-4 p-3 bg-red-500/20 rounded-lg border border-red-300/50">
-                        <p className="text-red-600 dark:text-red-400 mb-2 text-sm font-medium">
-                          Confermi eliminazione?
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleDeleteList(list.id)}
-                            className="px-3 py-1 bg-red-600/80 text-white text-sm rounded-lg hover:bg-red-600 transition-all"
-                          >
-                            Sì
-                          </button>
-                          <button
-                            onClick={() => setShowDeleteConfirm(null)}
-                            className="px-3 py-1 bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 text-sm rounded-lg border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-700/70 transition-all"
-                          >
-                            No
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </SwipeableListItem>
-              );
-            })}
-          </div>
+                    </SwipeableListItem>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </main>
       </div>
 
@@ -449,11 +527,19 @@ export default function Home() {
       <div className="fixed bottom-6 left-6 z-50">
         <div
           className={`flex flex-col items-start space-y-2 mb-2 transition-all duration-200 ${
-            menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+            menuOpen
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-2 pointer-events-none"
           }`}
         >
           <button
-            onClick={() => { setShowForm(true); setEditListId(null); setNewListName(""); setNewListCategory(null); }}
+            onClick={() => {
+              setShowForm(true);
+              setEditListId(null);
+              setNewListName("");
+              setNewListColor("blue");
+              setNewListCategory(null);
+            }}
             className="flex items-center gap-2 bg-blue-600/80 text-white px-4 py-2 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 transition-all"
           >
             <Plus size={18} /> Nuova Lista
@@ -468,8 +554,7 @@ export default function Home() {
             <ListFilter size={18} />
             <select
               value={sortOption}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onChange={e => handleSortChange(e.target.value as any)}
+              onChange={(e) => handleSortChange(e.target.value as any)}
               className="bg-transparent text-black text-sm"
             >
               <option value="created">Più recente</option>
@@ -524,12 +609,16 @@ export default function Home() {
             </select>
             <select
               value={newListCategory || ""}
-              onChange={(e) => setNewListCategory(Number(e.target.value))}
+              onChange={(e) =>
+                setNewListCategory(e.target.value ? Number(e.target.value) : null)
+              }
               className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 rounded-lg mb-4"
             >
               <option value="">Senza categoria</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
               ))}
             </select>
             <div className="flex justify-between gap-3">
@@ -538,6 +627,7 @@ export default function Home() {
                   setShowForm(false);
                   setEditListId(null);
                   setNewListName("");
+                  setNewListColor("blue");
                   setNewListCategory(null);
                 }}
                 className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
@@ -559,17 +649,23 @@ export default function Home() {
       {showCatForm && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-white/20 p-6 rounded-xl shadow-2xl w-80">
-            <h2 className="text-xl font-semibold mb-4">{editCatId ? "Modifica Categoria" : "Nuova Categoria"}</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {editCatId ? "Modifica Categoria" : "Nuova Categoria"}
+            </h2>
             <input
               type="text"
               placeholder="Nome categoria"
               value={catName}
-              onChange={e => setCatName(e.target.value)}
+              onChange={(e) => setCatName(e.target.value)}
               className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 rounded-lg mb-4"
             />
             <div className="flex justify-between gap-3">
               <button
-                onClick={() => { setShowCatForm(false); setEditCatId(null); setCatName(""); }}
+                onClick={() => {
+                  setShowCatForm(false);
+                  setEditCatId(null);
+                  setCatName("");
+                }}
                 className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
               >
                 Annulla
