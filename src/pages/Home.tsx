@@ -154,6 +154,27 @@ export default function Home() {
     }
   }, [showForm]);
 
+  // Aggiungi questo useEffect dopo gli altri useEffect esistenti
+  useEffect(() => {
+    // Ripristina la posizione di scroll salvata
+    const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
+    if (savedScrollPosition) {
+      window.scrollTo(0, parseInt(savedScrollPosition, 10));
+      sessionStorage.removeItem("homeScrollPosition"); // Pulisci dopo il ripristino
+    }
+
+    // Salva la posizione prima di lasciare la pagina
+    const handleBeforeUnload = () => {
+      sessionStorage.setItem("homeScrollPosition", window.scrollY.toString());
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   const fetchLists = async () => {
     try {
       const data = await fetchAllLists();
@@ -539,7 +560,16 @@ export default function Home() {
                           editMode ? "animate-wiggle" : ""
                         } transition-all duration-200 hover:shadow-xl hover:bg-white/80 dark:hover:bg-gray-800/80`}
                       >
-                        <Link to={`/lists/${list.id}`}>
+                        <Link
+                          onClick={() => {
+                            // Salva la posizione di scroll corrente
+                            sessionStorage.setItem(
+                              "homeScrollPosition",
+                              window.scrollY.toString()
+                            );
+                          }}
+                          to={`/lists/${list.id}`}
+                        >
                           <div className="cursor-pointer">
                             <h3 className="text-xl font-semibold mb-2">
                               {list.name}
