@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
 import { 
   fetchNotifications as fetchNotificationsAPI,
   markNotificationAsRead as markNotificationAsReadAPI,
@@ -53,15 +53,16 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
+  
+  // ✅ Traccia le notifiche già mostrate
+  const shownNotifications = useRef<Set<number>>(new Set());
 
-  // Controlla i permessi notifiche all'avvio
   useEffect(() => {
     if ("Notification" in window) {
       setHasPermission(Notification.permission === "granted");
     }
   }, []);
 
-  // Richiedi permessi notifiche browser
   const requestPermission = async () => {
     if (!("Notification" in window)) {
       console.log("Browser non supporta le notifiche");
@@ -79,7 +80,6 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     }
   };
 
-  // Fetch notifiche dal backend
   const fetchNotifications = async () => {
     try {
       const data = await fetchNotificationsAPI();
@@ -89,7 +89,6 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     }
   };
 
-  // Marca come letta
   const markAsRead = async (id: number) => {
     try {
       await markNotificationAsReadAPI(id);
@@ -103,7 +102,6 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     }
   };
 
-  // Marca tutte come lette
   const markAllAsRead = async () => {
     try {
       await markAllNotificationsAsReadAPI();
@@ -115,33 +113,43 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     }
   };
 
-  // Elimina notifica
   const deleteNotification = async (id: number) => {
     try {
       await deleteNotificationAPI(id);
       setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+      // ✅ Rimuovi anche dal set delle notifiche mostrate
+      shownNotifications.current.delete(id);
     } catch (error) {
       console.error("Errore nell'eliminazione notifica:", error);
     }
   };
 
-  // Polling ogni 30 secondi per nuove notifiche
+  // Polling ogni 30 secondi (aumentato da 5 secondi)
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 5000);
+    const interval = setInterval(fetchNotifications, 30000); // ✅ 30 secondi invece di 5
     return () => clearInterval(interval);
   }, []);
 
-  // Mostra notifica browser quando arriva una nuova
+  // ✅ Mostra notifica browser SOLO per notifiche NUOVE
   useEffect(() => {
     if (hasPermission && notifications.length > 0) {
-      const lastNotif = notifications[0];
-      if (!lastNotif.read) {
-        new Notification(lastNotif.title, {
-          body: lastNotif.message,
-          icon: "/icon-192.png", // Aggiungi la tua icona
+      // Trova notifiche non lette che non abbiamo ancora mostrato
+      const newUnreadNotifs = notifications.filter(
+        (notif) => !notif.read && !shownNotifications.current.has(notif.id)
+      );
+
+      // Mostra solo le nuove notifiche
+      newUnreadNotifs.forEach((notif) => {
+        new Notification(notif.title, {
+          body: notif.message,
+          icon: "/logo192.png",
+          tag: `notif-${notif.id}`, // Previene duplicati
         });
-      }
+        
+        // ✅ Segna come mostrata
+        shownNotifications.current.add(notif.id);
+      });
     }
   }, [notifications, hasPermission]);
 

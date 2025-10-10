@@ -1,6 +1,6 @@
 {
-  "version": "1.0.9",
+  "version": "1.1",
   "type": "normal",
-  "message": "Risolto bug sulle richieste di amicizia, riavvia l'app prima di riutilizzarla di nuovo!.",
+  "message": "Risoluzione bug, riavvia l'app.",
   "timestamp": "2025-09-27T16:28:00Z"
 }
