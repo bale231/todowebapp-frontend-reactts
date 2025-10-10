@@ -512,7 +512,7 @@ export default function Home() {
           </div>
         )}
 
-        <main className="flex-1 mt-8 mb-8 overflow-y-auto max-h-[60vh] pr-2">
+        <main className="flex-1 mt-8 mb-8 overflow-y-auto pr-2 pb-24">
           {groupedLists.map((group, groupIdx) => (
             <div key={groupIdx} className="mb-8">
               <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
@@ -866,15 +866,43 @@ export default function Home() {
 
       <style>
         {`
-          @keyframes wiggle {
-            0% { transform: rotate(-0.5deg);}
-            50% { transform: rotate(0.5deg);}
-            100% { transform: rotate(-0.5deg);}
-          }
-          .animate-wiggle {
-            animation: wiggle 0.3s ease-in-out infinite;
-          }
-        `}
+        @keyframes wiggle {
+          0% { transform: rotate(-0.5deg);}
+          50% { transform: rotate(0.5deg);}
+          100% { transform: rotate(-0.5deg);}
+        }
+        .animate-wiggle {
+          animation: wiggle 0.3s ease-in-out infinite;
+        }
+        
+        /* Rimuovi tutte le scrollbar */
+        * {
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE e Edge */
+        }
+        
+        *::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+          width: 0;
+          height: 0;
+        }
+        
+        /* Mantieni lo scrolling ma nascondi la barra */
+        .overflow-y-auto {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar {
+          display: none;
+        }
+        
+        /* Disabilita l'evidenziazione touch su mobile */
+        * {
+          -webkit-tap-highlight-color: transparent;
+          -webkit-touch-callout: none;
+        }
+      `}
       </style>
     </div>
   );
