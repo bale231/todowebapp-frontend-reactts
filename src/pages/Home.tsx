@@ -227,11 +227,6 @@ export default function Home() {
       <Navbar />
       <NotificationPrompt />
       <div className="p-6" ref={boxRef}>
-        <h1 ref={titleRef} className="text-xl sm:text-3xl font-bold">
-          Ciao {user.username}! Crea le tue prime Liste e organizza il tuo
-          tempo nel modo giusto!
-        </h1>
-
           {/* Bottoni per navigare alle pagine amicizie */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 pt-6">
             <button
