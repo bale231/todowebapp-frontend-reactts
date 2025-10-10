@@ -1,6 +1,6 @@
 {
-  "version": "1.0.7",
-  "type": "important",
-  "message": "Aggiunto pop-up per abilitare le notifiche push. Ora puoi ricevere promemoria e aggiornamenti direttamente sul tuo dispositivo! riavvia l'app per vedere il pop-up.",
+  "version": "1.0.8",
+  "type": "normal",
+  "message": "Risolto bug sulle richieste di amicizia, riavvia l'app prima di riutilizzarla!.",
   "timestamp": "2025-09-27T16:28:00Z"
 }
