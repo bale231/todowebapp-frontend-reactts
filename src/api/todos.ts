@@ -1,4 +1,4 @@
-// ✅ src/api/todos.ts - gestisce tutto ciò che riguarda liste e ToDo
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
 export function getAuthHeaders() {
@@ -51,17 +51,29 @@ export async function renameList(listId: number, newName: string) {
   return res.json();
 }
 
-// ✅ Modifica lista (PUT su /lists/:id/)
-export async function editList(listId: number, name: string, color: string) {
+// ✅ Modifica lista con categoria (PUT su /lists/:id/)
+export async function editList(listId: number, name: string, color: string, categoryId?: number | null) {
+  const body: Record<string, any> = { name, color };
+  if (typeof categoryId !== "undefined") body.category = categoryId;
   const res = await fetch(`${API_URL}/lists/${listId}/`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ name, color }),
+    body: JSON.stringify(body),
   });
   return res.json();
 }
 
-// ✅ Elimina lista (DELETE su /lists/:id/)
+export async function createList(name: string, color: string, categoryId?: number | null) {
+  const body: Record<string, any> = { name, color };
+  if (typeof categoryId !== "undefined") body.category = categoryId;
+  const res = await fetch(`${API_URL}/lists/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+
 export async function deleteList(listId: number) {
   const res = await fetch(`${API_URL}/lists/${listId}/`, {
     method: "DELETE",
@@ -70,6 +82,44 @@ export async function deleteList(listId: number) {
   return res.json();
 }
 
+// --- 📂 CATEGORIE ---
+// Lista tutte le categorie
+export async function fetchAllCategories() {
+  const res = await fetch(`${API_URL}/categories/`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  return res.json();
+}
+
+// Crea una nuova categoria
+export async function createCategory(name: string) {
+  const res = await fetch(`${API_URL}/categories/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ name }),
+  });
+  return res.json();
+}
+
+// Modifica una categoria
+export async function editCategory(categoryId: number, name: string) {
+  const res = await fetch(`${API_URL}/categories/${categoryId}/`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ name }),
+  });
+  return res.json();
+}
+
+// Elimina una categoria
+export async function deleteCategory(categoryId: number) {
+  const res = await fetch(`${API_URL}/categories/${categoryId}/`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  return res.json();
+}
 
 // --- ✅ TODOS ---
 export async function createTodo(listId: number | string, title: string) {
