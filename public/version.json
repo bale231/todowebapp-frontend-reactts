@@ -1,6 +1,6 @@
 {
-  "version": "1.1",
-  "type": "normal",
-  "message": "Risoluzione bug, riavvia l'app.",
+  "version": "1.1.0",
+  "type": "important",
+  "message": "Aggiunta possibilità di creare categorie personalizzate per le attività. Riavviare l'app.",
   "timestamp": "2025-09-27T16:28:00Z"
 }

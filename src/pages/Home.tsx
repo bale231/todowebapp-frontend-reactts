@@ -4,7 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUserJWT } from "../api/auth";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
-import { Plus, Pencil, ListFilter, Trash, Edit, Users, UserPlus, UserCheck } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  ListFilter,
+  Trash,
+  Edit,
+  Users,
+  UserPlus,
+  UserCheck,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
@@ -37,19 +46,25 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [lists, setLists] = useState<TodoList[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
   const [newListCategory, setNewListCategory] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editListId, setEditListId] = useState<number | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
+    null
+  );
   const [editMode, setEditMode] = useState(false);
-  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">("created");
+  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
+    "created"
+  );
   const [categorySortAlpha, setCategorySortAlpha] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-  
+
   // Categoria states
   const [showCatForm, setShowCatForm] = useState(false);
   const [catName, setCatName] = useState("");
@@ -71,6 +86,7 @@ export default function Home() {
       setUser(resUser);
 
       try {
+        // Carica preferenza ordinamento liste
         const res = await fetch(`${API_URL}/lists/sort_order/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -86,8 +102,19 @@ export default function Home() {
               : "created"
           );
         }
+
+        // ✅ NUOVO: Carica preferenza ordine alfabetico categorie
+        const catRes = await fetch(`${API_URL}/categories/sort_preference/`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        if (catRes.ok) {
+          const { category_sort_alpha } = await catRes.json();
+          setCategorySortAlpha(category_sort_alpha);
+        }
       } catch (err) {
-        console.error("Impossibile caricare preference ordinamento:", err);
+        console.error("Impossibile caricare preferenze:", err);
       }
     };
     loadUserAndPref();
@@ -160,7 +187,11 @@ export default function Home() {
   // Crea/modifica lista con categoria
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-    const payload = { name: newListName, color: newListColor, category: newListCategory };
+    const payload = {
+      name: newListName,
+      color: newListColor,
+      category: newListCategory,
+    };
     if (editListId !== null) {
       await editList(editListId, newListName, newListColor, newListCategory);
       setEditListId(null);
@@ -240,7 +271,6 @@ export default function Home() {
     }
   };
 
-
   // Categorie CRUD
   const handleCreateOrEditCat = async () => {
     if (!catName.trim()) return;
@@ -302,7 +332,10 @@ export default function Home() {
     // Liste senza categoria
     const uncategorized = sortedLists.filter((l) => !l.category);
     if (uncategorized.length > 0) {
-      groupedLists.push({ categoryName: "Senza categoria", lists: uncategorized });
+      groupedLists.push({
+        categoryName: "Senza categoria",
+        lists: uncategorized,
+      });
     }
 
     // Liste con categoria
@@ -317,13 +350,18 @@ export default function Home() {
 
     // Ordina alfabeticamente le categorie se richiesto
     if (categorySortAlpha) {
-      categoriesWithLists.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
+      categoriesWithLists.sort((a, b) =>
+        a.categoryName.localeCompare(b.categoryName)
+      );
     }
 
     groupedLists.push(...categoriesWithLists);
   } else {
     // Se filtrato per categoria specifica, mostra solo quella
-    groupedLists.push({ categoryName: selectedCategory.name, lists: sortedLists });
+    groupedLists.push({
+      categoryName: selectedCategory.name,
+      lists: sortedLists,
+    });
   }
 
   if (!user) {
@@ -433,7 +471,9 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {group.lists.map((list) => {
-                  const completed = list.todos.filter((t) => t.completed).length;
+                  const completed = list.todos.filter(
+                    (t) => t.completed
+                  ).length;
                   const pending = list.todos.length - completed;
                   return (
                     <SwipeableListItem
@@ -456,10 +496,13 @@ export default function Home() {
                               {list.name}
                             </h3>
                             {list.todos.length === 0 ? (
-                              <p className="text-sm text-gray-500">Nessuna ToDo</p>
+                              <p className="text-sm text-gray-500">
+                                Nessuna ToDo
+                              </p>
                             ) : (
                               <p className="text-sm text-gray-600 dark:text-gray-300">
-                                {pending} ToDo da completare, {completed} completate.
+                                {pending} ToDo da completare, {completed}{" "}
+                                completate.
                               </p>
                             )}
                           </div>
@@ -610,7 +653,9 @@ export default function Home() {
             <select
               value={newListCategory || ""}
               onChange={(e) =>
-                setNewListCategory(e.target.value ? Number(e.target.value) : null)
+                setNewListCategory(
+                  e.target.value ? Number(e.target.value) : null
+                )
               }
               className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-white/20 rounded-lg mb-4"
             >
