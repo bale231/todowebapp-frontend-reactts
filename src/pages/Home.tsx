@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
+import NotificationPrompt from "../components/NotificationPrompt";
 
 interface TodoList {
   id: number;
@@ -224,6 +225,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition">
       <Navbar />
+      <NotificationPrompt />
       <div className="p-6" ref={boxRef}>
         <h1 ref={titleRef} className="text-xl sm:text-3xl font-bold">
           Ciao {user.username}! Crea le tue prime Liste e organizza il tuo
