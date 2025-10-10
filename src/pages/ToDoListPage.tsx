@@ -267,7 +267,7 @@ export default function ToDoListPage() {
           {listName}
         </h1>
         <button
-          onClick={() => navigate("/home")}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-4 py-2 rounded-xl border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
         >
           <ArrowLeft size={20} />
