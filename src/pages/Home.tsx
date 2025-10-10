@@ -125,7 +125,11 @@ export default function Home() {
     if (user) {
       fetchLists();
       fetchCategories();
-      if (!hasAnimated) {
+
+      // ✅ Controlla se è la prima volta o un ritorno
+      const isReturning = sessionStorage.getItem("homeScrollPosition");
+
+      if (!hasAnimated && !isReturning) {
         gsap.from(titleRef.current, {
           y: -30,
           opacity: 0,
