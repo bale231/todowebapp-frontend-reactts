@@ -442,7 +442,29 @@ export default function Home() {
           {/* ✅ TOGGLE ORDINE ALFABETICO CATEGORIE */}
           {!selectedCategory && (
             <button
-              onClick={() => setCategorySortAlpha((prev) => !prev)}
+              onClick={async () => {
+                const newValue = !categorySortAlpha;
+                setCategorySortAlpha(newValue);
+
+                // ✅ Salva sul backend
+                try {
+                  await fetch(`${API_URL}/categories/sort_preference/`, {
+                    method: "PATCH",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem(
+                        "accessToken"
+                      )}`,
+                    },
+                    body: JSON.stringify({ category_sort_alpha: newValue }),
+                  });
+                } catch (err) {
+                  console.error(
+                    "Errore nel salvataggio preferenza categoria:",
+                    err
+                  );
+                }
+              }}
               className={`px-3 py-2 rounded-lg font-medium transition ${
                 categorySortAlpha
                   ? "bg-green-500/80 text-white"
