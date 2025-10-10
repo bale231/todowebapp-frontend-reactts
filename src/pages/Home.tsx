@@ -588,15 +588,11 @@ export default function Home() {
         </main>
       </div>
 
-      {/* FAB */}
+      {/* FAB con layout circolare */}
       <div className="fixed bottom-6 left-6 z-50">
-        <div
-          className={`flex flex-col items-start space-y-2 mb-2 transition-all duration-200 ${
-            menuOpen
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-2 pointer-events-none"
-          }`}
-        >
+        {/* Bottoni circolari disposti a ventaglio */}
+        <div className="relative">
+          {/* Nuova Lista */}
           <button
             onClick={() => {
               setShowForm(true);
@@ -605,43 +601,138 @@ export default function Home() {
               setNewListColor("blue");
               setNewListCategory(null);
             }}
-            className="flex items-center gap-2 bg-blue-600/80 text-white px-4 py-2 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 transition-all"
+            className={`absolute w-14 h-14 flex items-center justify-center rounded-full bg-blue-600/90 text-white shadow-lg border border-blue-300/30 transition-all duration-300 hover:scale-110 ${
+              menuOpen
+                ? "opacity-100 translate-x-0 translate-y-0"
+                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
+            }`}
+            style={{
+              transform: menuOpen ? "translate(0px, -80px)" : "translate(0, 0)",
+              transition: "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+            }}
+            title="Nuova Lista"
           >
-            <Plus size={18} /> Nuova Lista
+            <Plus size={24} />
           </button>
+
+          {/* Modifica Liste */}
           <button
             onClick={() => setEditMode((prev) => !prev)}
-            className="flex items-center gap-2 bg-green-600/80 text-white px-4 py-2 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 transition-all"
+            className={`absolute w-14 h-14 flex items-center justify-center rounded-full bg-green-600/90 text-white shadow-lg border border-green-300/30 transition-all duration-300 hover:scale-110 ${
+              menuOpen
+                ? "opacity-100 translate-x-0 translate-y-0"
+                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
+            }`}
+            style={{
+              transform: menuOpen
+                ? "translate(56px, -56px)"
+                : "translate(0, 0)",
+              transition:
+                "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.05s",
+            }}
+            title="Modifica Liste"
           >
-            <Pencil size={18} /> Modifica Liste
+            <Pencil size={20} />
           </button>
-          <div className="flex items-center gap-2 bg-yellow-500/80 text-white px-4 py-2 rounded-xl border border-yellow-300/30 shadow-lg hover:bg-yellow-500/90 transition-all">
-            <ListFilter size={18} />
-            <select
-              value={sortOption}
-              onChange={(e) => handleSortChange(e.target.value as any)}
-              className="bg-transparent text-black text-sm"
+
+          {/* Filtro ordinamento */}
+          <button
+            onClick={() => {
+              const options: ("created" | "name" | "complete")[] = [
+                "created",
+                "name",
+                "complete",
+              ];
+              const currentIndex = options.indexOf(sortOption);
+              const nextIndex = (currentIndex + 1) % options.length;
+              handleSortChange(options[nextIndex]);
+            }}
+            className={`absolute w-14 h-14 flex items-center justify-center rounded-full bg-yellow-500/90 text-white shadow-lg border border-yellow-300/30 transition-all duration-300 hover:scale-110 ${
+              menuOpen
+                ? "opacity-100 translate-x-0 translate-y-0"
+                : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
+            }`}
+            style={{
+              transform: menuOpen ? "translate(80px, 0px)" : "translate(0, 0)",
+              transition:
+                "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s",
+            }}
+            title={`Ordina: ${
+              sortOption === "created"
+                ? "Più recente"
+                : sortOption === "name"
+                ? "Alfabetico"
+                : "Per completezza"
+            }`}
+          >
+            <ListFilter size={20} />
+          </button>
+
+          {/* Ordine alfabetico categorie */}
+          {!selectedCategory && (
+            <button
+              onClick={async () => {
+                const newValue = !categorySortAlpha;
+                setCategorySortAlpha(newValue);
+
+                try {
+                  await fetch(`${API_URL}/categories/sort_preference/`, {
+                    method: "PATCH",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem(
+                        "accessToken"
+                      )}`,
+                    },
+                    body: JSON.stringify({ category_sort_alpha: newValue }),
+                  });
+                } catch (err) {
+                  console.error(
+                    "Errore nel salvataggio preferenza categoria:",
+                    err
+                  );
+                }
+              }}
+              className={`absolute w-14 h-14 flex items-center justify-center rounded-full shadow-lg border transition-all duration-300 hover:scale-110 ${
+                categorySortAlpha
+                  ? "bg-purple-600/90 border-purple-300/30"
+                  : "bg-gray-500/90 border-gray-300/30"
+              } text-white ${
+                menuOpen
+                  ? "opacity-100 translate-x-0 translate-y-0"
+                  : "opacity-0 pointer-events-none translate-x-0 translate-y-0"
+              }`}
+              style={{
+                transform: menuOpen
+                  ? "translate(56px, 56px)"
+                  : "translate(0, 0)",
+                transition:
+                  "all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s",
+              }}
+              title={
+                categorySortAlpha ? "Ordine A-Z attivo" : "Ordine A-Z disattivo"
+              }
             >
-              <option value="created">Più recente</option>
-              <option value="name">Alfabetico</option>
-              <option value="complete">Per completezza</option>
-            </select>
-          </div>
+              <span className="text-xl font-bold">A-Z</span>
+            </button>
+          )}
+
+          {/* Bottone principale */}
+          <button
+            onClick={() => {
+              setMenuOpen((prev) => {
+                const next = !prev;
+                if (!next) setEditMode(false);
+                return next;
+              });
+            }}
+            className={`w-16 h-16 flex items-center justify-center rounded-full bg-blue-600/90 text-white shadow-2xl border border-blue-300/30 transition-all duration-300 ${
+              menuOpen ? "rotate-45 scale-110" : "rotate-0 scale-100"
+            } hover:bg-blue-600 hover:scale-105 relative z-10`}
+          >
+            <Plus size={32} />
+          </button>
         </div>
-        <button
-          onClick={() => {
-            setMenuOpen((prev) => {
-              const next = !prev;
-              if (!next) setEditMode(false);
-              return next;
-            });
-          }}
-          className={`w-14 h-14 flex items-center justify-center rounded-full bg-blue-600/80 text-white shadow-lg border border-blue-300/30 transition-all duration-200 ${
-            menuOpen ? "rotate-45" : ""
-          } hover:bg-blue-600/90`}
-        >
-          <Plus size={28} />
-        </button>
       </div>
 
       {/* Modale creazione/modifica lista */}
