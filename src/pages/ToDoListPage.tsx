@@ -50,10 +50,13 @@ interface Todo {
 
 const colorThemes: Record<string, string> = {
   blue: "from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900",
-  green: "from-green-50 via-white to-blue-50 dark:from-green-900 dark:via-gray-800 dark:to-blue-900",
-  yellow: "from-yellow-50 via-white to-orange-50 dark:from-yellow-900 dark:via-gray-800 dark:to-orange-900",
+  green:
+    "from-green-50 via-white to-blue-50 dark:from-green-900 dark:via-gray-800 dark:to-blue-900",
+  yellow:
+    "from-yellow-50 via-white to-orange-50 dark:from-yellow-900 dark:via-gray-800 dark:to-orange-900",
   red: "from-red-50 via-white to-pink-50 dark:from-red-900 dark:via-gray-800 dark:to-pink-900",
-  purple: "from-purple-50 via-white to-blue-50 dark:from-purple-900 dark:via-gray-800 dark:to-blue-900",
+  purple:
+    "from-purple-50 via-white to-blue-50 dark:from-purple-900 dark:via-gray-800 dark:to-blue-900",
 };
 
 const colorMap: Record<string, string> = {
@@ -78,15 +81,19 @@ export default function ToDoListPage() {
   const modalRef = useRef<HTMLDivElement>(null);
   const shouldAnimate = useRef(true);
   const wasModalClosed = useRef(true);
-  const [sortOption, setSortOption] = useState<"created" | "alphabetical" | "completed">("created");  
+  const [sortOption, setSortOption] = useState<
+    "created" | "alphabetical" | "completed"
+  >("created");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Nuovi state per la modale Sposta
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [todoToMove, setTodoToMove] = useState<Todo | null>(null);
-  const [allLists, setAllLists] = useState<{ id: number; name: string; color: string }[]>([]);
+  const [allLists, setAllLists] = useState<
+    { id: number; name: string; color: string }[]
+  >([]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
@@ -173,7 +180,7 @@ export default function ToDoListPage() {
   // Gestisce lo spostamento della todo
   const handleMoveTodo = async (newListId: number) => {
     if (!todoToMove) return;
-    
+
     await moveTodo(todoToMove.id, newListId);
     setShowMoveModal(false);
     setTodoToMove(null);
@@ -252,7 +259,9 @@ export default function ToDoListPage() {
   const displayedTodos = todos;
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}>
+    <div
+      className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}
+    >
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           {listName}
@@ -291,9 +300,7 @@ export default function ToDoListPage() {
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <span className="ml-2 font-medium">
-              Seleziona tutte le ToDo
-            </span>
+            <span className="ml-2 font-medium">Seleziona tutte le ToDo</span>
           </label>
 
           {selectedIds.length > 0 && (
@@ -382,34 +389,51 @@ export default function ToDoListPage() {
         </div>
       )}
 
-      <div className="fixed bottom-6 left-6 z-50">
+      {/* FAB con menu verticale glassmorphism */}
+      <div className="fixed bottom-8 left-8 z-50">
         <div
-          className={`flex flex-col items-start space-y-2 mb-2 transition-all duration-200 ${
+          className={`flex flex-col items-start space-y-3 mb-3 transition-all duration-300 ${
             menuOpen
               ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-2 pointer-events-none"
+              : "opacity-0 translate-y-4 pointer-events-none"
           }`}
         >
+          {/* Modifica Liste */}
           <button
-            onClick={() => setEditMode((prev) => !prev)}
-            className="flex items-center gap-2 bg-green-600/80 backdrop-blur-md border border-green-300/30 text-white px-4 py-2 rounded-xl hover:bg-green-600/90 transition-all"
+            onClick={() => {
+              setEditMode((prev) => !prev);
+              setMenuOpen(false);
+            }}
+            className="flex items-center gap-3 bg-green-500/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-green-500/90 hover:scale-105 transition-all"
           >
-            <Pencil size={18} /> Modifica
+            <Pencil size={20} /> <span className="font-semibold">Modifica</span>
           </button>
 
-          <div className="flex items-center gap-2 bg-yellow-500/80 backdrop-blur-md border border-yellow-300/30 text-white px-4 py-2 rounded-xl hover:bg-yellow-500/90 transition-all">
-            <ListFilter size={18} />
+          {/* Filtro ordinamento */}
+          <div className="flex items-center gap-3 bg-yellow-500/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-yellow-500/90 transition-all">
+            <ListFilter size={20} />
             <select
               value={sortOption}
-              onChange={handleSortChange}
-              className="bg-transparent text-black text-sm"
+              onChange={(e) => {
+                handleSortChange(e);
+                setMenuOpen(false);
+              }}
+              className="bg-transparent text-white font-semibold text-sm border-none outline-none cursor-pointer"
             >
-              <option value="created">Per Creazione</option>
-              <option value="alphabetical">Alfabetico</option>
-              <option value="completed">Per Completezza</option>
+              <option value="created" className="text-black">
+                Per Creazione
+              </option>
+              <option value="alphabetical" className="text-black">
+                Alfabetico
+              </option>
+              <option value="completed" className="text-black">
+                Per Completezza
+              </option>
             </select>
           </div>
         </div>
+
+        {/* Bottone principale */}
         <button
           onClick={() => {
             setMenuOpen((prev) => {
@@ -418,11 +442,13 @@ export default function ToDoListPage() {
               return next;
             });
           }}
-          className={`w-14 h-14 flex items-center justify-center rounded-full backdrop-blur-md border transition-all duration-200 ${
+          className={`w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-xl text-white shadow-2xl border-2 border-white/30 transition-all duration-300 ${
             colorMap[listColor]
-          } text-white ${menuOpen ? "rotate-45" : "rotate-0"}`}
+          } ${
+            menuOpen ? "rotate-45 scale-110" : "rotate-0 scale-100"
+          } hover:scale-105 relative z-10`}
         >
-          <Plus size={28} className="transition-transform duration-300" />
+          <Plus size={32} strokeWidth={2.5} />
         </button>
       </div>
 
@@ -468,9 +494,7 @@ export default function ToDoListPage() {
               <h2 className="text-xl font-semibold mb-4">
                 Elimina {selectedIds.length} ToDo?
               </h2>
-              <p className="mb-6">
-                Questa operazione è irreversibile.
-              </p>
+              <p className="mb-6">Questa operazione è irreversibile.</p>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setShowBulkConfirm(false)}
@@ -551,13 +575,13 @@ function SortableTodo({
   setSelectedIds: React.Dispatch<React.SetStateAction<number[]>>;
   isDragging: boolean;
 }) {
-  const { 
-    setNodeRef, 
-    attributes, 
-    listeners, 
-    transform, 
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
     transition,
-    isDragging: isThisItemDragging 
+    isDragging: isThisItemDragging,
   } = useSortable({ id: todo.id });
 
   const style = {
