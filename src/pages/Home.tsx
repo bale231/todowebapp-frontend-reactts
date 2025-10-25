@@ -661,24 +661,29 @@ export default function Home() {
                                 <Share2 size={18} />
                               </button>
                             )}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditList(list);
-                              }}
-                              className="p-2 bg-blue-100/80 dark:bg-blue-900/80 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200/80 dark:hover:bg-blue-800/80 transition-all"
-                            >
-                              <Edit size={18} />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowDeleteConfirm(list.id);
-                              }}
-                              className="p-2 bg-red-100/80 dark:bg-red-900/80 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200/80 dark:hover:bg-red-800/80 transition-all"
-                            >
-                              <Trash size={18} />
-                            </button>
+                            {/* Pulsanti Edit e Delete solo per liste di proprietà */}
+                            {list.is_owner !== false && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditList(list);
+                                  }}
+                                  className="p-2 bg-blue-100/80 dark:bg-blue-900/80 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-200/80 dark:hover:bg-blue-800/80 transition-all"
+                                >
+                                  <Edit size={18} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowDeleteConfirm(list.id);
+                                  }}
+                                  className="p-2 bg-red-100/80 dark:bg-red-900/80 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-200/80 dark:hover:bg-red-800/80 transition-all"
+                                >
+                                  <Trash size={18} />
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                         {showDeleteConfirm === list.id && (

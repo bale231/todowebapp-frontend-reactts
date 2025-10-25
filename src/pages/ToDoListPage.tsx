@@ -46,6 +46,11 @@ interface Todo {
   id: number;
   title: string;
   completed: boolean;
+  created_by?: {
+    id: number;
+    username: string;
+    full_name: string;
+  } | null;
 }
 
 const colorThemes: Record<string, string> = {
@@ -644,7 +649,14 @@ function SortableTodo({
             <CheckSquare size={20} />
           </button>
 
-          <span>{todo.title}</span>
+          <div className="flex flex-col">
+            <span>{todo.title}</span>
+            {todo.created_by && (
+              <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                Aggiunta da {todo.created_by.full_name}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
