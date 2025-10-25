@@ -25,8 +25,12 @@ export interface Friendship {
 }
 
 // Ottieni lista utenti (esclusi amici)
-export const fetchUsers = async (): Promise<User[]> => {
-  const res = await fetch(`${API_URL}/users/`, {
+export const fetchUsers = async (search?: string): Promise<User[]> => {
+  const url = search
+    ? `${API_URL}/users/?search=${encodeURIComponent(search)}`
+    : `${API_URL}/users/`;
+
+  const res = await fetch(url, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Errore caricamento utenti");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { fetchUsers, sendFriendRequest, User } from "../api/friends";
 import UserCard from "../components/UserCard";
 import { useTheme } from "../context/ThemeContext";
@@ -8,10 +8,11 @@ import AnimatedAlert from "../components/AnimatedAlert";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { themeLoaded } = useTheme();
-  
+
   // ✅ State per l'alert
   const [alert, setAlert] = useState<{
     type: "success" | "error" | "warning";
@@ -19,12 +20,22 @@ export default function UsersPage() {
   } | null>(null);
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    // Debounce search
+    const timer = setTimeout(() => {
+      if (searchQuery.trim()) {
+        loadUsers(searchQuery);
+      } else {
+        setUsers([]);
+      }
+    }, 500);
 
-  const loadUsers = async () => {
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const loadUsers = async (search?: string) => {
+    setLoading(true);
     try {
-      const data = await fetchUsers();
+      const data = await fetchUsers(search);
       setUsers(data);
     } catch (error) {
       console.error(error);
@@ -36,7 +47,10 @@ export default function UsersPage() {
   const handleSendRequest = async (userId: number) => {
     try {
       await sendFriendRequest(userId);
-      loadUsers();
+      // Ricarica utenti con la query di ricerca corrente
+      if (searchQuery.trim()) {
+        loadUsers(searchQuery);
+      }
       // ✅ Mostra alert di successo
       setAlert({
         type: "success",
@@ -103,7 +117,7 @@ export default function UsersPage() {
       )}
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Utenti</h1>
+        <h1 className="text-3xl font-bold">Trova Amici</h1>
         <button
           onClick={() => navigate("/home")}
           className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-4 py-2 rounded-xl border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
@@ -113,11 +127,32 @@ export default function UsersPage() {
         </button>
       </div>
 
+      {/* Barra di ricerca */}
+      <div className="mb-6">
+        <div className="relative">
+          <Search
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
+          <input
+            type="text"
+            placeholder="Cerca per username..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-gray-200/50 dark:border-white/20 rounded-xl placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+          />
+        </div>
+      </div>
+
       {loading ? (
-        <p>Caricamento...</p>
+        <p className="text-center text-gray-500">Caricamento...</p>
+      ) : !searchQuery.trim() ? (
+        <p className="text-center text-gray-500 mt-10">
+          Digita un username per cercare utenti
+        </p>
       ) : users.length === 0 ? (
         <p className="text-center text-gray-500 mt-10">
-          Nessun utente disponibile
+          Nessun utente trovato
         </p>
       ) : (
         <div className="space-y-3 pb-8">
