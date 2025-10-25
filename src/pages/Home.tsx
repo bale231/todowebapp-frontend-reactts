@@ -14,6 +14,7 @@ import {
   Users,
   UserPlus,
   UserCheck,
+  Share2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
@@ -21,6 +22,7 @@ import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
 import AnimatedAlert from "../components/AnimatedAlert";
+import ShareModal from "../components/ShareModal";
 
 interface TodoList {
   id: number;
@@ -29,11 +31,27 @@ interface TodoList {
   created_at: string;
   todos: { id: number; text: string; completed: boolean }[];
   category?: Category | null;
+  is_owner?: boolean;
+  is_shared?: boolean;
+  can_edit?: boolean;
+  shared_by?: {
+    id: number;
+    username: string;
+    full_name: string;
+  } | null;
 }
 
 interface Category {
   id: number;
   name: string;
+  is_owner?: boolean;
+  is_shared?: boolean;
+  can_edit?: boolean;
+  shared_by?: {
+    id: number;
+    username: string;
+    full_name: string;
+  } | null;
 }
 
 const colorClasses: Record<string, string> = {
@@ -73,6 +91,10 @@ export default function Home() {
     type: "success" | "error" | "warning";
     message: string;
   } | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareItemId, setShareItemId] = useState<number | null>(null);
+  const [shareItemName, setShareItemName] = useState("");
+  const [shareItemType, setShareItemType] = useState<"list" | "category">("list");
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -599,6 +621,13 @@ export default function Home() {
                           to={`/lists/${list.id}`}
                         >
                           <div className="cursor-pointer">
+                            {/* Badge condivisa */}
+                            {list.is_shared && list.shared_by && (
+                              <div className="flex items-center gap-1 mb-2 text-xs text-purple-600 dark:text-purple-400">
+                                <Users size={14} />
+                                <span>Condivisa da {list.shared_by.full_name}</span>
+                              </div>
+                            )}
                             <h3 className="text-xl font-semibold mb-2">
                               {list.name}
                             </h3>
@@ -616,6 +645,22 @@ export default function Home() {
                         </Link>
                         {editMode && (
                           <div className="absolute top-2 right-2 flex gap-2 z-10">
+                            {/* Pulsante condividi solo per liste di proprietà */}
+                            {list.is_owner !== false && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShareItemId(list.id);
+                                  setShareItemName(list.name);
+                                  setShareItemType("list");
+                                  setShareModalOpen(true);
+                                }}
+                                className="p-2 bg-purple-100/80 dark:bg-purple-900/80 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-200/80 dark:hover:bg-purple-800/80 transition-all"
+                                title="Condividi lista"
+                              >
+                                <Share2 size={18} />
+                              </button>
+                            )}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -922,6 +967,24 @@ export default function Home() {
         </div>
       )}
 
+      {/* Modale Condivisione */}
+      {shareModalOpen && shareItemId && (
+        <ShareModal
+          isOpen={shareModalOpen}
+          onClose={() => {
+            setShareModalOpen(false);
+            setShareItemId(null);
+          }}
+          itemId={shareItemId}
+          itemName={shareItemName}
+          itemType={shareItemType}
+          onShare={() => {
+            fetchLists();
+            fetchCategories();
+          }}
+        />
+      )}
+
       <style>
         {`
         @keyframes wiggle {
@@ -932,29 +995,29 @@ export default function Home() {
         .animate-wiggle {
           animation: wiggle 0.3s ease-in-out infinite;
         }
-        
+
         /* Rimuovi tutte le scrollbar */
         * {
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* IE e Edge */
         }
-        
+
         *::-webkit-scrollbar {
           display: none; /* Chrome, Safari, Opera */
           width: 0;
           height: 0;
         }
-        
+
         /* Mantieni lo scrolling ma nascondi la barra */
         .overflow-y-auto {
           scrollbar-width: none;
           -ms-overflow-style: none;
         }
-        
+
         .overflow-y-auto::-webkit-scrollbar {
           display: none;
         }
-        
+
         /* Disabilita l'evidenziazione touch su mobile */
         * {
           -webkit-tap-highlight-color: transparent;
