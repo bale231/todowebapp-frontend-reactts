@@ -8,6 +8,7 @@ import {
   ListFilter,
   ArrowLeft,
   ArrowRightLeft,
+  Users,
 } from "lucide-react";
 import { getAuthHeaders } from "../api/todos";
 import gsap from "gsap";
@@ -46,6 +47,11 @@ interface Todo {
   id: number;
   title: string;
   completed: boolean;
+  created_by?: {
+    id: number;
+    username: string;
+    full_name: string;
+  } | null;
 }
 
 const colorThemes: Record<string, string> = {
@@ -87,6 +93,7 @@ export default function ToDoListPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [sharedWith, setSharedWith] = useState<Array<{ username: string; full_name: string }>>([]);
 
   // Nuovi state per la modale Sposta
   const [showMoveModal, setShowMoveModal] = useState(false);
@@ -137,6 +144,12 @@ export default function ToDoListPage() {
 
       setListName(data.name);
       setListColor(data.color || "blue");
+
+      // Salva informazioni di condivisione se presenti
+      if (data.shared_with && Array.isArray(data.shared_with)) {
+        setSharedWith(data.shared_with);
+      }
+
       if (shouldAnimate.current) {
         setTimeout(() => animateTodos(), 50);
         shouldAnimate.current = false;
@@ -263,9 +276,20 @@ export default function ToDoListPage() {
       className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}
     >
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          {listName}
-        </h1>
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            {listName}
+          </h1>
+          {/* Badge "Lista condivisa con" */}
+          {sharedWith.length > 0 && (
+            <div className="flex items-center gap-2 mt-2 text-sm text-purple-600 dark:text-purple-400">
+              <Users size={16} />
+              <span>
+                Lista condivisa con {sharedWith.map((user) => user.full_name).join(", ")}
+              </span>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => {
             navigate("/home");
@@ -644,7 +668,14 @@ function SortableTodo({
             <CheckSquare size={20} />
           </button>
 
-          <span>{todo.title}</span>
+          <div className="flex flex-col">
+            <span>{todo.title}</span>
+            {todo.created_by && (
+              <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                Aggiunta da {todo.created_by.full_name}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
