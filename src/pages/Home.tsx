@@ -16,7 +16,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { fetchAllLists, editList, deleteList } from "../api/todos";
+import { fetchAllLists, editList, deleteList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
@@ -203,9 +203,26 @@ export default function Home() {
       if (res.ok) {
         const data = await res.json();
         setCategories(data);
+
+        // Carica la categoria selezionata salvata
+        await loadSelectedCategory(data);
       }
     } catch (err) {
       console.error("Errore caricamento categorie:", err);
+    }
+  };
+
+  const loadSelectedCategory = async (categoriesData: Category[]) => {
+    try {
+      const result = await getSelectedCategory();
+      if (result && result.selected_category !== null && result.selected_category !== undefined) {
+        const cat = categoriesData.find((c) => c.id === result.selected_category);
+        if (cat) {
+          setSelectedCategory(cat);
+        }
+      }
+    } catch (err) {
+      console.error("Errore caricamento categoria selezionata:", err);
     }
   };
 
@@ -497,10 +514,17 @@ export default function Home() {
           </button>
           <select
             value={selectedCategory?.id || ""}
-            onChange={(e) => {
+            onChange={async (e) => {
               const id = Number(e.target.value);
               const cat = categories.find((c) => c.id === id) || null;
               setSelectedCategory(cat);
+
+              // Salva la categoria selezionata nel backend
+              try {
+                await saveSelectedCategory(cat ? cat.id : null);
+              } catch (err) {
+                console.error("Errore salvataggio categoria selezionata:", err);
+              }
 
               setAlert({
                 type: "success",

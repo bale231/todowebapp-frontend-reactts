@@ -189,3 +189,23 @@ export async function moveTodo(todoId: number, newListId: number) {
   });
   return res.json();
 }
+
+// --- 🎯 PREFERENZE CATEGORIA ---
+// Salva la categoria selezionata dall'utente
+export async function saveSelectedCategory(categoryId: number | null) {
+  const res = await fetch(`${API_URL}/categories/selected/`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ selected_category: categoryId }),
+  });
+  return res.json();
+}
+
+// Recupera la categoria selezionata dall'utente
+export async function getSelectedCategory() {
+  const res = await fetch(`${API_URL}/categories/selected/`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  return res.json();
+}
