@@ -53,6 +53,11 @@ interface Todo {
     username: string;
     full_name: string;
   } | null;
+  modified_by?: {
+    id: number;
+    username: string;
+    full_name: string;
+  } | null;
 }
 
 const colorThemes: Record<string, string> = {
@@ -686,11 +691,15 @@ function SortableTodo({
 
           <div className="flex flex-col">
             <span>{todo.title}</span>
-            {todo.created_by && (
+            {todo.modified_by && todo.modified_by.id !== todo.created_by?.id ? (
+              <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                Modificata da {todo.modified_by.full_name}
+              </span>
+            ) : todo.created_by ? (
               <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
                 Aggiunta da {todo.created_by.full_name}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
 
