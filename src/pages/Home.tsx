@@ -627,7 +627,7 @@ export default function Home() {
                           }}
                           to={`/lists/${list.id}`}
                         >
-                          <div className="cursor-pointer pt-6">
+                          <div className={`cursor-pointer ${list.is_shared && list.shared_by ? 'pt-6' : ''}`}>
                             <h3 className="text-xl font-semibold mb-2">
                               {list.name}
                             </h3>

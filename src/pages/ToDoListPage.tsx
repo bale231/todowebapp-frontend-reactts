@@ -149,9 +149,13 @@ export default function ToDoListPage() {
       // Carica le informazioni di condivisione usando l'API dedicata
       try {
         const shares = await getListShares(Number(id));
+        console.log("Shares ricevute:", shares); // Debug
         if (shares && shares.length > 0) {
-          setSharedWith(shares.map(s => ({ username: s.username, full_name: s.full_name })));
+          const mapped = shares.map(s => ({ username: s.username, full_name: s.full_name }));
+          console.log("SharedWith impostato a:", mapped); // Debug
+          setSharedWith(mapped);
         } else {
+          console.log("Nessuna condivisione trovata");
           setSharedWith([]);
         }
       } catch (error) {
@@ -279,6 +283,9 @@ export default function ToDoListPage() {
   if (!themeLoaded) return null;
 
   const displayedTodos = todos;
+
+  // Debug: log sharedWith prima del render
+  console.log("Rendering - sharedWith:", sharedWith);
 
   return (
     <div
