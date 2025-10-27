@@ -37,6 +37,7 @@ import {
   moveTodo,
   fetchAllLists,
 } from "../api/todos";
+import { getListShares } from "../api/sharing";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
@@ -145,9 +146,17 @@ export default function ToDoListPage() {
       setListName(data.name);
       setListColor(data.color || "blue");
 
-      // Salva informazioni di condivisione se presenti
-      if (data.shared_with && Array.isArray(data.shared_with)) {
-        setSharedWith(data.shared_with);
+      // Carica le informazioni di condivisione usando l'API dedicata
+      try {
+        const shares = await getListShares(Number(id));
+        if (shares && shares.length > 0) {
+          setSharedWith(shares.map(s => ({ username: s.username, full_name: s.full_name })));
+        } else {
+          setSharedWith([]);
+        }
+      } catch (error) {
+        console.error("Errore caricamento condivisioni:", error);
+        setSharedWith([]);
       }
 
       if (shouldAnimate.current) {

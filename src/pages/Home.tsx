@@ -610,6 +610,13 @@ export default function Home() {
                           editMode ? "animate-wiggle" : ""
                         } transition-all duration-200 hover:shadow-xl hover:bg-white/80 dark:hover:bg-gray-800/80`}
                       >
+                        {/* Badge condivisa - Posizione assoluta per non interferire col layout */}
+                        {list.is_shared && list.shared_by && (
+                          <div className="absolute top-2 left-4 flex items-center gap-1 px-2 py-1 bg-purple-100/90 dark:bg-purple-900/90 rounded-md text-xs text-purple-700 dark:text-purple-300 z-20">
+                            <Users size={12} />
+                            <span>Condivisa da {list.shared_by.full_name}</span>
+                          </div>
+                        )}
                         <Link
                           onClick={() => {
                             // Salva la posizione di scroll corrente
@@ -620,14 +627,7 @@ export default function Home() {
                           }}
                           to={`/lists/${list.id}`}
                         >
-                          <div className="cursor-pointer">
-                            {/* Badge condivisa */}
-                            {list.is_shared && list.shared_by && (
-                              <div className="flex items-center gap-1 mb-2 text-xs text-purple-600 dark:text-purple-400">
-                                <Users size={14} />
-                                <span>Condivisa da {list.shared_by.full_name}</span>
-                              </div>
-                            )}
+                          <div className="cursor-pointer pt-6">
                             <h3 className="text-xl font-semibold mb-2">
                               {list.name}
                             </h3>
