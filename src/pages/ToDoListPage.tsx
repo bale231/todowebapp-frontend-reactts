@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { getAuthHeaders } from "../api/todos";
+import { getCurrentUserJWT } from "../api/auth";
 import gsap from "gsap";
 import {
   DndContext,
@@ -100,6 +101,9 @@ export default function ToDoListPage() {
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [sharedWith, setSharedWith] = useState<Array<{ username: string; full_name: string }>>([]);
+  const [isShared, setIsShared] = useState(false);
+  const [isOwner, setIsOwner] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   // Nuovi state per la modale Sposta
   const [showMoveModal, setShowMoveModal] = useState(false);
@@ -150,6 +154,10 @@ export default function ToDoListPage() {
 
       setListName(data.name);
       setListColor(data.color || "blue");
+
+      // Salva info condivisione
+      setIsShared(data.is_shared || false);
+      setIsOwner(data.is_owner !== false);
 
       // Carica le informazioni di condivisione usando l'API dedicata
       try {
@@ -270,6 +278,17 @@ export default function ToDoListPage() {
       wasModalClosed.current = true;
     }
   }, [editedTodo]);
+
+  // Carica l'ID dell'utente corrente
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const user = await getCurrentUserJWT();
+      if (user && user.id) {
+        setCurrentUserId(user.id);
+      }
+    };
+    loadCurrentUser();
+  }, []);
 
   useEffect(() => {
     shouldAnimate.current = true;
@@ -407,6 +426,9 @@ export default function ToDoListPage() {
                   setSelectedIds={setSelectedIds}
                   editMode={editMode}
                   isDragging={isDragging}
+                  isShared={isShared}
+                  isOwner={isOwner}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -432,6 +454,9 @@ export default function ToDoListPage() {
               selectedIds={selectedIds}
               setSelectedIds={setSelectedIds}
               isDragging={false}
+              isShared={isShared}
+              isOwner={isOwner}
+              currentUserId={currentUserId}
             />
           ))}
         </div>
@@ -612,6 +637,9 @@ function SortableTodo({
   selectedIds,
   setSelectedIds,
   isDragging,
+  isShared,
+  isOwner,
+  currentUserId,
 }: {
   todo: Todo;
   onCheck: (id: number) => void;
@@ -622,6 +650,9 @@ function SortableTodo({
   selectedIds: number[];
   setSelectedIds: React.Dispatch<React.SetStateAction<number[]>>;
   isDragging: boolean;
+  isShared: boolean;
+  isOwner: boolean;
+  currentUserId: number | null;
 }) {
   const {
     setNodeRef,
@@ -691,15 +722,20 @@ function SortableTodo({
 
           <div className="flex flex-col">
             <span>{todo.title}</span>
-            {todo.modified_by && todo.modified_by.id !== todo.created_by?.id ? (
-              <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                Modificata da {todo.modified_by.full_name}
-              </span>
-            ) : todo.created_by ? (
-              <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                Aggiunta da {todo.created_by.full_name}
-              </span>
-            ) : null}
+            {/* Mostra badge solo se lista è condivisa e l'utente è diverso dall'utente corrente */}
+            {(isShared || !isOwner) && currentUserId && (
+              <>
+                {todo.modified_by && todo.modified_by.id !== todo.created_by?.id && todo.modified_by.id !== currentUserId ? (
+                  <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                    Modificata da {todo.modified_by.full_name}
+                  </span>
+                ) : todo.created_by && todo.created_by.id !== currentUserId ? (
+                  <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                    Aggiunta da {todo.created_by.full_name}
+                  </span>
+                ) : null}
+              </>
+            )}
           </div>
         </div>
 
