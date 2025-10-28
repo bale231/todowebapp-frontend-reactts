@@ -102,11 +102,13 @@ export default function Register() {
       setError("Controlla i campi inseriti.");
       return;
     }
-  
+
     try {
       const res = await register(username, email, password);
-  
-      if (res.message === "register success") {
+
+      // ✅ Controlla se la registrazione è andata a buon fine
+      // Il backend ritorna: "Registrazione completata! Controlla la tua email per verificare l'account."
+      if (res.message && res.message.includes("Registrazione completata")) {
         setError("");
         setShowModal(true); // ✅ Mostra la modale
       } else if (res.error?.includes("Username")) {
