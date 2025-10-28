@@ -12,7 +12,7 @@ export default function VerifyEmail() {
     const verify = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/api/verify-email/${uid}/${token}/`
+          `https://bale231.pythonanywhere.com/api/verify-email/${uid}/${token}/`
         );
         const data = await res.json();
         if (data.verified) {
