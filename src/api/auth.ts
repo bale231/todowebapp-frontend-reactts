@@ -7,15 +7,15 @@ export const login = async (username: string, password: string, rememberMe: bool
     const response = await fetch(`${API_URL}/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        username, 
+      body: JSON.stringify({
+        username,
         password,
         remember_me: rememberMe  // Invia il flag
       }),
     });
 
     const data = await response.json();
-    
+
     if (response.ok) {
       return {
         success: true,
@@ -25,8 +25,10 @@ export const login = async (username: string, password: string, rememberMe: bool
         rememberMe: data.remember_me
       };
     }
-    
-    return { success: false, message: data.message };
+
+    // ✅ Gestisci errori specifici
+    console.log("Login failed with status:", response.status, "message:", data.message);
+    return { success: false, message: data.message || "Invalid credentials" };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return { success: false, message: "Errore di connessione" };
