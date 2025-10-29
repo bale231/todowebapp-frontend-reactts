@@ -93,7 +93,7 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
           </button>
           <button
             onClick={() => {
-              onDelete();
+              onDelete?.();
               setShowConfirm(false);
             }}
             className="flex-1 px-4 py-2 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm text-white rounded-xl transition-all font-medium"

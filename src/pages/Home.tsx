@@ -644,7 +644,7 @@ export default function Home() {
                           </div>
                         </Link>
                         {editMode && (
-                          <div className="absolute top-2 right-2 flex gap-2 z-10">
+                          <div className={`absolute ${list.is_shared && list.shared_by ? 'top-8' : 'top-2'} right-2 flex gap-2 z-10`}>
                             {/* Pulsante condividi solo per liste di proprietà */}
                             {list.is_owner !== false && (
                               <button
