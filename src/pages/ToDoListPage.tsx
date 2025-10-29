@@ -665,7 +665,7 @@ function SortableTodo({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isThisItemDragging ? 'none' : transition,
     opacity: isThisItemDragging ? 0.5 : 1,
   };
 
@@ -679,7 +679,7 @@ function SortableTodo({
       <div
         ref={setNodeRef}
         style={style}
-        className="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-6 py-3 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
+        className={`flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-6 py-3 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/70 dark:hover:bg-gray-800/70 ${isThisItemDragging ? '' : 'transition-all'}`}
       >
         <div
           className={`flex items-center gap-3 ${

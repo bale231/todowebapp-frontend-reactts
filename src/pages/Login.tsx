@@ -103,7 +103,7 @@ export default function Login() {
       console.log("Login failed. Message received:", result.message); // Debug
       // Controlla varie versioni del messaggio (email not verified, email_not_verified, email_not_verifyed)
       if (result.message && result.message.toLowerCase().includes("email") && result.message.toLowerCase().includes("verif")) {
-        setError("Verifica l'email prima di registrarti!");
+        setError("Verifica l'email prima di loggarti!");
       } else {
         setError(result.message || "Credenziali non valide");
       }
@@ -130,7 +130,7 @@ export default function Login() {
           <div
             ref={errorRef}
             className={`px-4 py-2 rounded mb-4 text-sm border ${
-              error === "Verifica l'email prima di registrarti!"
+              error === "Verifica l'email prima di loggarti!"
                 ? "bg-orange-100 text-orange-700 border-orange-400"
                 : "bg-red-100 text-red-700 border-red-400"
             }`}
