@@ -101,7 +101,7 @@ export default function Login() {
     } else {
       // ✅ Gestisci messaggio email non verificata
       console.log("Login failed. Message received:", result.message); // Debug
-      if (result.message === "email not verified") {
+      if (result.message === "email not verified" || result.message === "email_not_verifyed") {
         setError("Verifica l'email prima di registrarti!");
       } else {
         setError(result.message || "Credenziali non valide");
