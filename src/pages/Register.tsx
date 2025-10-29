@@ -255,8 +255,8 @@ export default function Register() {
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div ref={modalRef} className="bg-gray-900 text-white rounded-2xl shadow-xl p-6 w-[90%] max-w-md text-center">
-            <h2 className="text-2xl font-bold mb-2">Registrazione completata</h2>
-            <p className="mb-6">Ora puoi effettuare il login con le tue credenziali.</p>
+            <h2 className="text-2xl font-bold mb-2">✅ Registrazione completata!</h2>
+            <p className="mb-6">Conferma la mail per effettuare il login.</p>
             <button
               onClick={() => {
                 setShowModal(false);
