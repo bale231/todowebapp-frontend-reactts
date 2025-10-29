@@ -87,10 +87,10 @@ export default function Login() {
     if (result.success) {
       const { accessToken, refreshToken } = result;
       const storage = rememberMe ? localStorage : sessionStorage;
-    
+
       storage.setItem("accessToken", accessToken);
       storage.setItem("refreshToken", refreshToken);
-    
+
       const user = await getCurrentUserJWT();
       if (user) {
         document.body.setAttribute("data-access-token", result.accessToken);
@@ -99,7 +99,12 @@ export default function Login() {
         setError("Errore nel recupero dati utente");
       }
     } else {
-      setError(result.message);
+      // ✅ Gestisci messaggio email non verificata
+      if (result.message === "email not verified") {
+        setError("Conferma la mail prima di entrare!");
+      } else {
+        setError(result.message || "Invalid credentials");
+      }
     }
 
     setIsLoading(false);
@@ -122,7 +127,11 @@ export default function Login() {
         {error && (
           <div
             ref={errorRef}
-            className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm border border-red-400"
+            className={`px-4 py-2 rounded mb-4 text-sm border ${
+              error === "Conferma la mail prima di entrare!"
+                ? "bg-orange-100 text-orange-700 border-orange-400"
+                : "bg-red-100 text-red-700 border-red-400"
+            }`}
           >
             {error}
           </div>
