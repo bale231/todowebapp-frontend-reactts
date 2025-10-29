@@ -598,8 +598,8 @@ export default function Home() {
                   return (
                     <SwipeableListItem
                       key={list.id}
-                      onEdit={list.is_owner !== false ? () => handleEditList(list) : undefined}
-                      onDelete={list.is_owner !== false ? () => handleDeleteList(list.id) : undefined}
+                      onEdit={() => handleEditList(list)}
+                      onDelete={() => handleDeleteList(list.id)}
                       label={list.name}
                     >
                       <div
