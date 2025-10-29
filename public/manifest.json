@@ -5,18 +5,57 @@
       {
         "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
         "type": "image/png",
-        "sizes": "192x192"
+        "sizes": "192x192",
+        "purpose": "any"
       },
       {
         "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
         "type": "image/png",
-        "sizes": "512x512"
+        "sizes": "192x192",
+        "purpose": "maskable"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "maskable"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "144x144",
+        "purpose": "any"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "72x72",
+        "purpose": "any"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "96x96",
+        "purpose": "any"
+      },
+      {
+        "src": "https://webdesign-vito-luigi.it/appIcon/apple-touch-icon.png",
+        "type": "image/png",
+        "sizes": "128x128",
+        "purpose": "any"
       }
     ],
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#0d6efd"
+    "theme_color": "#0d6efd",
+    "description": "Gestisci le tue attività con facilità",
+    "categories": ["productivity", "utilities"]
   }
-  
