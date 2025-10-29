@@ -627,7 +627,7 @@ export default function Home() {
                           }}
                           to={`/lists/${list.id}`}
                         >
-                          <div className={`cursor-pointer ${list.is_shared && list.shared_by ? 'pt-6' : ''}`}>
+                          <div className="cursor-pointer pt-6">
                             <h3 className="text-xl font-semibold mb-2">
                               {list.name}
                             </h3>
@@ -644,7 +644,7 @@ export default function Home() {
                           </div>
                         </Link>
                         {editMode && (
-                          <div className={`absolute ${list.is_shared && list.shared_by ? 'top-8' : 'top-2'} right-2 flex gap-2 z-10`}>
+                          <div className="absolute top-8 right-2 flex gap-2 z-10">
                             {/* Pulsante condividi solo per liste di proprietà */}
                             {list.is_owner !== false && (
                               <button
