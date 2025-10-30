@@ -13,7 +13,7 @@ interface SwipeableTodoItemProps {
 }
 
 const ACTION_WIDTH = 60; // Quanto swipe mostra
-const BUTTON_WIDTH = 100; // Larghezza reale del bottone (molto più largo per nascondere la fine)
+const BUTTON_WIDTH = 200; // Larghezza reale del bottone (molto più largo per riempire tutto)
 
 export default function SwipeableTodoItem({ children, label, onEdit, onDelete, disabled = false }: SwipeableTodoItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -125,11 +125,11 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
             {/* Azione Sinistra - MODIFICA */}
             <div
               className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm"
-              style={{ width: BUTTON_WIDTH, left: -40 }}
+              style={{ width: BUTTON_WIDTH, left: -(BUTTON_WIDTH - ACTION_WIDTH) }}
             >
               <button
                 onClick={onEdit}
-                className="w-full h-full flex items-center justify-center text-white hover:bg-yellow-500/80 transition-all"
+                className="w-full h-full flex items-center justify-end pr-5 text-white hover:bg-yellow-500/80 transition-all"
               >
                 <Pencil size={20} />
               </button>
@@ -138,11 +138,11 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
             {/* Azione Destra - ELIMINA */}
             <div
               className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm"
-              style={{ width: BUTTON_WIDTH, right: -40 }}
+              style={{ width: BUTTON_WIDTH, right: -(BUTTON_WIDTH - ACTION_WIDTH) }}
             >
               <button
                 onClick={() => setShowConfirm(true)}
-                className="w-full h-full flex items-center justify-center text-white hover:bg-red-600/80 transition-all"
+                className="w-full h-full flex items-center justify-start pl-5 text-white hover:bg-red-600/80 transition-all"
               >
                 <Trash size={20} />
               </button>
