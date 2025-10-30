@@ -11,7 +11,8 @@ export interface SwipeableListItemProps {
   onDelete: () => void;
 }
 
-const ACTION_WIDTH = 60;
+const ACTION_WIDTH = 60; // Quanto swipe mostra
+const BUTTON_WIDTH = 80; // Larghezza reale del bottone
 
 export default function SwipeableListItem({ children, label, onEdit, onDelete }: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -110,8 +111,8 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
       <div className="relative overflow-hidden rounded-xl">
         {/* Azione Sinistra - MODIFICA (nascosta inizialmente, rivelata quando swipe destro) */}
         <div
-          className="absolute inset-y-0 left-0 bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
-          style={{ width: ACTION_WIDTH }}
+          className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
+          style={{ width: BUTTON_WIDTH, left: -20 }}
         >
           <button
             onClick={onEdit}
@@ -123,8 +124,8 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
 
         {/* Azione Destra - ELIMINA (nascosta inizialmente, rivelata quando swipe sinistro) */}
         <div
-          className="absolute inset-y-0 right-0 bg-red-500/80 backdrop-blur-sm rounded-r-xl"
-          style={{ width: ACTION_WIDTH }}
+          className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm rounded-r-xl"
+          style={{ width: BUTTON_WIDTH, right: -20 }}
         >
           <button
             onClick={() => setShowConfirm(true)}
