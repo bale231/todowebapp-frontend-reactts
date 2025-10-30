@@ -7,7 +7,7 @@ import {
   deactivateAccount,
   updateNotificationPreferences,
 } from "../api/auth";
-import { Bell, BellOff } from "lucide-react";
+import { Bell, BellOff, Key } from "lucide-react";
 
 export default function Profile() {
   const formRef = useRef(null);
@@ -27,6 +27,7 @@ export default function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
 
   useEffect(() => {
     const calcStrength = () => {
@@ -202,6 +203,30 @@ export default function Profile() {
     }
   };
 
+  const handleRequestPasswordReset = async () => {
+    setShowResetPasswordModal(false);
+
+    try {
+      const response = await fetch("https://bale231.pythonanywhere.com/api/password-reset/request/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert("Email di reset password inviata! Controlla la tua casella di posta.", "success");
+      } else {
+        showAlert(data.message || "Errore nell'invio dell'email", "error");
+      }
+    } catch (error) {
+      showAlert("Errore di connessione", "error");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white relative overflow-hidden">
       <Navbar />
@@ -241,6 +266,38 @@ export default function Profile() {
                 className="flex-1 px-4 py-2 bg-red-600/80 backdrop-blur-sm border border-red-300/30 text-white rounded-lg hover:bg-red-600/90 transition-all"
               >
                 Conferma
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResetPasswordModal && (
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 p-6 rounded-lg shadow-2xl w-80">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <Key size={24} className="text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-center mb-2">
+              Reset Password
+            </h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-6">
+              Ti invieremo un'email con un link per resettare la password.
+            </p>
+            <div className="flex justify-between gap-3">
+              <button
+                onClick={() => setShowResetPasswordModal(false)}
+                className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 text-gray-800 dark:text-white rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={handleRequestPasswordReset}
+                className="flex-1 px-4 py-2 bg-blue-600/80 backdrop-blur-sm border border-blue-300/30 text-white rounded-lg hover:bg-blue-600/90 transition-all"
+              >
+                Invia email
               </button>
             </div>
           </div>
@@ -417,20 +474,30 @@ export default function Profile() {
           </div>
 
           {!editMode ? (
-            <div className="flex flex-col relative">
-              <input
-                id="password"
-                type="password"
-                disabled
-                value="********"
-                className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 disabled:opacity-60"
-              />
-              <label
-                htmlFor="password"
-                className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300"
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col relative">
+                <input
+                  id="password"
+                  type="password"
+                  disabled
+                  value="********"
+                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 disabled:opacity-60"
+                />
+                <label
+                  htmlFor="password"
+                  className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300"
+                >
+                  Password
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowResetPasswordModal(true)}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline self-start flex items-center gap-1"
               >
-                Password
-              </label>
+                <Key size={14} />
+                Ho dimenticato la password
+              </button>
             </div>
           ) : (
             <>
