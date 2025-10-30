@@ -101,6 +101,7 @@ export default function Home() {
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
+  const scrollRestoredRef = useRef(false); // ✅ Track if scroll has been restored
 
   useThemeColor();
 
@@ -187,21 +188,24 @@ export default function Home() {
 
   // Aggiungi questo useEffect dopo gli altri useEffect esistenti
   useEffect(() => {
-    // Ripristina la posizione di scroll salvata DOPO che il contenuto è renderizzato
-    const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
-    if (savedScrollPosition) {
-      // Usa setTimeout per aspettare che il contenuto sia completamente renderizzato
-      const timeoutId = setTimeout(() => {
-        window.scrollTo({
-          top: parseInt(savedScrollPosition, 10),
-          behavior: 'auto' // 'auto' invece di 'smooth' per evitare blocchi su mobile
-        });
-        sessionStorage.removeItem("homeScrollPosition"); // Pulisci dopo il ripristino
-      }, 100); // Piccolo delay per assicurarsi che tutto sia renderizzato
+    // Ripristina lo scroll solo UNA volta quando i dati sono pronti
+    if (scrollRestoredRef.current) return; // Se già ripristinato, esci
 
-      return () => clearTimeout(timeoutId);
+    const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
+    if (savedScrollPosition && lists.length > 0) { // Aspetta che ci siano liste
+      // Usa requestAnimationFrame per aspettare che il browser finisca il rendering
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: parseInt(savedScrollPosition, 10),
+            behavior: 'auto'
+          });
+          sessionStorage.removeItem("homeScrollPosition");
+          scrollRestoredRef.current = true; // Segna come ripristinato
+        });
+      });
     }
-  }, [lists, categories]); // Esegui quando liste e categorie sono caricate
+  }, [lists, categories]);
 
   useEffect(() => {
     // Salva la posizione prima di lasciare la pagina
