@@ -12,7 +12,7 @@ export interface SwipeableListItemProps {
 }
 
 const ACTION_WIDTH = 60; // Quanto swipe mostra
-const BUTTON_WIDTH = 80; // Larghezza reale del bottone
+const BUTTON_WIDTH = 100; // Larghezza reale del bottone (molto più largo per nascondere la fine)
 
 export default function SwipeableListItem({ children, label, onEdit, onDelete }: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -111,12 +111,12 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
       <div className="relative overflow-hidden rounded-xl">
         {/* Azione Sinistra - MODIFICA (nascosta inizialmente, rivelata quando swipe destro) */}
         <div
-          className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
-          style={{ width: BUTTON_WIDTH, left: -20 }}
+          className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm"
+          style={{ width: BUTTON_WIDTH, left: -40 }}
         >
           <button
             onClick={onEdit}
-            className="w-full h-full flex items-center justify-center text-white hover:bg-yellow-500/80 transition-all rounded-l-xl"
+            className="w-full h-full flex items-center justify-center text-white hover:bg-yellow-500/80 transition-all"
           >
             <Pencil size={20} />
           </button>
@@ -124,12 +124,12 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
 
         {/* Azione Destra - ELIMINA (nascosta inizialmente, rivelata quando swipe sinistro) */}
         <div
-          className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm rounded-r-xl"
-          style={{ width: BUTTON_WIDTH, right: -20 }}
+          className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm"
+          style={{ width: BUTTON_WIDTH, right: -40 }}
         >
           <button
             onClick={() => setShowConfirm(true)}
-            className="w-full h-full flex items-center justify-center text-white hover:bg-red-600/80 transition-all rounded-r-xl"
+            className="w-full h-full flex items-center justify-center text-white hover:bg-red-600/80 transition-all"
           >
             <Trash size={20} />
           </button>
@@ -146,7 +146,7 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
           onTouchMove={(e) => handleMove(e.touches[0].clientX)}
           onTouchEnd={handleEnd}
           onClick={onClickWrapper}
-          className="relative bg-white dark:bg-gray-800 cursor-grab active:cursor-grabbing"
+          className="relative bg-white dark:bg-gray-800 rounded-xl cursor-grab active:cursor-grabbing"
           style={{ zIndex: 10 }}
         >
           {children}
