@@ -187,13 +187,23 @@ export default function Home() {
 
   // Aggiungi questo useEffect dopo gli altri useEffect esistenti
   useEffect(() => {
-    // Ripristina la posizione di scroll salvata
+    // Ripristina la posizione di scroll salvata DOPO che il contenuto è renderizzato
     const savedScrollPosition = sessionStorage.getItem("homeScrollPosition");
     if (savedScrollPosition) {
-      window.scrollTo(0, parseInt(savedScrollPosition, 10));
-      sessionStorage.removeItem("homeScrollPosition"); // Pulisci dopo il ripristino
-    }
+      // Usa setTimeout per aspettare che il contenuto sia completamente renderizzato
+      const timeoutId = setTimeout(() => {
+        window.scrollTo({
+          top: parseInt(savedScrollPosition, 10),
+          behavior: 'auto' // 'auto' invece di 'smooth' per evitare blocchi su mobile
+        });
+        sessionStorage.removeItem("homeScrollPosition"); // Pulisci dopo il ripristino
+      }, 100); // Piccolo delay per assicurarsi che tutto sia renderizzato
 
+      return () => clearTimeout(timeoutId);
+    }
+  }, [lists, categories]); // Esegui quando liste e categorie sono caricate
+
+  useEffect(() => {
     // Salva la posizione prima di lasciare la pagina
     const handleBeforeUnload = () => {
       sessionStorage.setItem("homeScrollPosition", window.scrollY.toString());
