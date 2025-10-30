@@ -75,7 +75,7 @@ export default function NotificationPrompt() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
         },
         body: JSON.stringify({ push_notifications_enabled: true }),
       });

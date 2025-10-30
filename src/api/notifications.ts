@@ -17,8 +17,8 @@ export interface Notification {
 
 // GET - Fetch tutte le notifiche dell'utente
 export const fetchNotifications = async (): Promise<Notification[]> => {
-  const token = localStorage.getItem("accessToken");
-  
+  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
   if (!token) {
     throw new Error("Token non trovato");
   }
@@ -40,7 +40,7 @@ export const fetchNotifications = async (): Promise<Notification[]> => {
 
 // PATCH - Marca una notifica come letta
 export const markNotificationAsRead = async (notificationId: number): Promise<void> => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
   if (!token) {
     throw new Error("Token non trovato");
@@ -61,7 +61,7 @@ export const markNotificationAsRead = async (notificationId: number): Promise<vo
 
 // POST - Marca tutte le notifiche come lette
 export const markAllNotificationsAsRead = async (): Promise<void> => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
   if (!token) {
     throw new Error("Token non trovato");
@@ -82,7 +82,7 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
 
 // DELETE - Elimina una notifica
 export const deleteNotification = async (notificationId: number): Promise<void> => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
   if (!token) {
     throw new Error("Token non trovato");
@@ -108,7 +108,7 @@ export const createNotification = async (
   message: string,
   listName?: string
 ): Promise<Notification> => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
   if (!token) {
     throw new Error("Token non trovato");

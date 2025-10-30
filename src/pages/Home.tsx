@@ -104,6 +104,11 @@ export default function Home() {
 
   useThemeColor();
 
+  // ✅ Helper function to get access token from both storages
+  const getAccessToken = () => {
+    return localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || "";
+  };
+
   useEffect(() => {
     const loadUserAndPref = async () => {
       const resUser = await getCurrentUserJWT();
@@ -113,7 +118,7 @@ export default function Home() {
       try {
         const res = await fetch(`${API_URL}/lists/sort_order/`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${getAccessToken()}`,
           },
         });
         if (res.ok) {
@@ -129,7 +134,7 @@ export default function Home() {
 
         const catRes = await fetch(`${API_URL}/categories/sort_preference/`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${getAccessToken()}`,
           },
         });
         if (catRes.ok) {
@@ -218,7 +223,7 @@ export default function Home() {
     try {
       const res = await fetch(`${API_URL}/categories/`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${getAccessToken()}`,
           "Content-Type": "application/json",
         },
       });
@@ -272,9 +277,7 @@ export default function Home() {
         const res = await fetch(`${API_URL}/lists/`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("accessToken") || ""
-            }`,
+            Authorization: `Bearer ${getAccessToken()}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
@@ -328,7 +331,7 @@ export default function Home() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${getAccessToken()}`,
         },
         body: JSON.stringify({ sort_order: backendOrder }),
       });
@@ -390,7 +393,7 @@ export default function Home() {
       const res = await fetch(url, {
         method,
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${getAccessToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name: catName }),
@@ -821,9 +824,7 @@ export default function Home() {
                     method: "PATCH",
                     headers: {
                       "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem(
-                        "accessToken"
-                      )}`,
+                      Authorization: `Bearer ${getAccessToken()}`,
                     },
                     body: JSON.stringify({ category_sort_alpha: newValue }),
                   });
