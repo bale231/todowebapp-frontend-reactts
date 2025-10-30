@@ -101,6 +101,7 @@ export default function Home() {
   const titleRef = useRef(null);
   const boxRef = useRef(null);
   const modalRef = useRef(null);
+  const catModalRef = useRef(null);
   const scrollRestoredRef = useRef(false); // ✅ Track if scroll has been restored
 
   useThemeColor();
@@ -185,6 +186,16 @@ export default function Home() {
       );
     }
   }, [showForm]);
+
+  useEffect(() => {
+    if (showCatForm && catModalRef.current) {
+      gsap.fromTo(
+        catModalRef.current,
+        { scale: 0.9, opacity: 0, y: 20 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.2)" }
+      );
+    }
+  }, [showCatForm]);
 
   // Aggiungi questo useEffect dopo gli altri useEffect esistenti
   useEffect(() => {
@@ -954,7 +965,7 @@ export default function Home() {
       {/* Modale categorie */}
       {showCatForm && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-white/20 p-6 rounded-xl shadow-2xl w-80">
+          <div ref={catModalRef} className="bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-white/20 p-6 rounded-xl shadow-2xl w-80">
             <h2 className="text-xl font-semibold mb-4">
               {editCatId ? "Modifica Categoria" : "Nuova Categoria"}
             </h2>
