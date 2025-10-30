@@ -110,20 +110,26 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
       <div className="relative overflow-hidden rounded-xl">
         {/* Azione Sinistra - MODIFICA (nascosta inizialmente, rivelata quando swipe destro) */}
         <div
-          className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
+          className="absolute inset-y-0 left-0 bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
           style={{ width: ACTION_WIDTH }}
         >
-          <button onClick={onEdit} className="text-white p-2 hover:scale-110 transition-transform">
+          <button
+            onClick={onEdit}
+            className="w-full h-full flex items-center justify-center text-white hover:bg-yellow-500/80 transition-all rounded-l-xl"
+          >
             <Pencil size={20} />
           </button>
         </div>
 
         {/* Azione Destra - ELIMINA (nascosta inizialmente, rivelata quando swipe sinistro) */}
         <div
-          className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl"
+          className="absolute inset-y-0 right-0 bg-red-500/80 backdrop-blur-sm rounded-r-xl"
           style={{ width: ACTION_WIDTH }}
         >
-          <button onClick={() => setShowConfirm(true)} className="text-white p-2 hover:scale-110 transition-transform">
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="w-full h-full flex items-center justify-center text-white hover:bg-red-600/80 transition-all rounded-r-xl"
+          >
             <Trash size={20} />
           </button>
         </div>
