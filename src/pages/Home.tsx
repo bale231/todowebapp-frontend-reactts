@@ -607,7 +607,7 @@ export default function Home() {
                     >
                       <div
                         id={`card-${list.id}`}
-                        className={`relative p-4 bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg border-l-4 ${
+                        className={`relative p-4 bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg border-l-4 min-h-[120px] flex flex-col justify-center ${
                           colorClasses[list.color]
                         } ${
                           editMode ? "animate-wiggle" : ""
@@ -630,7 +630,7 @@ export default function Home() {
                           }}
                           to={`/lists/${list.id}`}
                         >
-                          <div className="cursor-pointer pt-6">
+                          <div className="cursor-pointer">
                             <h3 className="text-xl font-semibold mb-2">
                               {list.name}
                             </h3>
