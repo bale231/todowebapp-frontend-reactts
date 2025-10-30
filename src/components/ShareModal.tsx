@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import gsap from "gsap";
 import { X, UserPlus, Trash2, Edit, Eye } from "lucide-react";
 import { fetchFriends, Friendship } from "../api/friends";
 import { getListShares, getCategoryShares, shareList, shareCategory, unshareList, unshareCategory, SharedUser } from "../api/sharing";
@@ -19,10 +20,25 @@ export default function ShareModal({ isOpen, onClose, itemId, itemName, itemType
   const [canEdit, setCanEdit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       loadData();
+      // Animazione apertura
+      if (modalRef.current && overlayRef.current) {
+        gsap.fromTo(
+          overlayRef.current,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3, ease: "power2.out" }
+        );
+        gsap.fromTo(
+          modalRef.current,
+          { scale: 0.9, opacity: 0, y: 20 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.2)" }
+        );
+      }
     }
   }, [isOpen, itemId]);
 
@@ -97,8 +113,8 @@ export default function ShareModal({ isOpen, onClose, itemId, itemName, itemType
   );
 
   return (
-    <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-full max-w-md max-h-[80vh] overflow-y-auto">
+    <div ref={overlayRef} className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div ref={modalRef} className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-full max-w-md max-h-[80vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-white/20">
           <h2 className="text-xl font-bold">Condividi {itemType === "list" ? "Lista" : "Categoria"}</h2>

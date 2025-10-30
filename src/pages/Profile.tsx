@@ -13,6 +13,7 @@ export default function Profile() {
   const formRef = useRef(null);
   const alertRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const resetPasswordModalRef = useRef<HTMLDivElement>(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -62,6 +63,16 @@ export default function Profile() {
       );
     }
   }, [showConfirmModal]);
+
+  useEffect(() => {
+    if (showResetPasswordModal && resetPasswordModalRef.current) {
+      gsap.fromTo(
+        resetPasswordModalRef.current,
+        { scale: 0.9, opacity: 0, y: 20 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.2)" }
+      );
+    }
+  }, [showResetPasswordModal]);
 
   const fetchUserData = async () => {
     const user = await getCurrentUserJWT();
@@ -274,7 +285,7 @@ export default function Profile() {
 
       {showResetPasswordModal && (
         <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 p-6 rounded-lg shadow-2xl w-80">
+          <div ref={resetPasswordModalRef} className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 p-6 rounded-lg shadow-2xl w-80">
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
                 <Key size={24} className="text-blue-600 dark:text-blue-400" />
