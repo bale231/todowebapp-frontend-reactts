@@ -12,7 +12,7 @@ interface SwipeableTodoItemProps {
   disabled?: boolean;
 }
 
-const ACTION_WIDTH = 60;
+const ACTION_WIDTH = 80;
 
 export default function SwipeableTodoItem({ children, label, onEdit, onDelete, disabled = false }: SwipeableTodoItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -123,20 +123,26 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
           <>
             {/* Azione Sinistra - MODIFICA */}
             <div
-              className="absolute inset-y-0 left-0 flex items-center justify-center bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
+              className="absolute inset-y-0 left-0 bg-yellow-400/80 backdrop-blur-sm rounded-l-xl"
               style={{ width: ACTION_WIDTH }}
             >
-              <button onClick={onEdit} className="text-white p-2 hover:scale-110 transition-transform">
+              <button
+                onClick={onEdit}
+                className="w-full h-full flex items-center justify-center text-white hover:bg-yellow-500/80 transition-all rounded-l-xl"
+              >
                 <Pencil size={20} />
               </button>
             </div>
-            
+
             {/* Azione Destra - ELIMINA */}
             <div
-              className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-500/80 backdrop-blur-sm rounded-r-xl"
+              className="absolute inset-y-0 right-0 bg-red-500/80 backdrop-blur-sm rounded-r-xl"
               style={{ width: ACTION_WIDTH }}
             >
-              <button onClick={() => setShowConfirm(true)} className="text-white p-2 hover:scale-110 transition-transform">
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="w-full h-full flex items-center justify-center text-white hover:bg-red-600/80 transition-all rounded-r-xl"
+              >
                 <Trash size={20} />
               </button>
             </div>

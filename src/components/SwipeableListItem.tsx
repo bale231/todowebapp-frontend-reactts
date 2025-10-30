@@ -11,7 +11,7 @@ export interface SwipeableListItemProps {
   onDelete: () => void;
 }
 
-const ACTION_WIDTH = 60;
+const ACTION_WIDTH = 80;
 
 export default function SwipeableListItem({ children, label, onEdit, onDelete }: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
