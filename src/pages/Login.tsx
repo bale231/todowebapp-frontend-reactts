@@ -77,6 +77,58 @@ export default function Login() {
     }
   }, []);
 
+  // Funzione per generare messaggi di errore specifici
+  const getSpecificErrorMessage = (errorMessage: string): string => {
+    if (!errorMessage) return "Credenziali non valide";
+
+    const lowerMessage = errorMessage.toLowerCase();
+
+    // Controlla se è un errore di email non verificata
+    if (lowerMessage.includes("email") && lowerMessage.includes("verif")) {
+      return "Verifica l'email prima di loggarti!";
+    }
+
+    // Errori specifici per password
+    if (lowerMessage.includes("password") &&
+        (lowerMessage.includes("wrong") ||
+         lowerMessage.includes("incorrect") ||
+         lowerMessage.includes("invalid") ||
+         lowerMessage.includes("errata") ||
+         lowerMessage.includes("sbagliata"))) {
+      return "Password errata, ritenta o ripristina la password.";
+    }
+
+    // Errori specifici per username
+    if ((lowerMessage.includes("username") || lowerMessage.includes("user")) &&
+        (lowerMessage.includes("not found") ||
+         lowerMessage.includes("does not exist") ||
+         lowerMessage.includes("invalid") ||
+         lowerMessage.includes("non trovato") ||
+         lowerMessage.includes("non esiste"))) {
+      return "Username non trovato. Controlla e riprova.";
+    }
+
+    // Errori specifici per email
+    if ((lowerMessage.includes("email") || lowerMessage.includes("e-mail")) &&
+        (lowerMessage.includes("not found") ||
+         lowerMessage.includes("does not exist") ||
+         lowerMessage.includes("invalid") ||
+         lowerMessage.includes("non trovata") ||
+         lowerMessage.includes("non esiste"))) {
+      return "Email non trovata. Controlla e riprova.";
+    }
+
+    // Errore generico per credenziali non valide (username/email + password)
+    if (lowerMessage.includes("credential") ||
+        lowerMessage.includes("authentication") ||
+        lowerMessage.includes("credenziali")) {
+      return "Credenziali non valide. Controlla username/email e password.";
+    }
+
+    // Se non riconosciamo l'errore, mostra il messaggio del server o un messaggio generico
+    return errorMessage || "Credenziali non valide";
+  };
+
   // Funzione di gestione del login
   const handleLogin = async () => {
     setIsLoading(true);
@@ -99,14 +151,8 @@ export default function Login() {
         setError("Errore nel recupero dati utente");
       }
     } else {
-      // ✅ Gestisci messaggio email non verificata
       console.log("Login failed. Message received:", result.message); // Debug
-      // Controlla varie versioni del messaggio (email not verified, email_not_verified, email_not_verifyed)
-      if (result.message && result.message.toLowerCase().includes("email") && result.message.toLowerCase().includes("verif")) {
-        setError("Verifica l'email prima di loggarti!");
-      } else {
-        setError(result.message || "Credenziali non valide");
-      }
+      setError(getSpecificErrorMessage(result.message));
     }
 
     setIsLoading(false);
