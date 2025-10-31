@@ -210,7 +210,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white relative">
       <Navbar />
       <div className="fixed top-4 right-4 z-50">
         <div
