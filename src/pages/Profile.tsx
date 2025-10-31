@@ -507,7 +507,7 @@ export default function Profile() {
                 className="text-xs text-blue-600 dark:text-blue-400 hover:underline self-start flex items-center gap-1"
               >
                 <Key size={14} />
-                Ho dimenticato la password
+                Cambia la password
               </button>
             </div>
           ) : (
