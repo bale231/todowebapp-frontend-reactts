@@ -12,7 +12,7 @@ export interface SwipeableListItemProps {
 }
 
 const ACTION_WIDTH = 60; // Quanto swipe mostra
-const BUTTON_WIDTH = 400; // Larghezza reale del bottone (estremamente largo per coprire tutto)
+const BUTTON_WIDTH = 100; // Larghezza reale del bottone (estremamente largo per coprire tutto)
 
 export default function SwipeableListItem({ children, label, onEdit, onDelete }: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -116,7 +116,7 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
         >
           <button
             onClick={onEdit}
-            className="w-full h-full flex items-center justify-end pr-5 text-white hover:bg-yellow-500/80 transition-all"
+            className="w-full h-full flex items-center justify-start pl-5 text-white hover:bg-yellow-500/80 transition-all"
           >
             <Pencil size={20} />
           </button>
@@ -129,7 +129,7 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
         >
           <button
             onClick={() => setShowConfirm(true)}
-            className="w-full h-full flex items-center justify-start pl-5 text-white hover:bg-red-600/80 transition-all"
+            className="w-full h-full flex items-center justify-end pr-5 text-white hover:bg-red-600/80 transition-all"
           >
             <Trash size={20} />
           </button>
