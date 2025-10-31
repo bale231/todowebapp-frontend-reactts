@@ -316,6 +316,15 @@ export default function Login() {
           {isLoading ? "Attendi..." : "Accedi"}
         </button>
 
+        <div className="text-center mt-3">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Hai dimenticato la password?
+          </Link>
+        </div>
+
         <p className="text-sm text-center mt-4 text-gray-700">
           Non hai un account?{" "}
           <Link to="/register" className="text-blue-500 hover:underline">
