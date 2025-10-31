@@ -23,28 +23,8 @@ export default function Profile() {
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [clearPicture, setClearPicture] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState(0);
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
-
-  useEffect(() => {
-    const calcStrength = () => {
-      if (!newPassword) return setPasswordStrength(0);
-
-      let strength = 0;
-      if (newPassword.length >= 8) strength += 1;
-      if (/[A-Z]/.test(newPassword)) strength += 1;
-      if (/[0-9]/.test(newPassword)) strength += 1;
-      if (/[^A-Za-z0-9]/.test(newPassword)) strength += 1;
-
-      setPasswordStrength(strength);
-    };
-
-    calcStrength();
-  }, [newPassword]);
 
   useEffect(() => {
     gsap.fromTo(
@@ -163,15 +143,6 @@ export default function Profile() {
     formData.append("email", email);
     if (avatarFile) formData.append("profile_picture", avatarFile);
     if (clearPicture) formData.append("clear_picture", "true");
-    if (newPassword && newPassword !== confirmPassword) {
-      showAlert("La nuova password e la conferma non coincidono", "error");
-      return;
-    }
-
-    if (newPassword) {
-      formData.append("old_password", oldPassword);
-      formData.append("new_password", newPassword);
-    }
 
     const res = await updateProfile(formData);
     if (res.message === "Profile updated") {
@@ -239,7 +210,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white relative">
       <Navbar />
       <div className="fixed top-4 right-4 z-50">
         <div
@@ -484,99 +455,31 @@ export default function Profile() {
             </label>
           </div>
 
-          {!editMode ? (
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col relative">
-                <input
-                  id="password"
-                  type="password"
-                  disabled
-                  value="********"
-                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 disabled:opacity-60"
-                />
-                <label
-                  htmlFor="password"
-                  className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300"
-                >
-                  Password
-                </label>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowResetPasswordModal(true)}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline self-start flex items-center gap-1"
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col relative">
+              <input
+                id="password"
+                type="password"
+                disabled
+                value="********"
+                className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white transition duration-300 disabled:opacity-60"
+              />
+              <label
+                htmlFor="password"
+                className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300"
               >
-                <Key size={14} />
-                Cambia la password
-              </button>
+                Password
+              </label>
             </div>
-          ) : (
-            <>
-              <div className="flex flex-col relative">
-                <input
-                  type="password"
-                  placeholder="Vecchia password"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white focus:ring-2 focus:ring-blue-500/50"
-                />
-                <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
-                  Vecchia password
-                </label>
-              </div>
-
-              <div className="flex flex-col relative">
-                <input
-                  type="password"
-                  placeholder="Nuova password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white focus:ring-2 focus:ring-blue-500/50"
-                />
-                <div className="mt-2 h-2 w-full bg-gray-300/50 backdrop-blur-sm rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-300"
-                    ref={(el) => {
-                      if (el) {
-                        const width = ["0%", "33%", "66%", "100%"][
-                          passwordStrength
-                        ];
-                        const color = [
-                          "#DC2626",
-                          "#FACC15",
-                          "#22C55E",
-                          "#16A34A",
-                        ][passwordStrength];
-
-                        gsap.to(el, {
-                          width,
-                          backgroundColor: color,
-                          duration: 0.5,
-                          ease: "power2.out",
-                        });
-                      }
-                    }}
-                  />
-                </div>
-                <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
-                  Nuova password
-                </label>
-              </div>
-
-              <div className="flex flex-col relative">
-                <input
-                  type="password"
-                  placeholder="Conferma nuova password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="peer w-full px-4 pt-6 pb-2 rounded-lg border border-gray-200/50 dark:border-white/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm dark:text-white focus:ring-2 focus:ring-blue-500/50"
-                />
-                <label className="absolute left-4 top-2 text-sm text-gray-500 dark:text-gray-300">
-                  Conferma password
-                </label>
-              </div>
-            </>
-          )}
+            <button
+              type="button"
+              onClick={() => setShowResetPasswordModal(true)}
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline self-start flex items-center gap-1"
+            >
+              <Key size={14} />
+              Cambia la password
+            </button>
+          </div>
 
           <button
             type="submit"
