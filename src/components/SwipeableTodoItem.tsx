@@ -13,7 +13,7 @@ interface SwipeableTodoItemProps {
 }
 
 const ACTION_WIDTH = 60; // Quanto swipe mostra
-const BUTTON_WIDTH = 400; // Larghezza reale del bottone (estremamente largo per coprire tutto)
+const BUTTON_WIDTH = 100; // Larghezza reale del bottone (estremamente largo per coprire tutto)
 
 export default function SwipeableTodoItem({ children, label, onEdit, onDelete, disabled = false }: SwipeableTodoItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
