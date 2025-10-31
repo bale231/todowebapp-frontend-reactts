@@ -129,7 +129,7 @@ export default function ResetPassword() {
         <div className="flex justify-center w-full mb-6">
           <img
             ref={logoRef}
-            src="https://webdesign-vito-luigi.it/appIcon/logo-themelight.png"
+            src="/assets/logo-themelight.png"
             alt="ToDoApp Logo"
             width={270}
             className="transition-opacity duration-500 ease-in-out text-center"
