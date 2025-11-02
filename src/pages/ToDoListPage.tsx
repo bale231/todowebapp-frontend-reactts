@@ -205,6 +205,25 @@ export default function ToDoListPage() {
     fetchTodos();
   };
 
+  const handleCreateWithQuantity = async () => {
+    if (!title.trim()) return;
+    if (!quantityValue || !unitValue.trim()) {
+      alert("Inserisci quantità e unità di misura");
+      return;
+    }
+    const qty = parseInt(quantityValue);
+    if (isNaN(qty) || qty <= 0) {
+      alert("Quantità non valida");
+      return;
+    }
+    await createTodo(Number(id), title, qty, unitValue);
+    setTitle("");
+    setQuantityValue("");
+    setUnitValue("");
+    setShowQuantityModal(false);
+    fetchTodos();
+  };
+
   const handleToggle = async (todoId: number) => {
     await toggleTodo(todoId);
     await fetchTodos();
@@ -286,6 +305,16 @@ export default function ToDoListPage() {
       wasModalClosed.current = true;
     }
   }, [editedTodo]);
+
+  useEffect(() => {
+    if (showQuantityModal && quantityModalRef.current) {
+      gsap.fromTo(
+        quantityModalRef.current,
+        { scale: 0.9, opacity: 0, y: 20 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.2)" }
+      );
+    }
+  }, [showQuantityModal]);
 
   // Carica l'ID dell'utente corrente
   useEffect(() => {
