@@ -236,7 +236,12 @@ export default function ToDoListPage() {
 
   const handleEdit = async () => {
     if (editedTodo) {
-      await updateTodo(editedTodo.id, editedTodo.title);
+      await updateTodo(
+        editedTodo.id,
+        editedTodo.title,
+        editedTodo.quantity,
+        editedTodo.unit
+      );
       setEditedTodo(null);
       shouldAnimate.current = false;
       fetchTodos();
@@ -578,13 +583,47 @@ export default function ToDoListPage() {
             className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl p-6 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-80"
           >
             <h2 className="text-xl font-semibold mb-4">Modifica ToDo</h2>
-            <input
-              value={editedTodo.title}
-              onChange={(e) =>
-                setEditedTodo({ ...editedTodo, title: e.target.value })
-              }
-              className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
-            />
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Titolo</label>
+              <input
+                value={editedTodo.title}
+                onChange={(e) =>
+                  setEditedTodo({ ...editedTodo, title: e.target.value })
+                }
+                className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+              />
+            </div>
+
+            {/* Mostra campi quantità solo se la todo ha quantità */}
+            {(editedTodo.quantity !== null && editedTodo.quantity !== undefined) && (
+              <div className="mb-4 flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-2">Quantità</label>
+                  <input
+                    type="number"
+                    value={editedTodo.quantity || ""}
+                    onChange={(e) =>
+                      setEditedTodo({ ...editedTodo, quantity: e.target.value ? parseInt(e.target.value) : null })
+                    }
+                    min="1"
+                    className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-2">Unità</label>
+                  <input
+                    type="text"
+                    value={editedTodo.unit || ""}
+                    onChange={(e) =>
+                      setEditedTodo({ ...editedTodo, unit: e.target.value || null })
+                    }
+                    className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-between gap-3">
               <button
                 onClick={() => setEditedTodo(null)}

@@ -156,12 +156,21 @@ export async function deleteTodo(todoId: number) {
   return res.json();
 }
 
-// ✅ PATCH modifica titolo di una ToDo
-export async function updateTodo(todoId: number, title: string) {
+// ✅ PATCH modifica titolo di una ToDo (e opzionalmente quantità/unità)
+export async function updateTodo(
+  todoId: number,
+  title: string,
+  quantity?: number | null,
+  unit?: string | null
+) {
+  const body: Record<string, any> = { title };
+  if (quantity !== undefined) body.quantity = quantity;
+  if (unit !== undefined) body.unit = unit;
+
   const res = await fetch(`${API_URL}/todos/${todoId}/update/`, {
     method: "PATCH",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ title }),
+    body: JSON.stringify(body),
   });
   return res.json();
 }
