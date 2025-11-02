@@ -120,6 +120,9 @@ export default function ToDoListPage() {
   const [unitValue, setUnitValue] = useState<string>("");
   const quantityModalRef = useRef<HTMLDivElement>(null);
 
+  // Flag per ricordare se la todo editata aveva quantità inizialmente
+  const [editTodoHasQuantity, setEditTodoHasQuantity] = useState(false);
+
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
@@ -234,6 +237,12 @@ export default function ToDoListPage() {
     fetchTodos();
   };
 
+  const handleOpenEdit = (todo: Todo) => {
+    setEditedTodo(todo);
+    // Ricorda se questa todo ha quantità inizialmente
+    setEditTodoHasQuantity(todo.quantity !== null && todo.quantity !== undefined);
+  };
+
   const handleEdit = async () => {
     if (editedTodo) {
       await updateTodo(
@@ -243,6 +252,7 @@ export default function ToDoListPage() {
         editedTodo.unit
       );
       setEditedTodo(null);
+      setEditTodoHasQuantity(false); // Reset flag
       shouldAnimate.current = false;
       fetchTodos();
     }
@@ -468,7 +478,7 @@ export default function ToDoListPage() {
                   todo={todo}
                   onCheck={handleToggle}
                   onDelete={handleDelete}
-                  onEdit={() => setEditedTodo(todo)}
+                  onEdit={() => handleOpenEdit(todo)}
                   onMove={() => {
                     setTodoToMove(todo);
                     setShowMoveModal(true);
@@ -496,7 +506,7 @@ export default function ToDoListPage() {
               todo={todo}
               onCheck={handleToggle}
               onDelete={handleDelete}
-              onEdit={() => setEditedTodo(todo)}
+              onEdit={() => handleOpenEdit(todo)}
               onMove={() => {
                 setTodoToMove(todo);
                 setShowMoveModal(true);
@@ -595,8 +605,8 @@ export default function ToDoListPage() {
               />
             </div>
 
-            {/* Mostra campi quantità solo se la todo ha quantità */}
-            {(editedTodo.quantity !== null && editedTodo.quantity !== undefined) && (
+            {/* Mostra campi quantità solo se la todo aveva quantità inizialmente */}
+            {editTodoHasQuantity && (
               <div className="mb-4 flex gap-3">
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-2">Quantità</label>
@@ -626,7 +636,10 @@ export default function ToDoListPage() {
 
             <div className="flex justify-between gap-3">
               <button
-                onClick={() => setEditedTodo(null)}
+                onClick={() => {
+                  setEditedTodo(null);
+                  setEditTodoHasQuantity(false); // Reset flag
+                }}
                 className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
               >
                 Annulla
