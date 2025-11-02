@@ -427,9 +427,18 @@ export default function ToDoListPage() {
         />
         <button
           onClick={handleCreate}
-          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all`}
+          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all hover:scale-105`}
+          title="Aggiungi ToDo normale"
         >
           <Plus size={18} />
+        </button>
+        <button
+          onClick={() => setShowQuantityModal(true)}
+          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all hover:scale-105 flex items-center gap-1`}
+          title="Aggiungi ToDo con quantità"
+        >
+          <Plus size={18} />
+          <span className="text-xs font-bold">#</span>
         </button>
       </div>
 
@@ -644,6 +653,74 @@ export default function ToDoListPage() {
         />
       )}
 
+      {showQuantityModal && (
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div
+            ref={quantityModalRef}
+            className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl p-6 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-80"
+          >
+            <h2 className="text-xl font-semibold mb-4">Aggiungi ToDo con Quantità</h2>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">ToDo</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Es: Latte, Pane, Uova..."
+                className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+              />
+            </div>
+
+            <div className="mb-4 flex gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Quantità</label>
+                <input
+                  type="number"
+                  value={quantityValue}
+                  onChange={(e) => setQuantityValue(e.target.value)}
+                  placeholder="Es: 2"
+                  min="1"
+                  className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Unità</label>
+                <input
+                  type="text"
+                  value={unitValue}
+                  onChange={(e) => setUnitValue(e.target.value)}
+                  placeholder="Es: pz, kg, litri"
+                  className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              Esempi unità: pz (pezzi), kg (kilogrammi), litri, cf (confezioni), scatole
+            </div>
+
+            <div className="flex justify-between gap-3">
+              <button
+                onClick={() => {
+                  setShowQuantityModal(false);
+                  setQuantityValue("");
+                  setUnitValue("");
+                }}
+                className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={handleCreateWithQuantity}
+                className="flex-1 px-4 py-2 bg-blue-600/80 backdrop-blur-sm border border-blue-300/30 text-white rounded-lg hover:bg-blue-600/90 transition-all"
+              >
+                Aggiungi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>
         {`
           * {
@@ -758,7 +835,14 @@ function SortableTodo({
           </button>
 
           <div className="flex flex-col">
-            <span>{todo.title}</span>
+            <div className="flex items-center gap-2">
+              <span>{todo.title}</span>
+              {todo.quantity && todo.unit && (
+                <span className="px-2 py-0.5 bg-blue-500/20 dark:bg-blue-500/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+                  {todo.quantity} {todo.unit}
+                </span>
+              )}
+            </div>
             {/* Mostra badge solo se lista è condivisa e l'utente è diverso dall'utente corrente */}
             {(isShared || !isOwner) && currentUserId && (
               <>
