@@ -122,11 +122,20 @@ export async function deleteCategory(categoryId: number) {
 }
 
 // --- ✅ TODOS ---
-export async function createTodo(listId: number | string, title: string) {
+export async function createTodo(
+  listId: number | string,
+  title: string,
+  quantity?: number | null,
+  unit?: string | null
+) {
+  const body: Record<string, any> = { title };
+  if (quantity !== undefined && quantity !== null) body.quantity = quantity;
+  if (unit !== undefined && unit !== null) body.unit = unit;
+
   const res = await fetch(`${API_URL}/lists/${listId}/todos/`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ title }),
+    body: JSON.stringify(body),
   });
   return res.json();
 }

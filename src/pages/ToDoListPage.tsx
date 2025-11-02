@@ -49,6 +49,8 @@ interface Todo {
   id: number;
   title: string;
   completed: boolean;
+  quantity?: number | null;
+  unit?: string | null;
   created_by?: {
     id: number;
     username: string;
@@ -111,6 +113,12 @@ export default function ToDoListPage() {
   const [allLists, setAllLists] = useState<
     { id: number; name: string; color: string }[]
   >([]);
+
+  // Stati per la modale di quantità
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [quantityValue, setQuantityValue] = useState<string>("");
+  const [unitValue, setUnitValue] = useState<string>("");
+  const quantityModalRef = useRef<HTMLDivElement>(null);
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
