@@ -120,9 +120,6 @@ export default function ToDoListPage() {
   const [unitValue, setUnitValue] = useState<string>("");
   const quantityModalRef = useRef<HTMLDivElement>(null);
 
-  // Flag per ricordare se la todo editata aveva quantità inizialmente
-  const [editTodoHasQuantity, setEditTodoHasQuantity] = useState(false);
-
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
@@ -201,25 +198,31 @@ export default function ToDoListPage() {
     setAllLists(lists);
   };
 
-  const handleCreate = async () => {
-    if (!title.trim()) return;
-    await createTodo(Number(id), title);
-    setTitle("");
-    fetchTodos();
-  };
+  const handleCreateTodo = async () => {
+    if (!title.trim()) {
+      alert("Inserisci il titolo della todo");
+      return;
+    }
 
-  const handleCreateWithQuantity = async () => {
-    if (!title.trim()) return;
-    if (!quantityValue || !unitValue.trim()) {
-      alert("Inserisci quantità e unità di misura");
+    // Quantità e unità sono opzionali
+    let qty: number | null = null;
+    let unit: string | null = null;
+
+    if (quantityValue && unitValue.trim()) {
+      // Se entrambi sono compilati, validali
+      qty = parseInt(quantityValue);
+      if (isNaN(qty) || qty <= 0) {
+        alert("Quantità non valida");
+        return;
+      }
+      unit = unitValue;
+    } else if (quantityValue || unitValue.trim()) {
+      // Se solo uno è compilato, avvisa
+      alert("Compila sia quantità che unità, oppure lascia entrambi vuoti");
       return;
     }
-    const qty = parseInt(quantityValue);
-    if (isNaN(qty) || qty <= 0) {
-      alert("Quantità non valida");
-      return;
-    }
-    await createTodo(Number(id), title, qty, unitValue);
+
+    await createTodo(Number(id), title, qty, unit);
     setTitle("");
     setQuantityValue("");
     setUnitValue("");
@@ -237,12 +240,6 @@ export default function ToDoListPage() {
     fetchTodos();
   };
 
-  const handleOpenEdit = (todo: Todo) => {
-    setEditedTodo(todo);
-    // Ricorda se questa todo ha quantità inizialmente
-    setEditTodoHasQuantity(todo.quantity !== null && todo.quantity !== undefined);
-  };
-
   const handleEdit = async () => {
     if (editedTodo) {
       await updateTodo(
@@ -252,7 +249,6 @@ export default function ToDoListPage() {
         editedTodo.unit
       );
       setEditedTodo(null);
-      setEditTodoHasQuantity(false); // Reset flag
       shouldAnimate.current = false;
       fetchTodos();
     }
@@ -437,23 +433,18 @@ export default function ToDoListPage() {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') setShowQuantityModal(true);
+          }}
           placeholder="Nuova ToDo..."
           className="px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-gray-200/50 dark:border-white/20 rounded-xl w-full placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
         />
         <button
-          onClick={handleCreate}
-          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all hover:scale-105`}
-          title="Aggiungi ToDo normale"
-        >
-          <Plus size={18} />
-        </button>
-        <button
           onClick={() => setShowQuantityModal(true)}
-          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all hover:scale-105 flex items-center gap-1`}
-          title="Aggiungi ToDo con quantità"
+          className={`${colorMap[listColor]} backdrop-blur-md border text-white px-4 py-2 rounded-xl transition-all hover:scale-105`}
+          title="Aggiungi ToDo"
         >
           <Plus size={18} />
-          <span className="text-xs font-bold">#</span>
         </button>
       </div>
 
@@ -478,7 +469,7 @@ export default function ToDoListPage() {
                   todo={todo}
                   onCheck={handleToggle}
                   onDelete={handleDelete}
-                  onEdit={() => handleOpenEdit(todo)}
+                  onEdit={() => setEditedTodo(todo)}
                   onMove={() => {
                     setTodoToMove(todo);
                     setShowMoveModal(true);
@@ -506,7 +497,7 @@ export default function ToDoListPage() {
               todo={todo}
               onCheck={handleToggle}
               onDelete={handleDelete}
-              onEdit={() => handleOpenEdit(todo)}
+              onEdit={() => setEditedTodo(todo)}
               onMove={() => {
                 setTodoToMove(todo);
                 setShowMoveModal(true);
@@ -595,7 +586,7 @@ export default function ToDoListPage() {
             <h2 className="text-xl font-semibold mb-4">Modifica ToDo</h2>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Titolo</label>
+              <label className="block text-sm font-medium mb-2">Titolo <span className="text-red-500">*</span></label>
               <input
                 value={editedTodo.title}
                 onChange={(e) =>
@@ -605,41 +596,41 @@ export default function ToDoListPage() {
               />
             </div>
 
-            {/* Mostra campi quantità solo se la todo aveva quantità inizialmente */}
-            {editTodoHasQuantity && (
-              <div className="mb-4 flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-2">Quantità</label>
-                  <input
-                    type="number"
-                    value={editedTodo.quantity || ""}
-                    onChange={(e) =>
-                      setEditedTodo({ ...editedTodo, quantity: e.target.value ? parseInt(e.target.value) : null })
-                    }
-                    min="1"
-                    className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-2">Unità</label>
-                  <input
-                    type="text"
-                    value={editedTodo.unit || ""}
-                    onChange={(e) =>
-                      setEditedTodo({ ...editedTodo, unit: e.target.value || null })
-                    }
-                    className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
-                  />
-                </div>
+            <div className="mb-3 flex gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Quantità (opzionale)</label>
+                <input
+                  type="number"
+                  value={editedTodo.quantity || ""}
+                  onChange={(e) =>
+                    setEditedTodo({ ...editedTodo, quantity: e.target.value ? parseInt(e.target.value) : null })
+                  }
+                  min="1"
+                  placeholder="Es: 2"
+                  className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+                />
               </div>
-            )}
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Unità (opzionale)</label>
+                <input
+                  type="text"
+                  value={editedTodo.unit || ""}
+                  onChange={(e) =>
+                    setEditedTodo({ ...editedTodo, unit: e.target.value || null })
+                  }
+                  placeholder="Es: pz, kg"
+                  className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              💡 Lascia vuoti per rimuovere la quantità
+            </div>
 
             <div className="flex justify-between gap-3">
               <button
-                onClick={() => {
-                  setEditedTodo(null);
-                  setEditTodoHasQuantity(false); // Reset flag
-                }}
+                onClick={() => setEditedTodo(null)}
                 className="flex-1 px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
               >
                 Annulla
@@ -711,10 +702,10 @@ export default function ToDoListPage() {
             ref={quantityModalRef}
             className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl p-6 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-2xl w-80"
           >
-            <h2 className="text-xl font-semibold mb-4">Aggiungi ToDo con Quantità</h2>
+            <h2 className="text-xl font-semibold mb-4">Aggiungi ToDo</h2>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">ToDo</label>
+              <label className="block text-sm font-medium mb-2">Titolo <span className="text-red-500">*</span></label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -723,9 +714,9 @@ export default function ToDoListPage() {
               />
             </div>
 
-            <div className="mb-4 flex gap-3">
+            <div className="mb-3 flex gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Quantità</label>
+                <label className="block text-sm font-medium mb-2">Quantità (opzionale)</label>
                 <input
                   type="number"
                   value={quantityValue}
@@ -736,7 +727,7 @@ export default function ToDoListPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Unità</label>
+                <label className="block text-sm font-medium mb-2">Unità (opzionale)</label>
                 <input
                   type="text"
                   value={unitValue}
@@ -748,7 +739,7 @@ export default function ToDoListPage() {
             </div>
 
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-              Esempi unità: pz (pezzi), kg (kilogrammi), litri, cf (confezioni), scatole
+              💡 Lascia vuoti per creare una todo normale. Esempi unità: pz, kg, litri, cf, scatole
             </div>
 
             <div className="flex justify-between gap-3">
@@ -763,7 +754,7 @@ export default function ToDoListPage() {
                 Annulla
               </button>
               <button
-                onClick={handleCreateWithQuantity}
+                onClick={handleCreateTodo}
                 className="flex-1 px-4 py-2 bg-blue-600/80 backdrop-blur-sm border border-blue-300/30 text-white rounded-lg hover:bg-blue-600/90 transition-all"
               >
                 Aggiungi
