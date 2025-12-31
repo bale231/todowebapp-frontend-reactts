@@ -527,7 +527,8 @@ export default function Home() {
       )}
 
       <div className="p-6" ref={boxRef}>
-        <div className="flex gap-2 mb-6 pt-6">
+        {/* Prima riga: 3 bottoni icone + Nuova Categoria - centrati */}
+        <div className="flex gap-2 mb-4 pt-6 justify-center">
           <button
             onClick={() => navigate("/users")}
             className="flex items-center justify-center bg-blue-600/80 text-white p-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 hover:scale-105 transition-all"
@@ -549,19 +550,20 @@ export default function Home() {
           >
             <UserCheck size={22} />
           </button>
-        </div>
-
-        <div className="flex items-center gap-4 mb-6 flex-wrap">
           <button
             onClick={() => {
               setShowCatForm(true);
               setEditCatId(null);
               setCatName("");
             }}
-            className="bg-yellow-500/80 text-white px-3 py-2 rounded-lg flex items-center gap-2 font-medium shadow hover:bg-yellow-500/90 transition"
+            className="bg-yellow-500/80 text-white px-3 py-2 rounded-xl flex items-center gap-2 font-medium shadow-lg hover:bg-yellow-500/90 hover:scale-105 transition-all"
           >
-            <Plus size={16} /> Nuova Categoria
+            <Plus size={18} /> Nuova Categoria
           </button>
+        </div>
+
+        {/* Seconda riga: Select categoria - centrato e allungato */}
+        <div className="flex justify-center items-center gap-2 mb-6">
           <select
             value={selectedCategory?.id || ""}
             onChange={async (e) => {
@@ -583,7 +585,7 @@ export default function Home() {
                   : "Filtro: Tutte le categorie",
               });
             }}
-            className="bg-white/80 dark:bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700"
+            className="bg-white/80 dark:bg-gray-800/80 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg w-full max-w-md text-center font-medium"
           >
             <option value="">Tutte le categorie</option>
             {categories.map((cat) => (
@@ -595,7 +597,7 @@ export default function Home() {
           {selectedCategory && (
             <button
               onClick={() => handleEditCat(selectedCategory)}
-              className="bg-blue-200 dark:bg-blue-900 px-2 py-2 rounded-lg hover:bg-blue-300 dark:hover:bg-blue-800 transition"
+              className="bg-blue-200 dark:bg-blue-900 p-2 rounded-xl hover:bg-blue-300 dark:hover:bg-blue-800 transition shadow-lg"
               title="Modifica categoria"
             >
               <Pencil size={16} />
