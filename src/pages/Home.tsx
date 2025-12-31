@@ -527,27 +527,27 @@ export default function Home() {
       )}
 
       <div className="p-6" ref={boxRef}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 pt-6">
+        <div className="flex gap-2 mb-6 pt-6">
           <button
             onClick={() => navigate("/users")}
-            className="flex items-center justify-center gap-2 bg-blue-600/80 text-white px-4 py-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 transition-all"
+            className="flex items-center justify-center bg-blue-600/80 text-white p-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 hover:scale-105 transition-all"
+            title="Trova Utenti"
           >
-            <Users size={20} />
-            <span className="font-semibold">Trova Utenti</span>
+            <Users size={22} />
           </button>
           <button
             onClick={() => navigate("/friend-requests")}
-            className="flex items-center justify-center gap-2 bg-green-600/80 text-white px-4 py-3 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 transition-all"
+            className="flex items-center justify-center bg-green-600/80 text-white p-3 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 hover:scale-105 transition-all"
+            title="Richieste"
           >
-            <UserPlus size={20} />
-            <span className="font-semibold">Richieste</span>
+            <UserPlus size={22} />
           </button>
           <button
             onClick={() => navigate("/friends")}
-            className="flex items-center justify-center gap-2 bg-purple-600/80 text-white px-4 py-3 rounded-xl border border-purple-300/30 shadow-lg hover:bg-purple-600/90 transition-all"
+            className="flex items-center justify-center bg-purple-600/80 text-white p-3 rounded-xl border border-purple-300/30 shadow-lg hover:bg-purple-600/90 hover:scale-105 transition-all"
+            title="I Miei Amici"
           >
-            <UserCheck size={20} />
-            <span className="font-semibold">I Miei Amici</span>
+            <UserCheck size={22} />
           </button>
         </div>
 
