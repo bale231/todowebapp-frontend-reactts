@@ -180,11 +180,8 @@ export default function UsersPage() {
       )}
 
       <BottomNav
-        editMode={false}
-        sortOption="created"
-        onToggleEdit={() => navigate("/home")}
-        onCycleSortOption={() => navigate("/home")}
-        onAddList={() => navigate("/home")}
+        showHome={true}
+        showProfile={true}
       />
     </div>
   );
