@@ -1021,6 +1021,11 @@ export default function Home() {
 
       {/* Bottom Navigation - Solo Mobile */}
       <BottomNav
+        showHome={true}
+        showProfile={true}
+        showAdd={true}
+        showEdit={true}
+        showSort={true}
         editMode={editMode}
         sortOption={sortOption}
         onToggleEdit={() => {
@@ -1043,13 +1048,15 @@ export default function Home() {
           const nextIndex = (currentIndex + 1) % options.length;
           handleSortChange(options[nextIndex]);
         }}
-        onAddList={() => {
+        onAdd={() => {
           setShowForm(true);
           setEditListId(null);
           setNewListName("");
           setNewListColor("blue");
           setNewListCategory(null);
         }}
+        addTitle="Nuova Lista"
+        editTitle="Modifica Liste"
       />
 
       <style>

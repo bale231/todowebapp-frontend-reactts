@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
@@ -12,7 +11,6 @@ import {
 import { Bell, BellOff, Key } from "lucide-react";
 
 export default function Profile() {
-  const navigate = useNavigate();
   const formRef = useRef(null);
   const alertRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -508,11 +506,12 @@ export default function Profile() {
 
       {/* Bottom Navigation - Solo Mobile */}
       <BottomNav
-        editMode={false}
-        sortOption="created"
-        onToggleEdit={() => navigate("/home")}
-        onCycleSortOption={() => navigate("/home")}
-        onAddList={() => navigate("/home")}
+        showHome={true}
+        showProfile={true}
+        showEdit={true}
+        editMode={editMode}
+        onToggleEdit={() => setEditMode((prev) => !prev)}
+        editTitle="Modifica Profilo"
       />
 
       <style>

@@ -767,6 +767,10 @@ export default function ToDoListPage() {
 
       {/* Bottom Navigation - Solo Mobile */}
       <BottomNav
+        showHome={true}
+        showAdd={true}
+        showEdit={true}
+        showSort={true}
         editMode={editMode}
         sortOption={sortOption}
         onToggleEdit={() => setEditMode(!editMode)}
@@ -783,7 +787,9 @@ export default function ToDoListPage() {
           await updateSortOrder(id, newSort);
           setSortOption(newSort);
         }}
-        onAddList={() => navigate("/home")}
+        onAdd={() => setShowQuantityModal(true)}
+        addTitle="Nuova ToDo"
+        editTitle="Modifica ToDo"
       />
 
       <style>
