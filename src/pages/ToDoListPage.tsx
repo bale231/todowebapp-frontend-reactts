@@ -300,9 +300,20 @@ export default function ToDoListPage() {
   const handleSortOptionSelect = async (newSort: "created" | "name" | "complete") => {
     if (!id) return;
 
-    await updateSortOrder(id, newSort);
-    setSortOption(newSort);
-    fetchTodos(true);
+    console.log("🔄 Sorting to:", newSort);
+
+    try {
+      await updateSortOrder(id, newSort);
+      setSortOption(newSort);
+
+      // Piccolo delay per assicurarsi che il backend abbia processato
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      await fetchTodos(false); // Ricarica tutto dal backend
+      console.log("✅ Sort completed");
+    } catch (error) {
+      console.error("❌ Sort failed:", error);
+    }
   };
 
   useEffect(() => {
