@@ -23,6 +23,7 @@ import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
 import AnimatedAlert from "../components/AnimatedAlert";
 import ShareModal from "../components/ShareModal";
+import BottomNav from "../components/BottomNav";
 
 interface TodoList {
   id: number;
@@ -526,7 +527,7 @@ export default function Home() {
         />
       )}
 
-      <div className="p-6" ref={boxRef}>
+      <div className="p-6 pb-24 lg:pb-6" ref={boxRef}>
         {/* Prima riga: 3 bottoni icone + Nuova Categoria - centrati */}
         <div className="flex gap-2 mb-4 pt-6 justify-center">
           <button
@@ -753,8 +754,8 @@ export default function Home() {
         </main>
       </div>
 
-      {/* FAB con bottoni verticali verso l'alto */}
-      <div className="fixed bottom-8 left-8 z-50">
+      {/* FAB con bottoni verticali verso l'alto - Solo Desktop */}
+      <div className="fixed bottom-8 left-8 z-50 hidden lg:block">
         <div
           className={`flex flex-col items-start space-y-3 mb-3 transition-all duration-300 ${
             menuOpen
@@ -1017,6 +1018,39 @@ export default function Home() {
           }}
         />
       )}
+
+      {/* Bottom Navigation - Solo Mobile */}
+      <BottomNav
+        editMode={editMode}
+        sortOption={sortOption}
+        onToggleEdit={() => {
+          const newMode = !editMode;
+          setEditMode(newMode);
+          setAlert({
+            type: newMode ? "warning" : "success",
+            message: newMode
+              ? "Modalità modifica attivata"
+              : "Modalità modifica disattivata",
+          });
+        }}
+        onCycleSortOption={() => {
+          const options: ("created" | "name" | "complete")[] = [
+            "created",
+            "name",
+            "complete",
+          ];
+          const currentIndex = options.indexOf(sortOption);
+          const nextIndex = (currentIndex + 1) % options.length;
+          handleSortChange(options[nextIndex]);
+        }}
+        onAddList={() => {
+          setShowForm(true);
+          setEditListId(null);
+          setNewListName("");
+          setNewListColor("blue");
+          setNewListCategory(null);
+        }}
+      />
 
       <style>
         {`
