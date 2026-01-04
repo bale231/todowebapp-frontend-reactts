@@ -111,11 +111,12 @@ export default function Navbar() {
 
       <div className="flex items-center gap-4">
         <ThemeToggle />
-        
+
         {/* 🔔 BADGE NOTIFICHE */}
         <NotificationBadge />
 
-        <div className="relative">
+        {/* Icona profilo - solo su desktop (lg:block) */}
+        <div className="relative hidden lg:block">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="focus:outline-none"
