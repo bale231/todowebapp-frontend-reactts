@@ -42,6 +42,7 @@ import { getListShares } from "../api/sharing";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
+import BottomNav from "../components/BottomNav";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -361,7 +362,7 @@ export default function ToDoListPage() {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}
+      className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6 pb-24 lg:pb-6`}
     >
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -763,6 +764,24 @@ export default function ToDoListPage() {
           </div>
         </div>
       )}
+
+      {/* Bottom Navigation - Solo Mobile */}
+      <BottomNav
+        editMode={editMode}
+        sortOption={sortOption}
+        onToggleEdit={() => setEditMode(!editMode)}
+        onCycleSortOption={() => {
+          const options: ("created" | "alphabetical" | "completed")[] = [
+            "created",
+            "alphabetical",
+            "completed",
+          ];
+          const currentIndex = options.indexOf(sortOption);
+          const nextIndex = (currentIndex + 1) % options.length;
+          setSortOption(options[nextIndex]);
+        }}
+        onAddList={() => navigate("/home")}
+      />
 
       <style>
         {`

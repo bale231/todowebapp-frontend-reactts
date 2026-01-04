@@ -5,6 +5,7 @@ import { fetchUsers, sendFriendRequest, User } from "../api/friends";
 import UserCard from "../components/UserCard";
 import { useTheme } from "../context/ThemeContext";
 import AnimatedAlert from "../components/AnimatedAlert";
+import BottomNav from "../components/BottomNav";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -106,7 +107,7 @@ export default function UsersPage() {
   if (!themeLoaded) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900 text-gray-900 dark:text-white p-6 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900 text-gray-900 dark:text-white p-6 pb-24 lg:pb-4">
       {/* ✅ Mostra alert se presente */}
       {alert && (
         <AnimatedAlert
@@ -177,6 +178,14 @@ export default function UsersPage() {
           })}
         </div>
       )}
+
+      <BottomNav
+        editMode={false}
+        sortOption="created"
+        onToggleEdit={() => navigate("/home")}
+        onCycleSortOption={() => navigate("/home")}
+        onAddList={() => navigate("/home")}
+      />
     </div>
   );
 }
