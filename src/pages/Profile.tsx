@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import Navbar from "../components/Navbar";
+import BottomNav from "../components/BottomNav";
 import {
   getCurrentUserJWT,
   updateProfile,
@@ -10,6 +12,7 @@ import {
 import { Bell, BellOff, Key } from "lucide-react";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const formRef = useRef(null);
   const alertRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -286,7 +289,7 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="max-w-lg mx-auto p-4">
+      <div className="max-w-lg mx-auto p-4 pb-24 lg:pb-4">
         <form
           ref={formRef}
           onSubmit={handleSubmit}
@@ -502,6 +505,15 @@ export default function Profile() {
           </button>
         </form>
       </div>
+
+      {/* Bottom Navigation - Solo Mobile */}
+      <BottomNav
+        editMode={false}
+        sortOption="created"
+        onToggleEdit={() => navigate("/home")}
+        onCycleSortOption={() => navigate("/home")}
+        onAddList={() => navigate("/home")}
+      />
 
       <style>
         {`

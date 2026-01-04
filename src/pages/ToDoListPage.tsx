@@ -42,6 +42,7 @@ import { getListShares } from "../api/sharing";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
+import BottomNav from "../components/BottomNav";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -97,7 +98,7 @@ export default function ToDoListPage() {
   const shouldAnimate = useRef(true);
   const wasModalClosed = useRef(true);
   const [sortOption, setSortOption] = useState<
-    "created" | "alphabetical" | "completed"
+    "created" | "name" | "complete"
   >("created");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
@@ -271,7 +272,7 @@ export default function ToDoListPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = async (event: any) => {
     setIsDragging(false);
-    if (sortOption === "alphabetical") return;
+    if (sortOption === "name") return;
 
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -286,7 +287,7 @@ export default function ToDoListPage() {
   };
 
   const handleSortChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSort = e.target.value as "created" | "alphabetical" | "completed";
+    const newSort = e.target.value as "created" | "name" | "complete";
     if (!id) return;
 
     await updateSortOrder(id, newSort);
@@ -361,7 +362,7 @@ export default function ToDoListPage() {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6`}
+      className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6 pb-24 lg:pb-6`}
     >
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -548,10 +549,10 @@ export default function ToDoListPage() {
               <option value="created" className="text-black">
                 Per Creazione
               </option>
-              <option value="alphabetical" className="text-black">
+              <option value="name" className="text-black">
                 Alfabetico
               </option>
-              <option value="completed" className="text-black">
+              <option value="complete" className="text-black">
                 Per Completezza
               </option>
             </select>
@@ -763,6 +764,27 @@ export default function ToDoListPage() {
           </div>
         </div>
       )}
+
+      {/* Bottom Navigation - Solo Mobile */}
+      <BottomNav
+        editMode={editMode}
+        sortOption={sortOption}
+        onToggleEdit={() => setEditMode(!editMode)}
+        onCycleSortOption={async () => {
+          if (!id) return;
+          const options: ("created" | "name" | "complete")[] = [
+            "created",
+            "name",
+            "complete",
+          ];
+          const currentIndex = options.indexOf(sortOption);
+          const nextIndex = (currentIndex + 1) % options.length;
+          const newSort = options[nextIndex];
+          await updateSortOrder(id, newSort);
+          setSortOption(newSort);
+        }}
+        onAddList={() => navigate("/home")}
+      />
 
       <style>
         {`

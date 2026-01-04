@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { fetchFriends, removeFriend, Friendship } from "../api/friends";
 import UserCard from "../components/UserCard";
 import { useTheme } from "../context/ThemeContext";
+import BottomNav from "../components/BottomNav";
 
 export default function FriendsPage() {
   const [friends, setFriends] = useState<Friendship[]>([]);
@@ -42,7 +43,7 @@ export default function FriendsPage() {
   if (!themeLoaded) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-900 dark:via-gray-800 dark:to-pink-900 text-gray-900 dark:text-white p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-900 dark:via-gray-800 dark:to-pink-900 text-gray-900 dark:text-white p-6 pb-24 lg:pb-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">I Miei Amici</h1>
         <button
@@ -73,6 +74,14 @@ export default function FriendsPage() {
           ))}
         </div>
       )}
+
+      <BottomNav
+        editMode={false}
+        sortOption="created"
+        onToggleEdit={() => navigate("/home")}
+        onCycleSortOption={() => navigate("/home")}
+        onAddList={() => navigate("/home")}
+      />
     </div>
   );
 }
