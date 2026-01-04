@@ -117,6 +117,7 @@ export default function ToDoListPage() {
 
   // Stati per la modale di quantità
   const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
   const [quantityValue, setQuantityValue] = useState<string>("");
   const [unitValue, setUnitValue] = useState<string>("");
   const quantityModalRef = useRef<HTMLDivElement>(null);
@@ -515,8 +516,8 @@ export default function ToDoListPage() {
         </div>
       )}
 
-      {/* FAB con menu verticale glassmorphism */}
-      <div className="fixed bottom-8 left-8 z-50">
+      {/* FAB con menu verticale glassmorphism - Solo Desktop */}
+      <div className="fixed bottom-8 left-8 z-50 hidden lg:flex">
         <div
           className={`flex flex-col items-start space-y-3 mb-3 transition-all duration-300 ${
             menuOpen
@@ -765,30 +766,78 @@ export default function ToDoListPage() {
         </div>
       )}
 
+      {/* Menu di sorting - Solo Mobile */}
+      {showSortMenu && (
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-end justify-center z-50 lg:hidden">
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl w-full rounded-t-3xl p-6 border-t border-gray-200/50 dark:border-white/20 shadow-2xl">
+            <h3 className="text-lg font-semibold mb-4 text-center">Ordina per</h3>
+
+            <div className="space-y-3">
+              <button
+                onClick={async () => {
+                  if (id) await updateSortOrder(id, "created");
+                  setSortOption("created");
+                  setShowSortMenu(false);
+                }}
+                className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
+                  sortOption === "created"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70"
+                }`}
+              >
+                Per Creazione
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (id) await updateSortOrder(id, "name");
+                  setSortOption("name");
+                  setShowSortMenu(false);
+                }}
+                className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
+                  sortOption === "name"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70"
+                }`}
+              >
+                Alfabetico
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (id) await updateSortOrder(id, "complete");
+                  setSortOption("complete");
+                  setShowSortMenu(false);
+                }}
+                className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
+                  sortOption === "complete"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70"
+                }`}
+              >
+                Per Completezza
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowSortMenu(false)}
+              className="w-full mt-4 px-4 py-3 bg-gray-300/50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-300/70 dark:hover:bg-gray-700/70 transition-all"
+            >
+              Annulla
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Bottom Navigation - Solo Mobile */}
       <BottomNav
         showHome={true}
-        showAdd={true}
         showEdit={true}
         showSort={true}
         editMode={editMode}
         sortOption={sortOption}
         onToggleEdit={() => setEditMode(!editMode)}
-        onCycleSortOption={async () => {
-          if (!id) return;
-          const options: ("created" | "name" | "complete")[] = [
-            "created",
-            "name",
-            "complete",
-          ];
-          const currentIndex = options.indexOf(sortOption);
-          const nextIndex = (currentIndex + 1) % options.length;
-          const newSort = options[nextIndex];
-          await updateSortOrder(id, newSort);
-          setSortOption(newSort);
-        }}
-        onAdd={() => setShowQuantityModal(true)}
-        addTitle="Nuova ToDo"
+        onCycleSortOption={() => setShowSortMenu(true)}
         editTitle="Modifica ToDo"
       />
 
