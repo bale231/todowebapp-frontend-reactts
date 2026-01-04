@@ -121,6 +121,7 @@ export default function ToDoListPage() {
   const [quantityValue, setQuantityValue] = useState<string>("");
   const [unitValue, setUnitValue] = useState<string>("");
   const quantityModalRef = useRef<HTMLDivElement>(null);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
 
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
@@ -296,6 +297,14 @@ export default function ToDoListPage() {
     fetchTodos(true);
   };
 
+  const handleSortOptionSelect = async (newSort: "created" | "name" | "complete") => {
+    if (!id) return;
+
+    await updateSortOrder(id, newSort);
+    setSortOption(newSort);
+    fetchTodos(true);
+  };
+
   useEffect(() => {
     if (showBulkConfirm && bulkModalRef.current) {
       gsap.fromTo(
@@ -328,6 +337,16 @@ export default function ToDoListPage() {
       );
     }
   }, [showQuantityModal]);
+
+  useEffect(() => {
+    if (showSortMenu && sortMenuRef.current) {
+      gsap.fromTo(
+        sortMenuRef.current,
+        { y: 100, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }
+      );
+    }
+  }, [showSortMenu]);
 
   // Carica l'ID dell'utente corrente
   useEffect(() => {
@@ -768,15 +787,21 @@ export default function ToDoListPage() {
 
       {/* Menu di sorting - Solo Mobile */}
       {showSortMenu && (
-        <div className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-end justify-center z-50 lg:hidden">
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl w-full rounded-t-3xl p-6 border-t border-gray-200/50 dark:border-white/20 shadow-2xl">
+        <div
+          className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-end justify-center z-50 lg:hidden"
+          onClick={() => setShowSortMenu(false)}
+        >
+          <div
+            ref={sortMenuRef}
+            className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl w-full rounded-t-3xl p-6 border-t border-gray-200/50 dark:border-white/20 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-semibold mb-4 text-center">Ordina per</h3>
 
             <div className="space-y-3">
               <button
                 onClick={async () => {
-                  if (id) await updateSortOrder(id, "created");
-                  setSortOption("created");
+                  await handleSortOptionSelect("created");
                   setShowSortMenu(false);
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
@@ -790,8 +815,7 @@ export default function ToDoListPage() {
 
               <button
                 onClick={async () => {
-                  if (id) await updateSortOrder(id, "name");
-                  setSortOption("name");
+                  await handleSortOptionSelect("name");
                   setShowSortMenu(false);
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
@@ -805,8 +829,7 @@ export default function ToDoListPage() {
 
               <button
                 onClick={async () => {
-                  if (id) await updateSortOrder(id, "complete");
-                  setSortOption("complete");
+                  await handleSortOptionSelect("complete");
                   setShowSortMenu(false);
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
