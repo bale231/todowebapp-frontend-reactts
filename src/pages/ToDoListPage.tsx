@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   CheckSquare,
@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   ArrowRightLeft,
   Users,
+  Search,
 } from "lucide-react";
 import { getAuthHeaders } from "../api/todos";
 import { getCurrentUserJWT } from "../api/auth";
@@ -43,6 +44,7 @@ import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
 import BottomNav from "../components/BottomNav";
+import SearchBar from "../components/SearchBar";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -123,6 +125,10 @@ export default function ToDoListPage() {
   const quantityModalRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
 
+  // Search state
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
@@ -173,13 +179,10 @@ export default function ToDoListPage() {
       // Carica le informazioni di condivisione usando l'API dedicata
       try {
         const shares = await getListShares(Number(id));
-        console.log("Shares ricevute:", shares); // Debug
         if (shares && shares.length > 0) {
           const mapped = shares.map(s => ({ username: s.username, full_name: s.full_name }));
-          console.log("SharedWith impostato a:", mapped); // Debug
           setSharedWith(mapped);
         } else {
-          console.log("Nessuna condivisione trovata");
           setSharedWith([]);
         }
       } catch (error) {
@@ -300,8 +303,6 @@ export default function ToDoListPage() {
   const handleSortOptionSelect = async (newSort: "created" | "name" | "complete") => {
     if (!id) return;
 
-    console.log("🔄 Sorting to:", newSort);
-
     try {
       await updateSortOrder(id, newSort);
       setSortOption(newSort);
@@ -310,9 +311,8 @@ export default function ToDoListPage() {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       await fetchTodos(false); // Ricarica tutto dal backend
-      console.log("✅ Sort completed");
     } catch (error) {
-      console.error("❌ Sort failed:", error);
+      console.error("Errore ordinamento:", error);
     }
   };
 
@@ -384,18 +384,37 @@ export default function ToDoListPage() {
     );
   }, [menuOpen]);
 
+  // Filter todos based on search query
+  const filteredTodos = useMemo(() => {
+    if (!searchQuery.trim()) return todos;
+
+    const query = searchQuery.toLowerCase().trim();
+    return todos.filter((todo) => {
+      // Check title
+      if (todo.title.toLowerCase().includes(query)) return true;
+      // Check unit if exists
+      if (todo.unit && todo.unit.toLowerCase().includes(query)) return true;
+      return false;
+    });
+  }, [todos, searchQuery]);
+
   if (!themeLoaded) return null;
 
-  const displayedTodos = todos;
-
-  // Debug: log sharedWith prima del render
-  console.log("Rendering - sharedWith:", sharedWith);
+  const displayedTodos = filteredTodos;
 
   return (
     <div
       className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6 pb-24 lg:pb-6`}
     >
-      <div className="flex items-center justify-between mb-4">
+      {/* Search Bar */}
+      <SearchBar
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSearch={setSearchQuery}
+        placeholder="Cerca todo..."
+      />
+
+      <div className={`flex items-center justify-between ${searchOpen ? 'mt-0' : 'mb-4'}`}>
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             {listName}
@@ -410,16 +429,28 @@ export default function ToDoListPage() {
             </div>
           )}
         </div>
-        <button
-          onClick={() => {
-            navigate("/home");
-            // La posizione verrà ripristinata automaticamente grazie all'useEffect
-          }}
-          className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-4 py-2 rounded-xl border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
-        >
-          <ArrowLeft size={20} />
-          <span className="hidden sm:inline text-lg">Torna alla Home</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Search button */}
+          {!searchOpen && (
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg p-2 rounded-xl border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
+              title="Cerca"
+            >
+              <Search size={20} />
+            </button>
+          )}
+          <button
+            onClick={() => {
+              navigate("/home");
+              // La posizione verrà ripristinata automaticamente grazie all'useEffect
+            }}
+            className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-4 py-2 rounded-xl border border-gray-200/50 dark:border-white/20 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all"
+          >
+            <ArrowLeft size={20} />
+            <span className="hidden sm:inline text-lg">Torna alla Home</span>
+          </button>
+        </div>
       </div>
 
       {editMode && (
@@ -479,6 +510,19 @@ export default function ToDoListPage() {
           <Plus size={18} />
         </button>
       </div>
+
+      {/* No results message */}
+      {displayedTodos.length === 0 && searchQuery.trim() && (
+        <div className="text-center py-12">
+          <Search size={48} className="mx-auto text-gray-400 dark:text-gray-500 mb-3" />
+          <p className="text-lg text-gray-700 dark:text-gray-300">
+            Nessun risultato per "<span className="font-semibold">{searchQuery}</span>"
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Prova con un altro termine di ricerca
+          </p>
+        </div>
+      )}
 
       {sortOption === "created" ? (
         <DndContext
@@ -588,6 +632,19 @@ export default function ToDoListPage() {
               </option>
             </select>
           </div>
+
+          {/* Cerca */}
+          <button
+            onClick={() => {
+              setSearchOpen(true);
+              setMenuOpen(false);
+            }}
+            className="flex items-center gap-3 bg-gray-600/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-gray-600/90 hover:scale-105 transition-all"
+            title="Cerca"
+          >
+            <Search size={20} />
+            <span className="font-semibold">Cerca</span>
+          </button>
         </div>
 
         {/* Bottone principale */}
@@ -868,10 +925,12 @@ export default function ToDoListPage() {
         showHome={true}
         showEdit={true}
         showSort={true}
+        showSearch={true}
         editMode={editMode}
         sortOption={sortOption}
         onToggleEdit={() => setEditMode(!editMode)}
         onCycleSortOption={() => setShowSortMenu(true)}
+        onSearch={() => setSearchOpen(true)}
         editTitle="Modifica ToDo"
       />
 

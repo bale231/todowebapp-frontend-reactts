@@ -1,4 +1,4 @@
-import { Home, User, Pencil, ListFilter, Plus } from "lucide-react";
+import { Home, User, Pencil, ListFilter, Plus, Search } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 interface BottomNavProps {
@@ -8,6 +8,7 @@ interface BottomNavProps {
   showAdd?: boolean;
   showEdit?: boolean;
   showSort?: boolean;
+  showSearch?: boolean;
 
   // Props opzionali per funzionalità
   editMode?: boolean;
@@ -15,6 +16,7 @@ interface BottomNavProps {
   onToggleEdit?: () => void;
   onCycleSortOption?: () => void;
   onAdd?: () => void;
+  onSearch?: () => void;
   addTitle?: string; // Titolo personalizzato per il bottone add
   editTitle?: string; // Titolo personalizzato per il bottone edit
 }
@@ -25,11 +27,13 @@ export default function BottomNav({
   showAdd = false,
   showEdit = false,
   showSort = false,
+  showSearch = false,
   editMode = false,
   sortOption = "created",
   onToggleEdit,
   onCycleSortOption,
   onAdd,
+  onSearch,
   addTitle = "Aggiungi",
   editTitle = "Modifica",
 }: BottomNavProps) {
@@ -39,7 +43,7 @@ export default function BottomNav({
   const isProfile = location.pathname === "/profile";
 
   // Conta quanti bottoni vengono mostrati per gestire lo spacing
-  const buttonsCount = [showHome, showProfile, showAdd, showEdit, showSort].filter(Boolean).length;
+  const buttonsCount = [showHome, showProfile, showAdd, showEdit, showSort, showSearch].filter(Boolean).length;
   const hasAddButton = showAdd;
 
   return (
@@ -122,6 +126,18 @@ export default function BottomNav({
             >
               <ListFilter size={24} />
               <span className="text-xs font-medium">Ordina</span>
+            </button>
+          )}
+
+          {/* Cerca */}
+          {showSearch && onSearch && (
+            <button
+              onClick={onSearch}
+              className="flex flex-col items-center gap-1 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+              title="Cerca"
+            >
+              <Search size={24} />
+              <span className="text-xs font-medium">Cerca</span>
             </button>
           )}
         </div>

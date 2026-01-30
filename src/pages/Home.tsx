@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUserJWT } from "../api/auth";
 import Navbar from "../components/Navbar";
@@ -15,6 +15,7 @@ import {
   UserPlus,
   UserCheck,
   Share2,
+  Search,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
@@ -24,6 +25,7 @@ import NotificationPrompt from "../components/NotificationPrompt";
 import AnimatedAlert from "../components/AnimatedAlert";
 import ShareModal from "../components/ShareModal";
 import BottomNav from "../components/BottomNav";
+import SearchBar from "../components/SearchBar";
 
 interface TodoList {
   id: number;
@@ -96,6 +98,10 @@ export default function Home() {
   const [shareItemId, setShareItemId] = useState<number | null>(null);
   const [shareItemName, setShareItemName] = useState("");
   const [shareItemType, setShareItemType] = useState<"list" | "category">("list");
+
+  // Search state
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -452,9 +458,39 @@ export default function Home() {
     setShowCatForm(true);
   };
 
+  // Search and filter logic
+  const searchFilteredLists = useMemo(() => {
+    if (!searchQuery.trim()) return lists;
+
+    const query = searchQuery.toLowerCase().trim();
+
+    return lists.filter((list) => {
+      // Check if list name matches
+      if (list.name.toLowerCase().includes(query)) return true;
+
+      // Check if any todo in the list matches
+      if (list.todos.some((todo) => todo.text.toLowerCase().includes(query))) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [lists, searchQuery]);
+
+  // Apply category filter on top of search
   const filteredLists = selectedCategory
-    ? lists.filter((l) => l.category && l.category.id === selectedCategory.id)
-    : lists;
+    ? searchFilteredLists.filter((l) => l.category && l.category.id === selectedCategory.id)
+    : searchFilteredLists;
+
+  // Get matching todos for each list (for highlighting in search results)
+  const getMatchingTodos = useCallback(
+    (list: TodoList) => {
+      if (!searchQuery.trim()) return [];
+      const query = searchQuery.toLowerCase().trim();
+      return list.todos.filter((todo) => todo.text.toLowerCase().includes(query));
+    },
+    [searchQuery]
+  );
 
   const sortedLists = [...filteredLists].sort((a, b) => {
     if (sortOption === "name") {
@@ -528,8 +564,18 @@ export default function Home() {
       )}
 
       <div className="p-6 pb-24 lg:pb-6" ref={boxRef}>
-        {/* Prima riga: 3 bottoni icone + Nuova Categoria - centrati */}
-        <div className="flex gap-2 mb-4 pt-6 justify-center">
+        {/* Search Bar */}
+        <div className="pt-4">
+          <SearchBar
+            isOpen={searchOpen}
+            onClose={() => setSearchOpen(false)}
+            onSearch={setSearchQuery}
+            placeholder="Cerca liste o todo..."
+          />
+        </div>
+
+        {/* Prima riga: 3 bottoni icone + Nuova Categoria + Cerca - centrati */}
+        <div className={`flex gap-2 mb-4 ${searchOpen ? '' : 'pt-6'} justify-center flex-wrap`}>
           <button
             onClick={() => navigate("/users")}
             className="flex items-center justify-center bg-blue-600/80 text-white p-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 hover:scale-105 transition-all"
@@ -561,6 +607,16 @@ export default function Home() {
           >
             <Plus size={18} /> Nuova Categoria
           </button>
+          {/* Search button */}
+          {!searchOpen && (
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center justify-center bg-gray-600/80 text-white p-3 rounded-xl border border-gray-300/30 shadow-lg hover:bg-gray-600/90 hover:scale-105 transition-all"
+              title="Cerca"
+            >
+              <Search size={22} />
+            </button>
+          )}
         </div>
 
         {/* Seconda riga: Select categoria - centrato e allungato */}
@@ -608,9 +664,21 @@ export default function Home() {
 
         {sortedLists.length === 0 && (
           <div className="mt-6 p-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg">
-            <p className="text-lg text-gray-700 dark:text-gray-300 text-center">
-              Qui andranno le tue liste ToDo animate
-            </p>
+            {searchQuery.trim() ? (
+              <div className="text-center">
+                <Search size={48} className="mx-auto text-gray-400 dark:text-gray-500 mb-3" />
+                <p className="text-lg text-gray-700 dark:text-gray-300">
+                  Nessun risultato per "<span className="font-semibold">{searchQuery}</span>"
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Prova con un altro termine di ricerca
+                </p>
+              </div>
+            ) : (
+              <p className="text-lg text-gray-700 dark:text-gray-300 text-center">
+                Qui andranno le tue liste ToDo animate
+              </p>
+            )}
           </div>
         )}
 
@@ -626,6 +694,9 @@ export default function Home() {
                     (t) => t.completed
                   ).length;
                   const pending = list.todos.length - completed;
+                  const matchingTodos = getMatchingTodos(list);
+                  const isSearching = searchQuery.trim().length > 0;
+
                   return (
                     <SwipeableListItem
                       key={list.id}
@@ -639,6 +710,10 @@ export default function Home() {
                           colorClasses[list.color]
                         } ${
                           editMode ? "animate-wiggle" : ""
+                        } ${
+                          isSearching && matchingTodos.length > 0
+                            ? "ring-2 ring-blue-400/50"
+                            : ""
                         } transition-all duration-200 hover:shadow-xl hover:bg-white/80 dark:hover:bg-gray-800/80`}
                       >
                         {/* Badge condivisa - Posizione assoluta per non interferire col layout */}
@@ -666,6 +741,32 @@ export default function Home() {
                               <p className="text-sm text-gray-500">
                                 Nessuna ToDo
                               </p>
+                            ) : isSearching && matchingTodos.length > 0 ? (
+                              // Show matching todos when searching
+                              <div className="space-y-1">
+                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                  {matchingTodos.length} risultat{matchingTodos.length === 1 ? 'o' : 'i'} trovat{matchingTodos.length === 1 ? 'o' : 'i'}:
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {matchingTodos.slice(0, 3).map((todo) => (
+                                    <span
+                                      key={todo.id}
+                                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                        todo.completed
+                                          ? "bg-green-100/80 text-green-700 dark:bg-green-900/80 dark:text-green-300 line-through"
+                                          : "bg-blue-100/80 text-blue-700 dark:bg-blue-900/80 dark:text-blue-300"
+                                      }`}
+                                    >
+                                      {todo.text}
+                                    </span>
+                                  ))}
+                                  {matchingTodos.length > 3 && (
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      +{matchingTodos.length - 3} altr{matchingTodos.length - 3 === 1 ? 'o' : 'i'}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             ) : (
                               <p className="text-sm text-gray-600 dark:text-gray-300">
                                 {pending} ToDo da completare, {completed}{" "}
@@ -878,6 +979,19 @@ export default function Home() {
               </span>
             </button>
           )}
+
+          {/* Cerca */}
+          <button
+            onClick={() => {
+              setSearchOpen(true);
+              setMenuOpen(false);
+            }}
+            className="flex items-center gap-3 bg-gray-600/80 backdrop-blur-xl text-white px-5 py-3 rounded-xl border border-white/20 shadow-2xl hover:bg-gray-600/90 hover:scale-105 transition-all"
+            title="Cerca"
+          >
+            <Search size={20} />
+            <span className="font-semibold">Cerca</span>
+          </button>
         </div>
 
         {/* Bottone principale */}
@@ -1026,6 +1140,7 @@ export default function Home() {
         showAdd={true}
         showEdit={true}
         showSort={true}
+        showSearch={true}
         editMode={editMode}
         sortOption={sortOption}
         onToggleEdit={() => {
@@ -1055,6 +1170,7 @@ export default function Home() {
           setNewListColor("blue");
           setNewListCategory(null);
         }}
+        onSearch={() => setSearchOpen(true)}
         addTitle="Nuova Lista"
         editTitle="Modifica Liste"
       />
