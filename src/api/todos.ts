@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  deduplicatedFetch,
+  invalidateCache,
+  CACHE_TTL,
+  createCacheKey,
+} from "../utils/apiCache";
+
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
 export function getAuthHeaders() {
@@ -19,27 +26,51 @@ export function getAuthHeaders() {
 
 // --- 📋 LISTE ---
 export async function fetchAllLists() {
-  const res = await fetch(`${API_URL}/lists/`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-  return res.json();
+  const cacheKey = createCacheKey("lists", "all");
+  return deduplicatedFetch(
+    cacheKey,
+    async () => {
+      const res = await fetch(`${API_URL}/lists/`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+      return res.json();
+    },
+    CACHE_TTL.LISTS
+  );
+}
+
+// Force refresh lists (bypasses cache)
+export async function fetchAllListsForce() {
+  invalidateCache(/^lists:/);
+  return fetchAllLists();
 }
 
 export async function fetchListDetails(listId: number | string) {
-  const headers = getAuthHeaders();
+  const cacheKey = createCacheKey("list", listId.toString());
+  return deduplicatedFetch(
+    cacheKey,
+    async () => {
+      const res = await fetch(`${API_URL}/lists/${listId}/`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
 
-  const res = await fetch(`${API_URL}/lists/${listId}/`, {
-    method: "GET",
-    headers: headers,
-  });
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("❌ RESPONSE TEXT:", text);
+      }
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("❌ RESPONSE TEXT:", text);
-  }
+      return res.json();
+    },
+    CACHE_TTL.TODO_DETAILS
+  );
+}
 
-  return res.json();
+// Force refresh list details (bypasses cache)
+export async function fetchListDetailsForce(listId: number | string) {
+  invalidateCache(new RegExp(`^list:${listId}`));
+  return fetchListDetails(listId);
 }
 
 export async function renameList(listId: number, newName: string) {
@@ -60,6 +91,8 @@ export async function editList(listId: number, name: string, color: string, cate
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
   });
+  // Invalidate cache after modification
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
@@ -71,6 +104,7 @@ export async function createList(name: string, color: string, categoryId?: numbe
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
   });
+  invalidateCache(/^lists:/);
   return res.json();
 }
 
@@ -79,17 +113,31 @@ export async function deleteList(listId: number) {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
 // --- 📂 CATEGORIE ---
 // Lista tutte le categorie
 export async function fetchAllCategories() {
-  const res = await fetch(`${API_URL}/categories/`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-  return res.json();
+  const cacheKey = createCacheKey("categories", "all");
+  return deduplicatedFetch(
+    cacheKey,
+    async () => {
+      const res = await fetch(`${API_URL}/categories/`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+      return res.json();
+    },
+    CACHE_TTL.CATEGORIES
+  );
+}
+
+// Force refresh categories
+export async function fetchAllCategoriesForce() {
+  invalidateCache(/^categories:/);
+  return fetchAllCategories();
 }
 
 // Crea una nuova categoria
@@ -99,6 +147,7 @@ export async function createCategory(name: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ name }),
   });
+  invalidateCache(/^categories:/);
   return res.json();
 }
 
@@ -109,6 +158,7 @@ export async function editCategory(categoryId: number, name: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ name }),
   });
+  invalidateCache(/^categories:/);
   return res.json();
 }
 
@@ -118,6 +168,7 @@ export async function deleteCategory(categoryId: number) {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
+  invalidateCache(/^categories:/);
   return res.json();
 }
 
@@ -137,6 +188,7 @@ export async function createTodo(
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
   });
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
@@ -145,6 +197,7 @@ export async function toggleTodo(todoId: number) {
     method: "PATCH",
     headers: getAuthHeaders(),
   });
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
@@ -153,6 +206,7 @@ export async function deleteTodo(todoId: number) {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
@@ -172,6 +226,7 @@ export async function updateTodo(
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
   });
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
@@ -185,6 +240,7 @@ export async function reorderTodos(
     headers: getAuthHeaders(),
     body: JSON.stringify({ order }),
   });
+  invalidateCache(new RegExp(`^list:${listId}`));
   return res.json();
 }
 
@@ -195,7 +251,8 @@ export async function updateSortOrder(listId: number | string, sortOrder: string
     headers: getAuthHeaders(),
     body: JSON.stringify({ sort_order: sortOrder }),
   });
-  return res.json(); // ritorna { sort_order: "..." }
+  invalidateCache(new RegExp(`^list:${listId}`));
+  return res.json();
 }
 
 // ✅ PATCH per spostare una ToDo in un'altra lista
@@ -205,6 +262,7 @@ export async function moveTodo(todoId: number, newListId: number) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ new_list_id: newListId }),
   });
+  invalidateCache(/^lists?:/);
   return res.json();
 }
 
@@ -216,14 +274,28 @@ export async function saveSelectedCategory(categoryId: number | null) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ selected_category: categoryId }),
   });
+  invalidateCache(/^prefs:/);
   return res.json();
 }
 
 // Recupera la categoria selezionata dall'utente
 export async function getSelectedCategory() {
-  const res = await fetch(`${API_URL}/categories/selected/`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-  return res.json();
+  const cacheKey = createCacheKey("prefs", "selected_category");
+  return deduplicatedFetch(
+    cacheKey,
+    async () => {
+      const res = await fetch(`${API_URL}/categories/selected/`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+      return res.json();
+    },
+    CACHE_TTL.USER_PREFS
+  );
+}
+
+// --- 🔄 CACHE UTILITIES ---
+// Clear all cache (useful after logout or major changes)
+export function clearApiCache() {
+  invalidateCache();
 }
