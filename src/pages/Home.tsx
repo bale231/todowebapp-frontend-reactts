@@ -33,7 +33,7 @@ interface TodoList {
   name: string;
   color: string;
   created_at: string;
-  todos: { id: number; text: string; completed: boolean }[];
+  todos: { id: number; text?: string; title?: string; completed: boolean }[];
   category?: Category | null;
   is_owner?: boolean;
   is_shared?: boolean;
@@ -469,9 +469,12 @@ export default function Home() {
       // Check if list name matches
       if (list.name?.toLowerCase().includes(query)) return true;
 
-      // Check if any todo in the list matches (with safety check)
+      // Check if any todo in the list matches (support both text and title)
       if (list.todos && Array.isArray(list.todos)) {
-        if (list.todos.some((todo) => todo.text?.toLowerCase().includes(query))) {
+        if (list.todos.some((todo) => {
+          const todoText = todo.text || todo.title || "";
+          return todoText.toLowerCase().includes(query);
+        })) {
           return true;
         }
       }
@@ -491,7 +494,10 @@ export default function Home() {
       if (!searchQuery.trim()) return [];
       if (!list.todos || !Array.isArray(list.todos)) return [];
       const query = searchQuery.toLowerCase().trim();
-      return list.todos.filter((todo) => todo.text?.toLowerCase().includes(query));
+      return list.todos.filter((todo) => {
+        const todoText = todo.text || todo.title || "";
+        return todoText.toLowerCase().includes(query);
+      });
     },
     [searchQuery]
   );
@@ -780,7 +786,7 @@ export default function Home() {
                                           : "bg-blue-100/80 text-blue-700 dark:bg-blue-900/80 dark:text-blue-300"
                                       }`}
                                     >
-                                      {todo.text}
+                                      {todo.text || todo.title}
                                     </span>
                                   ))}
                                   {matchingTodos.length > 3 && (
