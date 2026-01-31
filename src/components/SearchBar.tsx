@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { Search, X } from "lucide-react";
-import gsap from "gsap";
 
 interface SearchBarProps {
   isOpen: boolean;
@@ -17,7 +16,6 @@ export default function SearchBar({
   placeholder = "Cerca...",
   autoFocus = true,
 }: SearchBarProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -60,31 +58,10 @@ export default function SearchBar({
     }
   };
 
-  // Animation on open/close
+  // Focus input when opened
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    if (isOpen) {
-      gsap.fromTo(
-        containerRef.current,
-        {
-          y: -20,
-          opacity: 0,
-          scale: 0.95,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.4,
-          ease: "power3.out",
-        }
-      );
-
-      // Focus input after animation
-      if (autoFocus) {
-        setTimeout(() => inputRef.current?.focus(), 100);
-      }
+    if (isOpen && autoFocus) {
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen, autoFocus]);
 
@@ -100,10 +77,7 @@ export default function SearchBar({
   if (!isOpen) return null;
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full max-w-2xl mx-auto mb-4"
-    >
+    <div className="w-full max-w-2xl mx-auto animate-fade-in">
       <div className="relative flex items-center">
         {/* Search icon */}
         <div className="absolute left-4 text-gray-400 dark:text-gray-500 pointer-events-none">
@@ -118,7 +92,7 @@ export default function SearchBar({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-12 pr-20 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl
+          className="w-full pl-12 pr-24 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl
                      border border-gray-200/50 dark:border-white/20 rounded-2xl
                      text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400
                      focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400
