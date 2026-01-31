@@ -11,6 +11,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true); // New loading state
   const errorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
@@ -18,12 +19,30 @@ export default function Login() {
   const [loginMode, setLoginMode] = useState<'username'|'email'>('username');
   const labelFlipRef = useRef<HTMLSpanElement>(null);
 
+  // Check auth FIRST before showing anything
+  useEffect(() => {
+    const checkAlreadyLoggedIn = async () => {
+      try {
+        const user = await getCurrentUserJWT();
+        if (user) {
+          navigate("/home", { replace: true });
+        } else {
+          setCheckingAuth(false);
+        }
+      } catch {
+        setCheckingAuth(false);
+      }
+    };
+    checkAlreadyLoggedIn();
+  }, [navigate]);
+
   // forzo tema chiaro alla pagina di login
   useLayoutEffect(() => {
+    if (checkingAuth) return; // Don't change theme while checking
     const root = document.documentElement;
     root.classList.remove('dark');
     root.classList.add('light');
-  }, []);
+  }, [checkingAuth]);
 
   // piccola animazione quando cambi modalità
   useEffect(() => {
@@ -36,16 +55,6 @@ export default function Login() {
       }
     });
   }, [loginMode]);
-
-  useEffect(() => {
-    const checkAlreadyLoggedIn = async () => {
-      const user = await getCurrentUserJWT();
-      if (user) {
-        navigate("/home");
-      }
-    };
-    checkAlreadyLoggedIn();
-  }, [navigate]);
   
   useEffect(() => {
     if (formRef.current) {
@@ -157,7 +166,23 @@ export default function Login() {
 
     setIsLoading(false);
   };
-  
+
+  // Show loading screen while checking auth
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src="/assets/logo-themelight.png"
+            alt="ToDoApp Logo"
+            width={200}
+            className="animate-pulse"
+          />
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
