@@ -467,11 +467,13 @@ export default function Home() {
 
     return lists.filter((list) => {
       // Check if list name matches
-      if (list.name.toLowerCase().includes(query)) return true;
+      if (list.name?.toLowerCase().includes(query)) return true;
 
-      // Check if any todo in the list matches
-      if (list.todos.some((todo) => todo.text.toLowerCase().includes(query))) {
-        return true;
+      // Check if any todo in the list matches (with safety check)
+      if (list.todos && Array.isArray(list.todos)) {
+        if (list.todos.some((todo) => todo.text?.toLowerCase().includes(query))) {
+          return true;
+        }
       }
 
       return false;
@@ -487,8 +489,9 @@ export default function Home() {
   const getMatchingTodos = useCallback(
     (list: TodoList) => {
       if (!searchQuery.trim()) return [];
+      if (!list.todos || !Array.isArray(list.todos)) return [];
       const query = searchQuery.toLowerCase().trim();
-      return list.todos.filter((todo) => todo.text.toLowerCase().includes(query));
+      return list.todos.filter((todo) => todo.text?.toLowerCase().includes(query));
     },
     [searchQuery]
   );
