@@ -27,6 +27,7 @@ import AnimatedAlert from "../components/AnimatedAlert";
 import ShareModal from "../components/ShareModal";
 import BottomNav from "../components/BottomNav";
 import SearchBar from "../components/SearchBar";
+import SupportWidget from "../components/SupportWidget";
 
 interface TodoList {
   id: number;
@@ -1161,6 +1162,9 @@ export default function Home() {
           }}
         />
       )}
+
+      {/* Support Widget */}
+      <SupportWidget />
 
       {/* Bottom Navigation - Solo Mobile */}
       <BottomNav
