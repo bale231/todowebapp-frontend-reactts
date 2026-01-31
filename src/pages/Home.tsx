@@ -507,11 +507,12 @@ export default function Home() {
     if (sortOption === "name") {
       return a.name.localeCompare(b.name);
     } else if (sortOption === "complete") {
+      // Liste meno completate prima (da completare prima)
       const aComplete =
         a.todos.filter((t) => t.completed).length / (a.todos.length || 1);
       const bComplete =
         b.todos.filter((t) => t.completed).length / (b.todos.length || 1);
-      return bComplete - aComplete;
+      return aComplete - bComplete;
     } else {
       return (
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
