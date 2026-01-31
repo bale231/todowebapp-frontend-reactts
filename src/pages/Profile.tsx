@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
@@ -7,10 +8,12 @@ import {
   updateProfile,
   deactivateAccount,
   updateNotificationPreferences,
+  logout,
 } from "../api/auth";
-import { Bell, BellOff, Key } from "lucide-react";
+import { Bell, BellOff, Key, LogOut } from "lucide-react";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const formRef = useRef(null);
   const alertRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -492,6 +495,20 @@ export default function Profile() {
             }`}
           >
             Salva modifiche
+          </button>
+
+          {/* Logout button */}
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              navigate("/");
+              window.location.reload();
+            }}
+            className="w-full text-sm bg-gray-500/20 dark:bg-gray-600/20 backdrop-blur-md px-4 py-3 transition-all hover:bg-gray-500/30 dark:hover:bg-gray-600/30 border border-gray-400/30 dark:border-gray-500/30 hover:border-gray-400/50 rounded-lg mt-4 shadow-lg text-gray-700 dark:text-gray-300 font-medium flex items-center justify-center gap-2"
+          >
+            <LogOut size={18} />
+            Esci dall'account
           </button>
 
           <button
