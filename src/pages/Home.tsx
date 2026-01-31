@@ -16,6 +16,7 @@ import {
   UserCheck,
   Share2,
   Search,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchAllLists, editList, deleteList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
@@ -565,56 +566,75 @@ export default function Home() {
 
       <div className="p-6 pb-24 lg:pb-6" ref={boxRef}>
         {/* Search Bar */}
-        <div className="pt-4">
-          <SearchBar
-            isOpen={searchOpen}
-            onClose={() => setSearchOpen(false)}
-            onSearch={setSearchQuery}
-            placeholder="Cerca liste o todo..."
-          />
-        </div>
+        {searchOpen && (
+          <div className="pt-4 mb-4">
+            <SearchBar
+              isOpen={searchOpen}
+              onClose={() => setSearchOpen(false)}
+              onSearch={setSearchQuery}
+              placeholder="Cerca liste o todo..."
+            />
+          </div>
+        )}
 
-        {/* Prima riga: 3 bottoni icone + Nuova Categoria + Cerca - centrati */}
-        <div className={`flex gap-2 mb-4 ${searchOpen ? '' : 'pt-6'} justify-center flex-wrap`}>
+        {/* Prima riga: Pulsanti utenti a larghezza piena */}
+        <div className={`grid grid-cols-3 gap-3 mb-4 ${searchOpen ? '' : 'pt-6'}`}>
           <button
             onClick={() => navigate("/users")}
-            className="flex items-center justify-center bg-blue-600/80 text-white p-3 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 hover:scale-105 transition-all"
+            className="flex items-center justify-center gap-2 bg-blue-600/80 text-white py-3 px-4 rounded-xl border border-blue-300/30 shadow-lg hover:bg-blue-600/90 hover:scale-[1.02] transition-all"
             title="Trova Utenti"
           >
-            <Users size={22} />
+            <Users size={20} />
+            <span className="text-sm font-medium hidden sm:inline">Utenti</span>
           </button>
           <button
             onClick={() => navigate("/friend-requests")}
-            className="flex items-center justify-center bg-green-600/80 text-white p-3 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 hover:scale-105 transition-all"
+            className="flex items-center justify-center gap-2 bg-green-600/80 text-white py-3 px-4 rounded-xl border border-green-300/30 shadow-lg hover:bg-green-600/90 hover:scale-[1.02] transition-all"
             title="Richieste"
           >
-            <UserPlus size={22} />
+            <UserPlus size={20} />
+            <span className="text-sm font-medium hidden sm:inline">Richieste</span>
           </button>
           <button
             onClick={() => navigate("/friends")}
-            className="flex items-center justify-center bg-purple-600/80 text-white p-3 rounded-xl border border-purple-300/30 shadow-lg hover:bg-purple-600/90 hover:scale-105 transition-all"
+            className="flex items-center justify-center gap-2 bg-purple-600/80 text-white py-3 px-4 rounded-xl border border-purple-300/30 shadow-lg hover:bg-purple-600/90 hover:scale-[1.02] transition-all"
             title="I Miei Amici"
           >
-            <UserCheck size={22} />
+            <UserCheck size={20} />
+            <span className="text-sm font-medium hidden sm:inline">Amici</span>
           </button>
+        </div>
+
+        {/* Seconda riga: Nuova Categoria + Cerca */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             onClick={() => {
               setShowCatForm(true);
               setEditCatId(null);
               setCatName("");
             }}
-            className="bg-yellow-500/80 text-white px-3 py-2 rounded-xl flex items-center gap-2 font-medium shadow-lg hover:bg-yellow-500/90 hover:scale-105 transition-all"
+            className="flex items-center justify-center gap-2 bg-yellow-500/80 text-white py-3 px-4 rounded-xl font-medium shadow-lg hover:bg-yellow-500/90 hover:scale-[1.02] transition-all"
           >
-            <Plus size={18} /> Nuova Categoria
+            <Plus size={20} />
+            <span className="text-sm font-medium">Nuova Categoria</span>
           </button>
-          {/* Search button */}
           {!searchOpen && (
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center justify-center bg-gray-600/80 text-white p-3 rounded-xl border border-gray-300/30 shadow-lg hover:bg-gray-600/90 hover:scale-105 transition-all"
+              className="flex items-center justify-center gap-2 bg-gray-600/80 text-white py-3 px-4 rounded-xl font-medium shadow-lg hover:bg-gray-600/90 hover:scale-[1.02] transition-all"
               title="Cerca"
             >
-              <Search size={22} />
+              <Search size={20} />
+              <span className="text-sm font-medium">Cerca</span>
+            </button>
+          )}
+          {searchOpen && (
+            <button
+              onClick={() => setSearchOpen(false)}
+              className="flex items-center justify-center gap-2 bg-red-500/80 text-white py-3 px-4 rounded-xl font-medium shadow-lg hover:bg-red-500/90 hover:scale-[1.02] transition-all"
+            >
+              <X size={20} />
+              <span className="text-sm font-medium">Chiudi Ricerca</span>
             </button>
           )}
         </div>
@@ -1140,7 +1160,6 @@ export default function Home() {
         showAdd={true}
         showEdit={true}
         showSort={true}
-        showSearch={true}
         editMode={editMode}
         sortOption={sortOption}
         onToggleEdit={() => {
@@ -1170,7 +1189,6 @@ export default function Home() {
           setNewListColor("blue");
           setNewListCategory(null);
         }}
-        onSearch={() => setSearchOpen(true)}
         addTitle="Nuova Lista"
         editTitle="Modifica Liste"
       />
