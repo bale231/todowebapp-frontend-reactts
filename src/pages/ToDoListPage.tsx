@@ -406,15 +406,19 @@ export default function ToDoListPage() {
     <div
       className={`min-h-screen bg-gradient-to-br ${colorThemes[listColor]} text-gray-900 dark:text-white p-6 pb-24 lg:pb-6`}
     >
-      {/* Search Bar */}
-      <SearchBar
-        isOpen={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        onSearch={setSearchQuery}
-        placeholder="Cerca todo..."
-      />
+      {/* Search Bar - rendered conditionally */}
+      {searchOpen && (
+        <div className="mb-4">
+          <SearchBar
+            isOpen={searchOpen}
+            onClose={() => setSearchOpen(false)}
+            onSearch={setSearchQuery}
+            placeholder="Cerca todo..."
+          />
+        </div>
+      )}
 
-      <div className={`flex items-center justify-between ${searchOpen ? 'mt-0' : 'mb-4'}`}>
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             {listName}
