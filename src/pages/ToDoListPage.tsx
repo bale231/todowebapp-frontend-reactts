@@ -45,6 +45,7 @@ import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
 import BottomNav from "../components/BottomNav";
 import SearchBar from "../components/SearchBar";
+import TodoSkeleton from "../components/TodoSkeleton";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -128,6 +129,9 @@ export default function ToDoListPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Loading state
+  const [isLoadingTodos, setIsLoadingTodos] = useState(true);
+
   const listRef = useRef<HTMLDivElement>(null);
   const bulkModalRef = useRef<HTMLDivElement>(null);
 
@@ -171,44 +175,49 @@ export default function ToDoListPage() {
 
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
-      const res = await fetch(
-        `https://bale231.pythonanywhere.com/api/lists/${id}/`,
-        {
-          method: "GET",
-          headers: getAuthHeaders(),
-        }
-      );
-      const text = await res.text();
-      const data = JSON.parse(text);
-      setTodos(data.todos);
-
-      if (!preserveSort) {
-        setSortOption(data.sort_order || "created");
-      }
-
-      setListName(data.name);
-      setListColor(data.color || "blue");
-
-      // Salva info condivisione
-      setIsShared(data.is_shared || false);
-      setIsOwner(data.is_owner !== false);
-
-      // Carica le informazioni di condivisione usando l'API dedicata
       try {
-        const shares = await getListShares(Number(id));
-        if (shares && shares.length > 0) {
-          const mapped = shares.map(s => ({ username: s.username, full_name: s.full_name }));
-          setSharedWith(mapped);
-        } else {
+        setIsLoadingTodos(true);
+        const res = await fetch(
+          `https://bale231.pythonanywhere.com/api/lists/${id}/`,
+          {
+            method: "GET",
+            headers: getAuthHeaders(),
+          }
+        );
+        const text = await res.text();
+        const data = JSON.parse(text);
+        setTodos(data.todos);
+
+        if (!preserveSort) {
+          setSortOption(data.sort_order || "created");
+        }
+
+        setListName(data.name);
+        setListColor(data.color || "blue");
+
+        // Salva info condivisione
+        setIsShared(data.is_shared || false);
+        setIsOwner(data.is_owner !== false);
+
+        // Carica le informazioni di condivisione usando l'API dedicata
+        try {
+          const shares = await getListShares(Number(id));
+          if (shares && shares.length > 0) {
+            const mapped = shares.map(s => ({ username: s.username, full_name: s.full_name }));
+            setSharedWith(mapped);
+          } else {
+            setSharedWith([]);
+          }
+        } catch (error) {
+          console.error("Errore caricamento condivisioni:", error);
           setSharedWith([]);
         }
-      } catch (error) {
-        console.error("Errore caricamento condivisioni:", error);
-        setSharedWith([]);
-      }
 
-      // Animate only on first visit to this list in current session
-      setTimeout(() => animateTodos(), 50);
+        // Animate only on first visit to this list in current session
+        setTimeout(() => animateTodos(), 50);
+      } finally {
+        setIsLoadingTodos(false);
+      }
     },
     [id, animateTodos]
   );
@@ -550,8 +559,15 @@ export default function ToDoListPage() {
         </button>
       </div>
 
+      {/* Skeleton loading */}
+      {isLoadingTodos && (
+        <div className="pb-24">
+          <TodoSkeleton count={6} />
+        </div>
+      )}
+
       {/* No results message */}
-      {displayedTodos.length === 0 && searchQuery.trim() && (
+      {!isLoadingTodos && displayedTodos.length === 0 && searchQuery.trim() && (
         <div className="text-center py-12">
           <Search size={48} className="mx-auto text-gray-400 dark:text-gray-500 mb-3" />
           <p className="text-lg text-gray-700 dark:text-gray-300">
@@ -563,7 +579,7 @@ export default function ToDoListPage() {
         </div>
       )}
 
-      {sortOption === "created" ? (
+      {!isLoadingTodos && (sortOption === "created" ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -627,7 +643,7 @@ export default function ToDoListPage() {
             />
           ))}
         </div>
-      )}
+      ))}
 
       {/* FAB con menu verticale glassmorphism - Solo Desktop */}
       <div className="fixed bottom-8 left-8 z-50 hidden lg:block">
