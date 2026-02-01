@@ -318,9 +318,17 @@ export default function ToDoListPage() {
     if (!id) return;
 
     try {
+      // Prima aggiorna il backend
       await updateSortOrder(id, newSort);
+
+      // Aggiorna lo stato locale immediatamente
       setSortOption(newSort);
-      await fetchTodos(true); // Ricarica dal backend ma preserva il sort option selezionato
+
+      // Delay per dare tempo al backend di processare
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Ricarica i todos dal backend (ordinati)
+      await fetchTodos(true);
     } catch (error) {
       console.error("Errore ordinamento:", error);
     }
