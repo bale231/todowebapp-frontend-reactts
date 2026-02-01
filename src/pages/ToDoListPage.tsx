@@ -595,7 +595,7 @@ export default function ToDoListPage() {
       )}
 
       {/* FAB con menu verticale glassmorphism - Solo Desktop */}
-      <div className="fixed bottom-8 left-8 z-50 hidden lg:flex">
+      <div className="fixed bottom-8 left-8 z-50 hidden lg:block">
         <div
           className={`flex flex-col items-start space-y-3 mb-3 transition-all duration-300 ${
             menuOpen
@@ -689,9 +689,9 @@ export default function ToDoListPage() {
               />
             </div>
 
-            <div className="mb-3 flex gap-3">
+            <div className="mb-3 flex gap-3 items-end">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Quantità (opzionale)</label>
+                <label className="block text-sm font-medium mb-2">Quantità</label>
                 <input
                   type="number"
                   value={editedTodo.quantity || ""}
@@ -704,7 +704,7 @@ export default function ToDoListPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Unità (opzionale)</label>
+                <label className="block text-sm font-medium mb-2">Unità</label>
                 <input
                   type="text"
                   value={editedTodo.unit || ""}
@@ -807,9 +807,9 @@ export default function ToDoListPage() {
               />
             </div>
 
-            <div className="mb-3 flex gap-3">
+            <div className="mb-3 flex gap-3 items-end">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Quantità (opzionale)</label>
+                <label className="block text-sm font-medium mb-2">Quantità</label>
                 <input
                   type="number"
                   value={quantityValue}
@@ -820,12 +820,12 @@ export default function ToDoListPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Unità (opzionale)</label>
+                <label className="block text-sm font-medium mb-2">Unità</label>
                 <input
                   type="text"
                   value={unitValue}
                   onChange={(e) => setUnitValue(e.target.value)}
-                  placeholder="Es: pz, kg, litri"
+                  placeholder="Es: pz, kg"
                   className="w-full px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition-all"
                 />
               </div>
