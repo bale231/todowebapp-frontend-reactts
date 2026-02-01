@@ -99,7 +99,7 @@ export default function ToDoListPage() {
   const modalRef = useRef<HTMLDivElement>(null);
   const wasModalClosed = useRef(true);
   const [sortOption, setSortOption] = useState<
-    "created" | "name" | "complete"
+    "created" | "alphabetical" | "completed"
   >("created");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
@@ -291,7 +291,7 @@ export default function ToDoListPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = async (event: any) => {
     setIsDragging(false);
-    if (sortOption === "name") return;
+    if (sortOption === "alphabetical") return;
 
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -306,7 +306,7 @@ export default function ToDoListPage() {
   };
 
   const handleSortChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSort = e.target.value as "created" | "name" | "complete";
+    const newSort = e.target.value as "created" | "alphabetical" | "completed";
     if (!id) return;
 
     await updateSortOrder(id, newSort);
@@ -314,7 +314,7 @@ export default function ToDoListPage() {
     fetchTodos(true);
   };
 
-  const handleSortOptionSelect = async (newSort: "created" | "name" | "complete") => {
+  const handleSortOptionSelect = async (newSort: "created" | "alphabetical" | "completed") => {
     if (!id) return;
 
     try {
@@ -663,10 +663,10 @@ export default function ToDoListPage() {
               <option value="created" className="text-black">
                 Per Creazione
               </option>
-              <option value="name" className="text-black">
+              <option value="alphabetical" className="text-black">
                 Alfabetico
               </option>
-              <option value="complete" className="text-black">
+              <option value="completed" className="text-black">
                 Per Completezza
               </option>
             </select>
@@ -922,11 +922,11 @@ export default function ToDoListPage() {
 
               <button
                 onClick={async () => {
-                  await handleSortOptionSelect("name");
+                  await handleSortOptionSelect("alphabetical");
                   closeSortMenu();
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
-                  sortOption === "name"
+                  sortOption === "alphabetical"
                     ? "bg-blue-600 text-white"
                     : "bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70"
                 }`}
@@ -936,11 +936,11 @@ export default function ToDoListPage() {
 
               <button
                 onClick={async () => {
-                  await handleSortOptionSelect("complete");
+                  await handleSortOptionSelect("completed");
                   closeSortMenu();
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
-                  sortOption === "complete"
+                  sortOption === "completed"
                     ? "bg-blue-600 text-white"
                     : "bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70"
                 }`}

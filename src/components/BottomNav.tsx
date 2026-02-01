@@ -12,7 +12,7 @@ interface BottomNavProps {
 
   // Props opzionali per funzionalità
   editMode?: boolean;
-  sortOption?: "created" | "name" | "complete";
+  sortOption?: "created" | "alphabetical" | "complete" | "completed";
   onToggleEdit?: () => void;
   onCycleSortOption?: () => void;
   onAdd?: () => void;
@@ -123,7 +123,7 @@ export default function BottomNav({
               title={`Ordina: ${
                 sortOption === "created"
                   ? "Più recente"
-                  : sortOption === "name"
+                  : sortOption === "alphabetical"
                   ? "Alfabetico"
                   : "Per completezza"
               }`}

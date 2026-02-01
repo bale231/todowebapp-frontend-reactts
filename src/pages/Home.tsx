@@ -85,7 +85,7 @@ export default function Home() {
     null
   );
   const [editMode, setEditMode] = useState(false);
-  const [sortOption, setSortOption] = useState<"created" | "name" | "complete">(
+  const [sortOption, setSortOption] = useState<"created" | "alphabetical" | "complete">(
     "created"
   );
   const [categorySortAlpha, setCategorySortAlpha] = useState(false);
@@ -140,7 +140,7 @@ export default function Home() {
           const { sort_order } = await res.json();
           setSortOption(
             sort_order === "alphabetical"
-              ? "name"
+              ? "alphabetical"
               : sort_order === "complete"
               ? "complete"
               : "created"
@@ -350,18 +350,18 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleSortChange = async (newOpt: "created" | "name" | "complete") => {
+  const handleSortChange = async (newOpt: "created" | "alphabetical" | "complete") => {
     setSortOption(newOpt);
     const backendOrder =
-      newOpt === "name"
+      newOpt === "alphabetical"
         ? "alphabetical"
         : newOpt === "complete"
         ? "complete"
         : "created";
 
-    const messages = {
+    const messages: Record<string, string> = {
       created: "Ordinamento: Più recente",
-      name: "Ordinamento: Alfabetico",
+      alphabetical: "Ordinamento: Alfabetico",
       complete: "Ordinamento: Per completezza",
     };
 
@@ -511,7 +511,7 @@ export default function Home() {
   );
 
   const sortedLists = [...filteredLists].sort((a, b) => {
-    if (sortOption === "name") {
+    if (sortOption === "alphabetical") {
       return a.name.localeCompare(b.name);
     } else if (sortOption === "complete") {
       // Liste meno completate prima (da completare prima)
@@ -950,9 +950,9 @@ export default function Home() {
           {/* Filtro ordinamento */}
           <button
             onClick={() => {
-              const options: ("created" | "name" | "complete")[] = [
+              const options: ("created" | "alphabetical" | "complete")[] = [
                 "created",
-                "name",
+                "alphabetical",
                 "complete",
               ];
               const currentIndex = options.indexOf(sortOption);
@@ -964,7 +964,7 @@ export default function Home() {
             title={`Ordina: ${
               sortOption === "created"
                 ? "Più recente"
-                : sortOption === "name"
+                : sortOption === "alphabetical"
                 ? "Alfabetico"
                 : "Per completezza"
             }`}
@@ -973,7 +973,7 @@ export default function Home() {
             <span className="font-semibold">
               {sortOption === "created"
                 ? "Più recente"
-                : sortOption === "name"
+                : sortOption === "alphabetical"
                 ? "Alfabetico"
                 : "Per completezza"}
             </span>
@@ -1202,9 +1202,9 @@ export default function Home() {
           });
         }}
         onCycleSortOption={() => {
-          const options: ("created" | "name" | "complete")[] = [
+          const options: ("created" | "alphabetical" | "complete")[] = [
             "created",
-            "name",
+            "alphabetical",
             "complete",
           ];
           const currentIndex = options.indexOf(sortOption);
