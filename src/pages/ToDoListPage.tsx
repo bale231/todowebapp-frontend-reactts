@@ -318,19 +318,22 @@ export default function ToDoListPage() {
     if (!id) return;
 
     try {
-      // Prima aggiorna il backend
-      await updateSortOrder(id, newSort);
+      console.log("📤 Updating sort order to:", newSort);
 
-      // Aggiorna lo stato locale immediatamente
+      // Prima aggiorna il backend
+      const result = await updateSortOrder(id, newSort);
+      console.log("📥 Backend response:", result);
+
+      // Aggiorna lo stato locale
       setSortOption(newSort);
 
       // Delay per dare tempo al backend di processare
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Ricarica i todos dal backend (ordinati)
-      await fetchTodos(true);
+      await fetchTodos(false);
     } catch (error) {
-      console.error("Errore ordinamento:", error);
+      console.error("❌ Errore ordinamento:", error);
     }
   };
 
