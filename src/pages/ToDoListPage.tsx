@@ -1036,6 +1036,11 @@ function SortableTodo({
   isOwner: boolean;
   currentUserId: number | null;
 }) {
+  const [isMarquee, setIsMarquee] = useState(false);
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [needsMarquee, setNeedsMarquee] = useState(false);
+
   const {
     setNodeRef,
     attributes,
@@ -1051,6 +1056,34 @@ function SortableTodo({
     opacity: isThisItemDragging ? 0.5 : 1,
   };
 
+  // Check if text overflows and needs marquee
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (titleRef.current && containerRef.current) {
+        const textWidth = titleRef.current.scrollWidth;
+        const containerWidth = containerRef.current.clientWidth;
+        setNeedsMarquee(textWidth > containerWidth);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [todo.title]);
+
+  // Stop marquee after animation completes
+  useEffect(() => {
+    if (isMarquee) {
+      const timer = setTimeout(() => setIsMarquee(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMarquee]);
+
+  const handleTitleClick = () => {
+    if (needsMarquee && !isMarquee) {
+      setIsMarquee(true);
+    }
+  };
+
   return (
     <SwipeableTodoItem
       onEdit={onEdit}
@@ -1061,13 +1094,10 @@ function SortableTodo({
       <div
         ref={setNodeRef}
         style={style}
-        className={`flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-6 py-3 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/70 dark:hover:bg-gray-800/70 ${isThisItemDragging ? '' : 'transition-all'}`}
+        className={`flex items-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg px-4 py-3 rounded-xl border border-gray-200/50 dark:border-white/20 shadow-lg text-xl font-semibold hover:bg-white/70 dark:hover:bg-gray-800/70 ${isThisItemDragging ? '' : 'transition-all'}`}
       >
-        <div
-          className={`flex items-center gap-3 ${
-            todo.completed ? "line-through text-gray-400" : ""
-          }`}
-        >
+        {/* Left side - checkbox + check button */}
+        <div className={`flex items-center gap-2 flex-shrink-0 ${todo.completed ? "text-gray-400" : ""}`}>
           {editMode && (
             <label className="inline-flex items-center cursor-pointer">
               <input
@@ -1097,38 +1127,52 @@ function SortableTodo({
 
           <button
             onClick={() => onCheck(todo.id)}
-            className="text-green-600 hover:text-green-800 transition-colors"
+            className="text-green-600 hover:text-green-800 transition-colors flex-shrink-0"
           >
             <CheckSquare size={20} />
           </button>
-
-          <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="truncate">{todo.title}</span>
-              {todo.quantity && todo.unit && (
-                <span className="flex-shrink-0 whitespace-nowrap px-2 py-0.5 bg-blue-500/20 dark:bg-blue-500/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
-                  {todo.quantity} {todo.unit}
-                </span>
-              )}
-            </div>
-            {/* Mostra badge solo se lista è condivisa e l'utente è diverso dall'utente corrente */}
-            {(isShared || !isOwner) && currentUserId && (
-              <>
-                {todo.modified_by && todo.modified_by.id !== todo.created_by?.id && todo.modified_by.id !== currentUserId ? (
-                  <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                    Modificata da {todo.modified_by.full_name}
-                  </span>
-                ) : todo.created_by && todo.created_by.id !== currentUserId ? (
-                  <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                    Aggiunta da {todo.created_by.full_name}
-                  </span>
-                ) : null}
-              </>
-            )}
-          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Center - title with marquee effect */}
+        <div className={`flex-1 min-w-0 mx-3 ${todo.completed ? "line-through text-gray-400" : ""}`}>
+          <div className="flex items-center gap-2">
+            <div
+              ref={containerRef}
+              className="overflow-hidden flex-1 min-w-0 cursor-pointer"
+              onClick={handleTitleClick}
+              title={needsMarquee ? "Tocca per vedere il testo completo" : undefined}
+            >
+              <span
+                ref={titleRef}
+                className={`inline-block whitespace-nowrap ${isMarquee ? 'animate-marquee' : ''}`}
+              >
+                {todo.title}
+              </span>
+            </div>
+            {todo.quantity && todo.unit && (
+              <span className="flex-shrink-0 whitespace-nowrap px-2 py-0.5 bg-blue-500/20 dark:bg-blue-500/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+                {todo.quantity} {todo.unit}
+              </span>
+            )}
+          </div>
+          {/* Mostra badge solo se lista è condivisa e l'utente è diverso dall'utente corrente */}
+          {(isShared || !isOwner) && currentUserId && (
+            <>
+              {todo.modified_by && todo.modified_by.id !== todo.created_by?.id && todo.modified_by.id !== currentUserId ? (
+                <span className="text-xs text-purple-600 dark:text-purple-400 mt-1 block">
+                  Modificata da {todo.modified_by.full_name}
+                </span>
+              ) : todo.created_by && todo.created_by.id !== currentUserId ? (
+                <span className="text-xs text-purple-600 dark:text-purple-400 mt-1 block">
+                  Aggiunta da {todo.created_by.full_name}
+                </span>
+              ) : null}
+            </>
+          )}
+        </div>
+
+        {/* Right side - drag handle and edit buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           <span
             {...attributes}
             {...listeners}
