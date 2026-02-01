@@ -251,6 +251,13 @@ export async function updateSortOrder(listId: number | string, sortOrder: string
     headers: getAuthHeaders(),
     body: JSON.stringify({ sort_order: sortOrder }),
   });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ updateSortOrder failed:", res.status, errorText);
+    throw new Error(`Failed to update sort order: ${res.status}`);
+  }
+
   invalidateCache(new RegExp(`^list:${listId}`));
   return res.json();
 }
