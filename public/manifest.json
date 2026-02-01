@@ -1,61 +1,49 @@
 {
-    "short_name": "ToDoApp",
-    "name": "ToDo WebApp",
-    "icons": [
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "192x192",
-        "purpose": "any"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "192x192",
-        "purpose": "maskable"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "512x512",
-        "purpose": "any"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "512x512",
-        "purpose": "maskable"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "144x144",
-        "purpose": "any"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "72x72",
-        "purpose": "any"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "96x96",
-        "purpose": "any"
-      },
-      {
-        "src": "/assets/apple-touch-icon.png",
-        "type": "image/png",
-        "sizes": "128x128",
-        "purpose": "any"
-      }
-    ],
-    "start_url": "/",
-    "scope": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#0d6efd",
-    "description": "Gestisci le tue attività con facilità",
-    "categories": ["productivity", "utilities"]
-  }
+  "short_name": "ToDoApp",
+  "name": "ToDo WebApp",
+  "icons": [
+    {
+      "src": "/assets/favicon.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/assets/favicon.png",
+      "type": "image/png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#3b82f6",
+  "description": "Gestisci le tue attività con facilità",
+  "categories": ["productivity", "utilities"],
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}
