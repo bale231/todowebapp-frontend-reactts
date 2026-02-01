@@ -108,10 +108,6 @@ export default function Home() {
 
   // Loading state
   const [isLoadingLists, setIsLoadingLists] = useState(true);
-  const [skeletonCount, setSkeletonCount] = useState(() => {
-    const saved = localStorage.getItem("listsCount");
-    return saved ? parseInt(saved, 10) : 6;
-  });
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -254,9 +250,6 @@ export default function Home() {
       const data = await fetchAllLists();
       if (Array.isArray(data)) {
         setLists(data);
-        // Save list count for skeleton on next load
-        localStorage.setItem("listsCount", data.length.toString());
-        setSkeletonCount(data.length);
       } else {
         console.error("Formato risposta non valido:", data);
       }
@@ -711,7 +704,7 @@ export default function Home() {
         {isLoadingLists && (
           <div className="mt-8 mb-8">
             <div className="h-8 w-48 bg-gray-300/60 dark:bg-gray-600/60 rounded-md mb-4 animate-pulse" />
-            <ListCardSkeleton count={skeletonCount > 0 ? skeletonCount : 6} />
+            <ListCardSkeleton count={6} />
           </div>
         )}
 
