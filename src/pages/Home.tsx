@@ -28,6 +28,7 @@ import ShareModal from "../components/ShareModal";
 import BottomNav from "../components/BottomNav";
 import SearchBar from "../components/SearchBar";
 import SupportWidget from "../components/SupportWidget";
+import ListCardSkeleton from "../components/ListCardSkeleton";
 
 interface TodoList {
   id: number;
@@ -104,6 +105,13 @@ export default function Home() {
   // Search state
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Loading state
+  const [isLoadingLists, setIsLoadingLists] = useState(true);
+  const [skeletonCount, setSkeletonCount] = useState(() => {
+    const saved = localStorage.getItem("listsCount");
+    return saved ? parseInt(saved, 10) : 6;
+  });
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -242,14 +250,20 @@ export default function Home() {
 
   const fetchLists = async () => {
     try {
+      setIsLoadingLists(true);
       const data = await fetchAllLists();
       if (Array.isArray(data)) {
         setLists(data);
+        // Save list count for skeleton on next load
+        localStorage.setItem("listsCount", data.length.toString());
+        setSkeletonCount(data.length);
       } else {
         console.error("Formato risposta non valido:", data);
       }
     } catch (err) {
       console.error("Errore nel caricamento liste:", err);
+    } finally {
+      setIsLoadingLists(false);
     }
   };
 
@@ -693,7 +707,15 @@ export default function Home() {
           )}
         </div>
 
-        {sortedLists.length === 0 && (
+        {/* Skeleton loading */}
+        {isLoadingLists && (
+          <div className="mt-8 mb-8">
+            <div className="h-8 w-48 bg-gray-300/60 dark:bg-gray-600/60 rounded-md mb-4 animate-pulse" />
+            <ListCardSkeleton count={skeletonCount > 0 ? skeletonCount : 6} />
+          </div>
+        )}
+
+        {!isLoadingLists && sortedLists.length === 0 && (
           <div className="mt-6 p-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-xl shadow-lg">
             {searchQuery.trim() ? (
               <div className="text-center">
@@ -713,7 +735,7 @@ export default function Home() {
           </div>
         )}
 
-        <main className="flex-1 mt-8 mb-8 overflow-y-auto pr-2 pb-24">
+        {!isLoadingLists && <main className="flex-1 mt-8 mb-8 overflow-y-auto pr-2 pb-24">
           {groupedLists.map((group, groupIdx) => (
             <div key={groupIdx} className="mb-8">
               <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
@@ -883,7 +905,7 @@ export default function Home() {
               </div>
             </div>
           ))}
-        </main>
+        </main>}
       </div>
 
       {/* FAB con bottoni verticali verso l'alto - Solo Desktop */}
