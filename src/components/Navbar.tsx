@@ -1,29 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
-import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getCurrentUserJWT } from "../api/auth";
 import { logout } from "../api/auth";
 import NotificationBadge from "./NotificationBadge";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-  };
-
-  return (
-    <button
-      onClick={toggleTheme}
-      className="text-blue-600 dark:text-yellow-400 hover:scale-105 transition"
-    >
-      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-    </button>
-  );
-}
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const navigate = useNavigate();
