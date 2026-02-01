@@ -270,7 +270,6 @@ export default function ToDoListPage() {
         editedTodo.unit
       );
       setEditedTodo(null);
-      shouldAnimate.current = false;
       fetchTodos();
     }
   };
@@ -386,7 +385,6 @@ export default function ToDoListPage() {
   }, []);
 
   useEffect(() => {
-    shouldAnimate.current = true;
     fetchTodos();
     loadAllLists();
   }, [fetchTodos]);
