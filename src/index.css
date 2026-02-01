@@ -82,6 +82,26 @@ body, * {
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
+/* Marquee text animation for long todo titles */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(0);
+  }
+  90% {
+    transform: translateX(calc(-100% + 100px));
+  }
+  100% {
+    transform: translateX(calc(-100% + 100px));
+  }
+}
+
+.animate-marquee {
+  animation: marquee 4s ease-in-out forwards;
+}
+
 /* ===== THEME TOGGLE SWITCH ===== */
 .theme-switch {
   position: relative;
