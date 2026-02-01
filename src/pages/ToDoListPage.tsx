@@ -97,7 +97,6 @@ export default function ToDoListPage() {
   const { themeLoaded } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const shouldAnimate = useRef(true);
   const wasModalClosed = useRef(true);
   const [sortOption, setSortOption] = useState<
     "created" | "name" | "complete"
@@ -142,15 +141,33 @@ export default function ToDoListPage() {
     })
   );
 
-  const animateTodos = () => {
-    if (listRef.current) {
+  // Check if this specific list has already been animated in this session
+  const hasAnimatedThisList = useCallback(() => {
+    const animatedLists = sessionStorage.getItem("animatedLists");
+    if (!animatedLists) return false;
+    const lists = JSON.parse(animatedLists);
+    return lists.includes(id);
+  }, [id]);
+
+  const markListAsAnimated = useCallback(() => {
+    const animatedLists = sessionStorage.getItem("animatedLists");
+    const lists = animatedLists ? JSON.parse(animatedLists) : [];
+    if (!lists.includes(id)) {
+      lists.push(id);
+      sessionStorage.setItem("animatedLists", JSON.stringify(lists));
+    }
+  }, [id]);
+
+  const animateTodos = useCallback(() => {
+    if (listRef.current && !hasAnimatedThisList()) {
       gsap.fromTo(
         listRef.current.children,
         { x: 30, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power2.out" }
       );
+      markListAsAnimated();
     }
-  };
+  }, [hasAnimatedThisList, markListAsAnimated]);
 
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
@@ -190,12 +207,10 @@ export default function ToDoListPage() {
         setSharedWith([]);
       }
 
-      if (shouldAnimate.current) {
-        setTimeout(() => animateTodos(), 50);
-        shouldAnimate.current = false;
-      }
+      // Animate only on first visit to this list in current session
+      setTimeout(() => animateTodos(), 50);
     },
-    [id]
+    [id, animateTodos]
   );
 
   // Carica tutte le liste per la modale Sposta
