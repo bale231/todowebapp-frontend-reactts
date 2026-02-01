@@ -320,13 +320,24 @@ export default function ToDoListPage() {
     try {
       await updateSortOrder(id, newSort);
       setSortOption(newSort);
-
-      // Piccolo delay per assicurarsi che il backend abbia processato
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      await fetchTodos(false); // Ricarica tutto dal backend
+      await fetchTodos(true); // Ricarica dal backend ma preserva il sort option selezionato
     } catch (error) {
       console.error("Errore ordinamento:", error);
+    }
+  };
+
+  // Chiude il menu sort con animazione
+  const closeSortMenu = () => {
+    if (sortMenuRef.current) {
+      gsap.to(sortMenuRef.current, {
+        y: 100,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => setShowSortMenu(false),
+      });
+    } else {
+      setShowSortMenu(false);
     }
   };
 
@@ -873,12 +884,12 @@ export default function ToDoListPage() {
       {/* Menu di sorting - Solo Mobile */}
       {showSortMenu && (
         <div
-          className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-end justify-center z-50 lg:hidden"
-          onClick={() => setShowSortMenu(false)}
+          className="fixed inset-0 bg-black/30 dark:bg-black/40 backdrop-blur-sm flex items-end justify-center z-50 lg:hidden pb-20"
+          onClick={closeSortMenu}
         >
           <div
             ref={sortMenuRef}
-            className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl w-full rounded-t-3xl p-6 border-t border-gray-200/50 dark:border-white/20 shadow-2xl"
+            className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl w-full rounded-t-3xl p-6 pb-8 border-t border-gray-200/50 dark:border-white/20 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4 text-center">Ordina per</h3>
@@ -887,7 +898,7 @@ export default function ToDoListPage() {
               <button
                 onClick={async () => {
                   await handleSortOptionSelect("created");
-                  setShowSortMenu(false);
+                  closeSortMenu();
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
                   sortOption === "created"
@@ -901,7 +912,7 @@ export default function ToDoListPage() {
               <button
                 onClick={async () => {
                   await handleSortOptionSelect("name");
-                  setShowSortMenu(false);
+                  closeSortMenu();
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
                   sortOption === "name"
@@ -915,7 +926,7 @@ export default function ToDoListPage() {
               <button
                 onClick={async () => {
                   await handleSortOptionSelect("complete");
-                  setShowSortMenu(false);
+                  closeSortMenu();
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
                   sortOption === "complete"
@@ -928,7 +939,7 @@ export default function ToDoListPage() {
             </div>
 
             <button
-              onClick={() => setShowSortMenu(false)}
+              onClick={closeSortMenu}
               className="w-full mt-4 px-4 py-3 bg-gray-300/50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-300/70 dark:hover:bg-gray-700/70 transition-all"
             >
               Annulla
