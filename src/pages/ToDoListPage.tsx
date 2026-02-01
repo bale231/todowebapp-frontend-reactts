@@ -1102,11 +1102,11 @@ function SortableTodo({
             <CheckSquare size={20} />
           </button>
 
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span>{todo.title}</span>
+              <span className="truncate">{todo.title}</span>
               {todo.quantity && todo.unit && (
-                <span className="px-2 py-0.5 bg-blue-500/20 dark:bg-blue-500/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+                <span className="flex-shrink-0 whitespace-nowrap px-2 py-0.5 bg-blue-500/20 dark:bg-blue-500/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
                   {todo.quantity} {todo.unit}
                 </span>
               )}
