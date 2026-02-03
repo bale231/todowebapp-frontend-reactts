@@ -53,7 +53,14 @@ export default function BottomNav({
           {/* Home */}
           {showHome && (
             <button
-              onClick={() => navigate("/home")}
+              onClick={() => {
+                if (isHome) {
+                  // Se già sulla home, scroll to top con effetto smooth
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                } else {
+                  navigate("/home");
+                }
+              }}
               className={`flex flex-col items-center gap-0.5 min-w-[64px] py-1.5 rounded-2xl transition-all active:scale-95 ${
                 isHome
                   ? "text-blue-600 dark:text-blue-400"
