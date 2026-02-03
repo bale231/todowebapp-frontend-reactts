@@ -29,6 +29,7 @@ import BottomNav from "../components/BottomNav";
 import SearchBar from "../components/SearchBar";
 import SupportWidget from "../components/SupportWidget";
 import ListCardSkeleton from "../components/ListCardSkeleton";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 interface TodoList {
   id: number;
@@ -562,11 +563,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-500">Caricamento...</div>
-      </div>
-    );
+    return <LoadingOverlay blur={false} />;
   }
 
   return (

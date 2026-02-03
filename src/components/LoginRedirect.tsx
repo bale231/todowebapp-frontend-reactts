@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingOverlay from "./LoadingOverlay";
 
 export default function LoginRedirect() {
   const navigate = useNavigate();
@@ -19,9 +20,5 @@ export default function LoginRedirect() {
       .catch(() => navigate("/"));
   }, [navigate]);
 
-  return (
-    <div className="h-screen flex items-center justify-center text-lg">
-      Caricamento in corso...
-    </div>
-  );
+  return <LoadingOverlay blur={false} />;
 }

@@ -6,6 +6,7 @@ import UserCard from "../components/UserCard";
 import { useTheme } from "../context/ThemeContext";
 import AnimatedAlert from "../components/AnimatedAlert";
 import BottomNav from "../components/BottomNav";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -146,7 +147,7 @@ export default function UsersPage() {
       </div>
 
       {loading ? (
-        <p className="text-center text-gray-500">Caricamento...</p>
+        <LoadingOverlay />
       ) : !searchQuery.trim() ? (
         <p className="text-center text-gray-500 mt-10">
           Digita un username per cercare utenti

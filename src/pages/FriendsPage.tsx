@@ -5,6 +5,7 @@ import { fetchFriends, removeFriend, Friendship } from "../api/friends";
 import UserCard from "../components/UserCard";
 import { useTheme } from "../context/ThemeContext";
 import BottomNav from "../components/BottomNav";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 export default function FriendsPage() {
   const [friends, setFriends] = useState<Friendship[]>([]);
@@ -56,7 +57,7 @@ export default function FriendsPage() {
       </div>
 
       {loading ? (
-        <p>Caricamento...</p>
+        <LoadingOverlay />
       ) : friends.length === 0 ? (
         <p className="text-center text-gray-500 mt-10">
           Non hai ancora amici
