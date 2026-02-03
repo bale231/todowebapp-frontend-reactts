@@ -87,19 +87,19 @@ body, * {
   0% {
     transform: translateX(0);
   }
-  10% {
+  5% {
     transform: translateX(0);
   }
-  90% {
-    transform: translateX(calc(-100% + 100px));
+  95% {
+    transform: translateX(calc(-100% + 80px));
   }
   100% {
-    transform: translateX(calc(-100% + 100px));
+    transform: translateX(calc(-100% + 80px));
   }
 }
 
 .animate-marquee {
-  animation: marquee 4s ease-in-out forwards;
+  animation: marquee 2.5s ease-in-out forwards;
 }
 
 /* ===== THEME TOGGLE SWITCH ===== */
