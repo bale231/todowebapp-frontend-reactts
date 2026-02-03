@@ -1130,7 +1130,7 @@ function SortableTodo({
         </div>
 
         {/* Center - title with marquee effect */}
-        <div className={`flex-1 min-w-0 mx-3 ${todo.completed ? "line-through text-gray-400" : ""}`}>
+        <div className={`flex-1 min-w-0 mx-3 ${todo.completed ? "text-gray-400" : ""}`}>
           <div className="flex items-center gap-2">
             <div
               ref={containerRef}
@@ -1140,7 +1140,7 @@ function SortableTodo({
             >
               <span
                 ref={titleRef}
-                className={`inline-block whitespace-nowrap ${isMarquee ? 'animate-marquee' : ''}`}
+                className={`inline-block whitespace-nowrap ${isMarquee ? 'animate-marquee' : ''} ${todo.completed ? 'line-through' : ''}`}
               >
                 {todo.title}
               </span>
