@@ -11,6 +11,7 @@ import {
   logout,
 } from "../api/auth";
 import { Bell, BellOff, Key, LogOut } from "lucide-react";
+import { useFirebaseNotifications } from "../hooks/useFirebaseNotifications";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ export default function Profile() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
+  const { requestPermission, notificationPermission } = useFirebaseNotifications();
 
   useEffect(() => {
     gsap.fromTo(
@@ -173,19 +176,62 @@ export default function Profile() {
 
   const handleToggleNotifications = async () => {
     const newValue = !pushNotificationsEnabled;
-    setPushNotificationsEnabled(newValue);
+    setIsTogglingNotifications(true);
 
-    const res = await updateNotificationPreferences(newValue);
-    if (res.message === "Preferences updated") {
-      showAlert(
-        newValue
-          ? "Notifiche push attivate"
-          : "Notifiche push disattivate (notifiche in-app sempre attive)",
-        "success"
-      );
-    } else {
-      showAlert("Errore nell'aggiornamento preferenze", "error");
-      setPushNotificationsEnabled(!newValue);
+    try {
+      if (newValue) {
+        // Attivando le notifiche: richiedi permessi browser e registra FCM token
+        if (!("Notification" in window)) {
+          showAlert("Il tuo browser non supporta le notifiche push", "error");
+          setIsTogglingNotifications(false);
+          return;
+        }
+
+        // Se i permessi sono già negati, avvisa l'utente
+        if (notificationPermission === "denied") {
+          showAlert(
+            "Hai bloccato le notifiche. Vai nelle impostazioni del browser per sbloccarle.",
+            "error"
+          );
+          setIsTogglingNotifications(false);
+          return;
+        }
+
+        // Richiedi permesso e registra token FCM
+        const token = await requestPermission();
+
+        if (!token) {
+          showAlert(
+            "Non è stato possibile attivare le notifiche. Assicurati di consentire i permessi.",
+            "error"
+          );
+          setIsTogglingNotifications(false);
+          return;
+        }
+
+        // Aggiorna preferenze sul backend
+        const res = await updateNotificationPreferences(true);
+        if (res.message === "Preferences updated") {
+          setPushNotificationsEnabled(true);
+          showAlert("Notifiche push attivate con successo!", "success");
+        } else {
+          showAlert("Errore nell'aggiornamento preferenze", "error");
+        }
+      } else {
+        // Disattivando le notifiche: solo aggiorna il flag sul backend
+        const res = await updateNotificationPreferences(false);
+        if (res.message === "Preferences updated") {
+          setPushNotificationsEnabled(false);
+          showAlert("Notifiche push disattivate (notifiche in-app sempre attive)", "success");
+        } else {
+          showAlert("Errore nell'aggiornamento preferenze", "error");
+        }
+      }
+    } catch (error) {
+      console.error("Errore toggle notifiche:", error);
+      showAlert("Errore durante l'operazione", "error");
+    } finally {
+      setIsTogglingNotifications(false);
     }
   };
 
@@ -408,17 +454,24 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={handleToggleNotifications}
+                disabled={isTogglingNotifications}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   pushNotificationsEnabled
                     ? "bg-blue-600"
                     : "bg-gray-300 dark:bg-gray-600"
-                }`}
+                } ${isTogglingNotifications ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    pushNotificationsEnabled ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
+                {isTogglingNotifications ? (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </span>
+                ) : (
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      pushNotificationsEnabled ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                )}
               </button>
             </div>
           </div>
