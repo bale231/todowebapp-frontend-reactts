@@ -9,6 +9,7 @@ import {
 } from "../api/friends";
 import { useTheme } from "../context/ThemeContext";
 import BottomNav from "../components/BottomNav";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 export default function FriendRequestsPage() {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -75,7 +76,7 @@ export default function FriendRequestsPage() {
       </div>
 
       {loading ? (
-        <p>Caricamento...</p>
+        <LoadingOverlay />
       ) : requests.length === 0 ? (
         <p className="text-center text-gray-500 mt-10">
           Nessuna richiesta in sospeso
