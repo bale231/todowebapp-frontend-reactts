@@ -45,7 +45,6 @@ import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
 import BottomNav from "../components/BottomNav";
 import SearchBar from "../components/SearchBar";
-import TodoSkeleton from "../components/TodoSkeleton";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -559,10 +558,24 @@ export default function ToDoListPage() {
         </button>
       </div>
 
-      {/* Skeleton loading */}
+      {/* Loading overlay with blur */}
       {isLoadingTodos && (
-        <div className="pb-24">
-          <TodoSkeleton count={6} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 dark:bg-gray-900/30 backdrop-blur-md">
+          <div className="flex flex-col items-center gap-4">
+            <img
+              src="/assets/logo-themedark.png"
+              alt="ToDoApp Logo"
+              width={150}
+              className="animate-pulse dark:block hidden"
+            />
+            <img
+              src="/assets/logo-themelight.png"
+              alt="ToDoApp Logo"
+              width={150}
+              className="animate-pulse dark:hidden block"
+            />
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          </div>
         </div>
       )}
 
@@ -1073,7 +1086,7 @@ function SortableTodo({
   // Stop marquee after animation completes
   useEffect(() => {
     if (isMarquee) {
-      const timer = setTimeout(() => setIsMarquee(false), 4000);
+      const timer = setTimeout(() => setIsMarquee(false), 2500);
       return () => clearTimeout(timer);
     }
   }, [isMarquee]);
