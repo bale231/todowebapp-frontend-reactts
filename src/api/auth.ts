@@ -208,13 +208,34 @@ export const updateTheme = async (theme: string) => {
 
 // 🔔 Aggiorna preferenze notifiche push
 export const updateNotificationPreferences = async (pushEnabled: boolean) => {
-  const res = await fetch(`${API_URL}/notifications/preferences/`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || ""}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ push_notifications_enabled: pushEnabled }),
-  });
-  return res.json();
+  try {
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || "";
+    console.log("Token usato:", token ? "presente" : "assente");
+    console.log("Invio richiesta PATCH a:", `${API_URL}/notifications/preferences/`);
+    console.log("Body:", { push_notifications_enabled: pushEnabled });
+
+    const res = await fetch(`${API_URL}/notifications/preferences/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ push_notifications_enabled: pushEnabled }),
+    });
+
+    console.log("Status risposta:", res.status);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Errore risposta:", errorText);
+      return { error: `HTTP ${res.status}`, message: errorText };
+    }
+
+    const data = await res.json();
+    console.log("Dati risposta:", data);
+    return data;
+  } catch (error) {
+    console.error("Errore fetch:", error);
+    return { error: "Network error", message: String(error) };
+  }
 };

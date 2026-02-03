@@ -211,20 +211,26 @@ export default function Profile() {
 
         // Aggiorna preferenze sul backend
         const res = await updateNotificationPreferences(true);
-        if (res.message === "Preferences updated") {
+        console.log("Risposta backend (attiva):", res);
+
+        // Accetta diverse risposte positive dal backend
+        if (res.message === "Preferences updated" || res.success || res.push_notifications_enabled !== undefined) {
           setPushNotificationsEnabled(true);
           showAlert("Notifiche push attivate con successo!", "success");
         } else {
-          showAlert("Errore nell'aggiornamento preferenze", "error");
+          showAlert(res.error || res.message || "Errore nell'aggiornamento preferenze", "error");
         }
       } else {
         // Disattivando le notifiche: solo aggiorna il flag sul backend
         const res = await updateNotificationPreferences(false);
-        if (res.message === "Preferences updated") {
+        console.log("Risposta backend (disattiva):", res);
+
+        // Accetta diverse risposte positive dal backend
+        if (res.message === "Preferences updated" || res.success || res.push_notifications_enabled !== undefined) {
           setPushNotificationsEnabled(false);
           showAlert("Notifiche push disattivate (notifiche in-app sempre attive)", "success");
         } else {
-          showAlert("Errore nell'aggiornamento preferenze", "error");
+          showAlert(res.error || res.message || "Errore nell'aggiornamento preferenze", "error");
         }
       }
     } catch (error) {
