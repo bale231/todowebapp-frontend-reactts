@@ -588,7 +588,7 @@ export default function ToDoListPage() {
           >
             <div
               ref={listRef}
-              className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 pb-24"
+              className="space-y-3 pr-1 pb-32 lg:pb-8"
             >
               {displayedTodos.map((todo) => (
                 <SortableTodo
