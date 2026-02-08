@@ -117,6 +117,25 @@ export async function deleteList(listId: number) {
   return res.json();
 }
 
+// 📦 Archivia/Disarchivia lista
+export async function archiveList(listId: number) {
+  const res = await fetch(`${API_URL}/lists/${listId}/archive/`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+  invalidateCache(/^lists?:/);
+  return res.json();
+}
+
+export async function unarchiveList(listId: number) {
+  const res = await fetch(`${API_URL}/lists/${listId}/unarchive/`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+  invalidateCache(/^lists?:/);
+  return res.json();
+}
+
 // --- 📂 CATEGORIE ---
 // Lista tutte le categorie
 export async function fetchAllCategories() {
