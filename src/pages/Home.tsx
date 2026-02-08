@@ -17,9 +17,11 @@ import {
   Share2,
   Search,
   X,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { fetchAllLists, editList, deleteList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
+import { fetchAllLists, editList, deleteList, archiveList, unarchiveList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
 import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
@@ -40,6 +42,7 @@ interface TodoList {
   category?: Category | null;
   is_owner?: boolean;
   is_shared?: boolean;
+  is_archived?: boolean;
   can_edit?: boolean;
   shared_by?: {
     id: number;
@@ -109,6 +112,9 @@ export default function Home() {
 
   // Loading state
   const [isLoadingLists, setIsLoadingLists] = useState(true);
+
+  // Archive filter state
+  const [showArchived, setShowArchived] = useState(false);
 
   const API_URL = "https://bale231.pythonanywhere.com/api";
   const navigate = useNavigate();
@@ -417,6 +423,22 @@ export default function Home() {
     }
   };
 
+  const handleArchiveList = async (id: number, isCurrentlyArchived: boolean) => {
+    try {
+      if (isCurrentlyArchived) {
+        await unarchiveList(id);
+        setAlert({ type: "success", message: "Lista ripristinata" });
+      } else {
+        await archiveList(id);
+        setAlert({ type: "success", message: "Lista archiviata" });
+      }
+      fetchLists();
+    } catch (error) {
+      console.error("Errore archivio:", error);
+      setAlert({ type: "error", message: "Errore durante l'operazione" });
+    }
+  };
+
   const handleCreateOrEditCat = async () => {
     if (!catName.trim()) {
       setAlert({
@@ -493,9 +515,17 @@ export default function Home() {
   }, [lists, searchQuery]);
 
   // Apply category filter on top of search
-  const filteredLists = selectedCategory
+  const categoryFilteredLists = selectedCategory
     ? searchFilteredLists.filter((l) => l.category && l.category.id === selectedCategory.id)
     : searchFilteredLists;
+
+  // Apply archive filter
+  const filteredLists = categoryFilteredLists.filter((l) =>
+    showArchived ? l.is_archived : !l.is_archived
+  );
+
+  // Count archived lists for badge
+  const archivedCount = categoryFilteredLists.filter((l) => l.is_archived).length;
 
   // Get matching todos for each list (for highlighting in search results)
   const getMatchingTodos = useCallback(
@@ -620,8 +650,8 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Seconda riga: Nuova Categoria + Cerca */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        {/* Seconda riga: Nuova Categoria + Archivio + Cerca */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <button
             onClick={() => {
               setShowCatForm(true);
@@ -631,7 +661,26 @@ export default function Home() {
             className="flex items-center justify-center gap-2 bg-yellow-500/80 text-white py-3 px-4 rounded-xl font-medium shadow-lg hover:bg-yellow-500/90 hover:scale-[1.02] transition-all"
           >
             <Plus size={20} />
-            <span className="text-sm font-medium">Nuova Categoria</span>
+            <span className="text-sm font-medium hidden sm:inline">Categoria</span>
+          </button>
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium shadow-lg hover:scale-[1.02] transition-all relative ${
+              showArchived
+                ? "bg-orange-500/80 text-white hover:bg-orange-500/90"
+                : "bg-gray-500/80 text-white hover:bg-gray-500/90"
+            }`}
+            title={showArchived ? "Mostra liste attive" : "Mostra archivio"}
+          >
+            {showArchived ? <ArchiveRestore size={20} /> : <Archive size={20} />}
+            <span className="text-sm font-medium hidden sm:inline">
+              {showArchived ? "Attive" : "Archivio"}
+            </span>
+            {archivedCount > 0 && !showArchived && (
+              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {archivedCount}
+              </span>
+            )}
           </button>
           {!searchOpen && (
             <button
@@ -640,7 +689,7 @@ export default function Home() {
               title="Cerca"
             >
               <Search size={20} />
-              <span className="text-sm font-medium">Cerca</span>
+              <span className="text-sm font-medium hidden sm:inline">Cerca</span>
             </button>
           )}
           {searchOpen && (
@@ -649,7 +698,7 @@ export default function Home() {
               className="flex items-center justify-center gap-2 bg-red-500/80 text-white py-3 px-4 rounded-xl font-medium shadow-lg hover:bg-red-500/90 hover:scale-[1.02] transition-all"
             >
               <X size={20} />
-              <span className="text-sm font-medium">Chiudi Ricerca</span>
+              <span className="text-sm font-medium hidden sm:inline">Chiudi</span>
             </button>
           )}
         </div>
@@ -745,6 +794,8 @@ export default function Home() {
                       key={list.id}
                       onEdit={() => handleEditList(list)}
                       onDelete={() => handleDeleteList(list.id)}
+                      onArchive={() => handleArchiveList(list.id, list.is_archived || false)}
+                      isArchived={list.is_archived || false}
                       label={list.name}
                     >
                       <div
@@ -834,6 +885,23 @@ export default function Home() {
                                 title="Condividi lista"
                               >
                                 <Share2 size={18} />
+                              </button>
+                            )}
+                            {/* Pulsante Archivia/Ripristina */}
+                            {list.is_owner !== false && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleArchiveList(list.id, list.is_archived || false);
+                                }}
+                                className={`p-2 rounded-lg transition-all ${
+                                  list.is_archived
+                                    ? "bg-green-100/80 dark:bg-green-900/80 text-green-600 dark:text-green-400 hover:bg-green-200/80 dark:hover:bg-green-800/80"
+                                    : "bg-orange-100/80 dark:bg-orange-900/80 text-orange-600 dark:text-orange-400 hover:bg-orange-200/80 dark:hover:bg-orange-800/80"
+                                }`}
+                                title={list.is_archived ? "Ripristina lista" : "Archivia lista"}
+                              >
+                                {list.is_archived ? <ArchiveRestore size={18} /> : <Archive size={18} />}
                               </button>
                             )}
                             {/* Pulsanti Edit e Delete solo per liste di proprietà */}

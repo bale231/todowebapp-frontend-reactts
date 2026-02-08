@@ -2,19 +2,21 @@
 import { ReactNode, useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Archive, ArchiveRestore } from "lucide-react";
 
 export interface SwipeableListItemProps {
   children: ReactNode;
   label: string;
   onEdit: () => void;
   onDelete: () => void;
+  onArchive?: () => void;
+  isArchived?: boolean;
 }
 
 const ACTION_WIDTH = 60; // Quanto swipe mostra
 const BUTTON_WIDTH = 100; // Larghezza reale del bottone (estremamente largo per coprire tutto)
 
-export default function SwipeableListItem({ children, label, onEdit, onDelete }: SwipeableListItemProps) {
+export default function SwipeableListItem({ children, label, onEdit, onDelete, onArchive, isArchived = false }: SwipeableListItemProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -122,18 +124,20 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete }:
           </button>
         </div>
 
-        {/* Azione Destra - ELIMINA (nascosta inizialmente, rivelata quando swipe sinistro) */}
-        <div
-          className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm"
-          style={{ width: BUTTON_WIDTH, right: 0 }}
-        >
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="w-full h-full flex items-center justify-end pr-5 text-white hover:bg-red-600/80 transition-all"
+        {/* Azione Destra - ARCHIVIA/DISARCHIVIA (nascosta inizialmente, rivelata quando swipe sinistro) */}
+        {onArchive && (
+          <div
+            className={`absolute inset-y-0 ${isArchived ? 'bg-green-500/80' : 'bg-orange-500/80'} backdrop-blur-sm`}
+            style={{ width: BUTTON_WIDTH, right: 0 }}
           >
-            <Trash size={20} />
-          </button>
-        </div>
+            <button
+              onClick={onArchive}
+              className={`w-full h-full flex items-center justify-end pr-5 text-white ${isArchived ? 'hover:bg-green-600/80' : 'hover:bg-orange-600/80'} transition-all`}
+            >
+              {isArchived ? <ArchiveRestore size={20} /> : <Archive size={20} />}
+            </button>
+          </div>
+        )}
 
         {/* Contenuto principale swipeable */}
         <div
