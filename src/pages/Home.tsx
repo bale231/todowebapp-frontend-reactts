@@ -768,7 +768,9 @@ export default function Home() {
               </div>
             ) : (
               <p className="text-lg text-gray-700 dark:text-gray-300 text-center">
-                Qui andranno le tue liste ToDo animate
+                {showArchived
+                  ? "Qui andranno le tue ToDo Archiviate"
+                  : "Qui andranno le tue liste ToDo animate"}
               </p>
             )}
           </div>
