@@ -57,10 +57,13 @@ export default function Register() {
         { opacity: 0, x: 100 },
         { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }
       );
+      // Auto-dismiss after 4 seconds
+      const timer = setTimeout(() => setError(""), 4000);
+      return () => clearTimeout(timer);
     }
   }, [error]);
 
-  
+
   useEffect(() => {
     if (logoRef.current) {
       gsap.fromTo(

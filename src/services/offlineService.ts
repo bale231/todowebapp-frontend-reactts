@@ -648,8 +648,8 @@ export async function editCategoryOffline(
 /**
  * Get current user with offline fallback.
  * - Online: fetches from API, saves to IndexedDB, returns user
- * - Offline: returns cached user from IndexedDB (if previously logged in)
- * - No token & no cached user: returns null (user must login)
+ * - Offline: returns cached user from IndexedDB, or a placeholder if token exists
+ * - No token: returns null (user must login)
  */
 export async function getCurrentUserOfflineFirst(): Promise<LocalUserProfile | null> {
   const token =
@@ -676,7 +676,16 @@ export async function getCurrentUserOfflineFirst(): Promise<LocalUserProfile | n
 
   // Offline or API failed: return cached profile
   const cached = await getLocalUserProfile();
-  return cached || null;
+  if (cached) return cached;
+
+  // Token exists but no cached profile (first time offline with new code)
+  // Return a placeholder so the app doesn't redirect to login
+  return {
+    id: 0,
+    username: "Utente",
+    email: "",
+    profile_picture: null,
+  };
 }
 
 // Re-export auth headers for components that need them
