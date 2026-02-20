@@ -54,6 +54,14 @@ export default function ResetPassword() {
     }
   }, []);
 
+  // Auto-dismiss error after 4 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");

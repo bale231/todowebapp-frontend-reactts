@@ -39,6 +39,14 @@ export default function Login() {
     checkAlreadyLoggedIn();
   }, [navigate]);
 
+  // Auto-dismiss error after 4 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // forzo tema chiaro alla pagina di login
   useLayoutEffect(() => {
     if (checkingAuth) return; // Don't change theme while checking
