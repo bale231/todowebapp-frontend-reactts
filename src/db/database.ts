@@ -53,6 +53,16 @@ export interface LocalCategory {
   } | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface LocalUserProfile {
+  id: number;
+  username: string;
+  email: string;
+  profile_picture: string | null;
+  push_notifications_enabled?: boolean;
+  [key: string]: any;
+}
+
 export interface SyncQueueEntry {
   id?: number;
   action: string;
@@ -70,14 +80,16 @@ class TodoAppDB extends Dexie {
   lists!: Table<LocalTodoList, number>;
   categories!: Table<LocalCategory, number>;
   syncQueue!: Table<SyncQueueEntry, number>;
+  userProfile!: Table<LocalUserProfile, number>;
 
   constructor() {
     super("TodoAppOfflineDB");
 
-    this.version(1).stores({
+    this.version(2).stores({
       lists: "id, name, is_archived",
       categories: "id, name",
       syncQueue: "++id, action, timestamp",
+      userProfile: "id",
     });
   }
 }
@@ -138,8 +150,22 @@ export async function clearSyncQueue(): Promise<void> {
   await db.syncQueue.clear();
 }
 
+export async function saveUserProfile(user: LocalUserProfile): Promise<void> {
+  await db.userProfile.put(user);
+}
+
+export async function getLocalUserProfile(): Promise<LocalUserProfile | undefined> {
+  // Return the first (and only) user profile
+  return db.userProfile.toCollection().first();
+}
+
+export async function clearUserProfile(): Promise<void> {
+  await db.userProfile.clear();
+}
+
 export async function clearAllLocalData(): Promise<void> {
   await db.lists.clear();
   await db.categories.clear();
   await db.syncQueue.clear();
+  await db.userProfile.clear();
 }

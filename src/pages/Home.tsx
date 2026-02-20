@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUserJWT } from "../api/auth";
+import { getCurrentUserOfflineFirst } from "../services/offlineService";
 import Navbar from "../components/Navbar";
 import gsap from "gsap";
 import {
@@ -143,38 +143,41 @@ export default function Home() {
 
   useEffect(() => {
     const loadUserAndPref = async () => {
-      const resUser = await getCurrentUserJWT();
+      const resUser = await getCurrentUserOfflineFirst();
       if (!resUser) return navigate("/");
       setUser(resUser);
 
-      try {
-        const res = await fetch(`${API_URL}/lists/sort_order/`, {
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-          },
-        });
-        if (res.ok) {
-          const { sort_order } = await res.json();
-          setSortOption(
-            sort_order === "alphabetical"
-              ? "alphabetical"
-              : sort_order === "complete"
-              ? "complete"
-              : "created"
-          );
-        }
+      // Le preferenze di ordinamento sono solo su API, fallback ai default se offline
+      if (navigator.onLine) {
+        try {
+          const res = await fetch(`${API_URL}/lists/sort_order/`, {
+            headers: {
+              Authorization: `Bearer ${getAccessToken()}`,
+            },
+          });
+          if (res.ok) {
+            const { sort_order } = await res.json();
+            setSortOption(
+              sort_order === "alphabetical"
+                ? "alphabetical"
+                : sort_order === "complete"
+                ? "complete"
+                : "created"
+            );
+          }
 
-        const catRes = await fetch(`${API_URL}/categories/sort_preference/`, {
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-          },
-        });
-        if (catRes.ok) {
-          const { category_sort_alpha } = await catRes.json();
-          setCategorySortAlpha(category_sort_alpha);
+          const catRes = await fetch(`${API_URL}/categories/sort_preference/`, {
+            headers: {
+              Authorization: `Bearer ${getAccessToken()}`,
+            },
+          });
+          if (catRes.ok) {
+            const { category_sort_alpha } = await catRes.json();
+            setCategorySortAlpha(category_sort_alpha);
+          }
+        } catch (err) {
+          console.error("Impossibile caricare preferenze:", err);
         }
-      } catch (err) {
-        console.error("Impossibile caricare preferenze:", err);
       }
     };
     loadUserAndPref();

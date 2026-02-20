@@ -11,7 +11,7 @@ import {
   Users,
   Search,
 } from "lucide-react";
-import { getCurrentUserJWT } from "../api/auth";
+import { getCurrentUserOfflineFirst } from "../services/offlineService";
 import gsap from "gsap";
 import {
   DndContext,
@@ -404,7 +404,7 @@ export default function ToDoListPage() {
   // Carica l'ID dell'utente corrente
   useEffect(() => {
     const loadCurrentUser = async () => {
-      const user = await getCurrentUserJWT();
+      const user = await getCurrentUserOfflineFirst();
       if (user && user.id) {
         setCurrentUserId(user.id);
       }

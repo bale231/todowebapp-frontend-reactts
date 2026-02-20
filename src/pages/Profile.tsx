@@ -4,12 +4,12 @@ import gsap from "gsap";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 import {
-  getCurrentUserJWT,
   updateProfile,
   deactivateAccount,
   updateNotificationPreferences,
   logout,
 } from "../api/auth";
+import { getCurrentUserOfflineFirst } from "../services/offlineService";
 import { Bell, BellOff, Key, LogOut } from "lucide-react";
 import { useFirebaseNotifications } from "../hooks/useFirebaseNotifications";
 import { useNetwork } from "../context/NetworkContext";
@@ -67,7 +67,7 @@ export default function Profile() {
   }, [showResetPasswordModal]);
 
   const fetchUserData = async () => {
-    const user = await getCurrentUserJWT();
+    const user = await getCurrentUserOfflineFirst();
     if (user) {
       setUsername(user.username);
       setEmail(user.email);

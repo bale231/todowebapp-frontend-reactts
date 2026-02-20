@@ -16,10 +16,14 @@ import {
   saveCategoriesToLocal,
   getLocalCategories,
   addToSyncQueue,
+  saveUserProfile,
+  getLocalUserProfile,
   type LocalTodoList,
   type LocalCategory,
+  type LocalUserProfile,
 } from "../db/database";
 import { getAuthHeaders } from "../api/todos";
+import { getCurrentUserJWT } from "../api/auth";
 import {
   invalidateCache,
 } from "../utils/apiCache";
@@ -637,6 +641,42 @@ export async function editCategoryOffline(
   });
 
   return true;
+}
+
+// --- USER PROFILE ---
+
+/**
+ * Get current user with offline fallback.
+ * - Online: fetches from API, saves to IndexedDB, returns user
+ * - Offline: returns cached user from IndexedDB (if previously logged in)
+ * - No token & no cached user: returns null (user must login)
+ */
+export async function getCurrentUserOfflineFirst(): Promise<LocalUserProfile | null> {
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken");
+
+  if (!token) {
+    // No token at all - user never logged in on this device
+    return null;
+  }
+
+  if (navigator.onLine) {
+    try {
+      const user = await getCurrentUserJWT();
+      if (user) {
+        // Save to IndexedDB for offline use
+        await saveUserProfile(user);
+        return user;
+      }
+    } catch {
+      // Network error - fall through to local
+    }
+  }
+
+  // Offline or API failed: return cached profile
+  const cached = await getLocalUserProfile();
+  return cached || null;
 }
 
 // Re-export auth headers for components that need them

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login, getCurrentUserJWT } from "../api/auth";
+import { login } from "../api/auth";
+import { getCurrentUserOfflineFirst } from "../services/offlineService";
 import gsap from "gsap";
 import { Eye, EyeOff, User, AtSign } from "lucide-react";
 import { useNetwork } from "../context/NetworkContext";
@@ -25,7 +26,7 @@ export default function Login() {
   useEffect(() => {
     const checkAlreadyLoggedIn = async () => {
       try {
-        const user = await getCurrentUserJWT();
+        const user = await getCurrentUserOfflineFirst();
         if (user) {
           navigate("/home", { replace: true });
         } else {
@@ -158,7 +159,7 @@ export default function Login() {
       storage.setItem("accessToken", accessToken);
       storage.setItem("refreshToken", refreshToken);
 
-      const user = await getCurrentUserJWT();
+      const user = await getCurrentUserOfflineFirst();
       if (user) {
         document.body.setAttribute("data-access-token", result.accessToken);
         navigate("/home");
