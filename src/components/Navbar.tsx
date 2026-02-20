@@ -2,8 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { useTheme } from "../context/ThemeContext";
-import { getCurrentUserJWT } from "../api/auth";
 import { logout } from "../api/auth";
+import { getCurrentUserOfflineFirst } from "../services/offlineService";
 import NotificationBadge from "./NotificationBadge";
 import ThemeToggle from "./ThemeToggle";
 
@@ -15,7 +15,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
-      const user = await getCurrentUserJWT();
+      const user = await getCurrentUserOfflineFirst();
       if (user?.profile_picture) {
         setProfilePictureUrl(`https://bale231.pythonanywhere.com${user.profile_picture}`);
       } else {

@@ -112,6 +112,9 @@ export function logout() {
   sessionStorage.removeItem("accessToken");
   sessionStorage.removeItem("refreshToken");
   localStorage.removeItem("theme");
+
+  // Pulisce dati offline (import dinamico per non creare dipendenza circolare)
+  import("../db/database").then(({ clearAllLocalData }) => clearAllLocalData()).catch(() => {});
 }
 
 // 📝 Register

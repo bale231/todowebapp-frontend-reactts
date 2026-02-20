@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getCurrentUserJWT, updateTheme } from "../api/auth";
+import { updateTheme } from "../api/auth";
+import { getCurrentUserOfflineFirst } from "../services/offlineService";
 
 interface ThemeContextProps {
   theme: "light" | "dark";
@@ -19,7 +20,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const loadThemeFromBackend = async () => {
-      const user = await getCurrentUserJWT();
+      const user = await getCurrentUserOfflineFirst();
       if (user?.theme) {
         setThemeState(user.theme);
         if (user.theme === "dark") {

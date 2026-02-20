@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { CheckCircle, XCircle, Key } from "lucide-react";
+import { useNetwork } from "../context/NetworkContext";
 
 export default function ResetPassword() {
   const { uid, token } = useParams<{ uid: string; token: string }>();
   const navigate = useNavigate();
+  const { isOnline } = useNetwork();
   const formRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
 
@@ -55,6 +57,11 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!isOnline) {
+      setError("Sei offline. Questa operazione richiede una connessione internet.");
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       setError("Le password non coincidono");
