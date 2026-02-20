@@ -10,7 +10,9 @@ import ToDoListPage from './pages/ToDoListPage'
 import LoginRedirect from './components/LoginRedirect'
 import { ThemeProvider } from './context/ThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
+import { NetworkProvider } from './context/NetworkContext'
 import NotificationPopup from './components/NotificationPopup'
+import OfflineBanner from './components/OfflineBanner'
 import VersionChecker from './components/VersionChecker'
 import UsersPage from './pages/UsersPage'
 import FriendsPage from './pages/FriendsPage'
@@ -20,27 +22,30 @@ function App() {
 
   return (
     <Router>
-      <ThemeProvider>
-        <NotificationProvider>
-          <VersionChecker />
-          <Routes>
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
-            <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
-            <Route path="/lists/:id" element={<ToDoListPage />} />
-            <Route path="/login-success" element={<LoginRedirect />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="*" element={<Navigate to="/" />} />
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/friends" element={<FriendsPage />} />
-            <Route path="/friend-requests" element={<FriendRequestsPage />} />
-          </Routes>
-          <NotificationPopup />
-        </NotificationProvider>
-      </ThemeProvider>
+      <NetworkProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <OfflineBanner />
+            <VersionChecker />
+            <Routes>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+              <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
+              <Route path="/lists/:id" element={<ToDoListPage />} />
+              <Route path="/login-success" element={<LoginRedirect />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="*" element={<Navigate to="/" />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/friends" element={<FriendsPage />} />
+              <Route path="/friend-requests" element={<FriendRequestsPage />} />
+            </Routes>
+            <NotificationPopup />
+          </NotificationProvider>
+        </ThemeProvider>
+      </NetworkProvider>
     </Router>
   )
 }

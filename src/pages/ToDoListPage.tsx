@@ -11,7 +11,6 @@ import {
   Users,
   Search,
 } from "lucide-react";
-import { getAuthHeaders } from "../api/todos";
 import { getCurrentUserJWT } from "../api/auth";
 import gsap from "gsap";
 import {
@@ -30,15 +29,18 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import {
-  createTodo,
-  deleteTodo,
-  updateTodo,
-  toggleTodo,
   reorderTodos,
   updateSortOrder,
   moveTodo,
-  fetchAllLists,
 } from "../api/todos";
+import {
+  fetchListDetailsOfflineFirst,
+  fetchListsOfflineFirst,
+  createTodoOffline,
+  toggleTodoOffline,
+  deleteTodoOffline,
+  updateTodoOffline,
+} from "../services/offlineService";
 import { getListShares } from "../api/sharing";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
@@ -177,19 +179,14 @@ export default function ToDoListPage() {
     async (preserveSort = false) => {
       try {
         setIsLoadingTodos(true);
-        const res = await fetch(
-          `https://bale231.pythonanywhere.com/api/lists/${id}/`,
-          {
-            method: "GET",
-            headers: getAuthHeaders(),
-          }
-        );
-        const text = await res.text();
-        const data = JSON.parse(text);
+        const data = await fetchListDetailsOfflineFirst(id!);
+
+        if (!data) return;
+
         setTodos(data.todos);
 
         if (!preserveSort) {
-          setSortOption(data.sort_order || "created");
+          setSortOption((data as any).sort_order || "created");
         }
 
         setListName(data.name);
@@ -224,7 +221,7 @@ export default function ToDoListPage() {
 
   // Carica tutte le liste per la modale Sposta
   const loadAllLists = async () => {
-    const lists = await fetchAllLists();
+    const lists = await fetchListsOfflineFirst();
     setAllLists(lists);
   };
 
@@ -252,7 +249,7 @@ export default function ToDoListPage() {
       return;
     }
 
-    await createTodo(Number(id), title, qty, unit);
+    await createTodoOffline(Number(id), title, qty, unit);
     setTitle("");
     setQuantityValue("");
     setUnitValue("");
@@ -261,18 +258,18 @@ export default function ToDoListPage() {
   };
 
   const handleToggle = async (todoId: number) => {
-    await toggleTodo(todoId);
+    await toggleTodoOffline(todoId);
     await fetchTodos();
   };
 
   const handleDelete = async (todoId: number) => {
-    await deleteTodo(todoId);
+    await deleteTodoOffline(todoId);
     fetchTodos();
   };
 
   const handleEdit = async () => {
     if (editedTodo) {
-      await updateTodo(
+      await updateTodoOffline(
         editedTodo.id,
         editedTodo.title,
         editedTodo.quantity,
@@ -806,7 +803,7 @@ export default function ToDoListPage() {
                 </button>
                 <button
                   onClick={async () => {
-                    await Promise.all(selectedIds.map((i) => deleteTodo(i)));
+                    await Promise.all(selectedIds.map((i) => deleteTodoOffline(i)));
                     setShowBulkConfirm(false);
                     setSelectedIds([]);
                     fetchTodos();

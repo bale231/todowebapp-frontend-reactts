@@ -3,8 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { login, getCurrentUserJWT } from "../api/auth";
 import gsap from "gsap";
 import { Eye, EyeOff, User, AtSign } from "lucide-react";
+import { useNetwork } from "../context/NetworkContext";
 
 export default function Login() {
+  const { isOnline } = useNetwork();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -140,6 +142,10 @@ export default function Login() {
 
   // Funzione di gestione del login
   const handleLogin = async () => {
+    if (!isOnline) {
+      setError("Sei offline. Il login richiede una connessione internet.");
+      return;
+    }
     setIsLoading(true);
     setError("");
 

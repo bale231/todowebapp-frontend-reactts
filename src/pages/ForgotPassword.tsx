@@ -2,8 +2,10 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { CheckCircle, Mail, ArrowLeft } from "lucide-react";
+import { useNetwork } from "../context/NetworkContext";
 
 export default function ForgotPassword() {
+  const { isOnline } = useNetwork();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -73,6 +75,12 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isOnline) {
+      setError("Sei offline. Questa operazione richiede una connessione internet.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 

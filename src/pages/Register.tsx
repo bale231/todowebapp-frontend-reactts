@@ -4,9 +4,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth";
 import gsap from "gsap";
 import { Eye, EyeOff } from "lucide-react";
+import { useNetwork } from "../context/NetworkContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { isOnline } = useNetwork();
 
   const formRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
@@ -98,6 +100,10 @@ export default function Register() {
   }, [password, confirmPassword, email]);
 
   const handleRegister = async () => {
+    if (!isOnline) {
+      setError("Sei offline. La registrazione richiede una connessione internet.");
+      return;
+    }
     if (!passwordValid || !passwordMatch || !emailValid) {
       setError("Controlla i campi inseriti.");
       return;

@@ -21,7 +21,17 @@ import {
   ArchiveRestore,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { fetchAllLists, editList, deleteList, archiveList, unarchiveList, getSelectedCategory, saveSelectedCategory } from "../api/todos";
+import { getSelectedCategory, saveSelectedCategory } from "../api/todos";
+import {
+  fetchListsOfflineFirst,
+  fetchCategoriesOfflineFirst,
+  createListOffline,
+  editListOffline,
+  deleteListOffline,
+  archiveListOffline,
+  createCategoryOffline,
+  editCategoryOffline,
+} from "../services/offlineService";
 import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
@@ -254,7 +264,7 @@ export default function Home() {
   const fetchLists = async () => {
     try {
       setIsLoadingLists(true);
-      const data = await fetchAllLists();
+      const data = await fetchListsOfflineFirst();
       if (Array.isArray(data)) {
         setLists(data);
       } else {
@@ -269,17 +279,9 @@ export default function Home() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch(`${API_URL}/categories/`, {
-        headers: {
-          Authorization: `Bearer ${getAccessToken()}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await fetchCategoriesOfflineFirst();
+      if (Array.isArray(data)) {
         setCategories(data);
-
-        // Carica la categoria selezionata salvata
         await loadSelectedCategory(data);
       }
     } catch (err) {
@@ -307,37 +309,24 @@ export default function Home() {
       return;
     }
 
-    const payload = {
-      name: newListName,
-      color: newListColor,
-      category: newListCategory,
-    };
-
     try {
       if (editListId !== null) {
-        await editList(editListId, newListName, newListColor, newListCategory);
-        setAlert({
-          type: "success",
-          message: "Lista modificata con successo!",
-        });
-        setEditListId(null);
-      } else {
-        const res = await fetch(`${API_URL}/lists/`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) {
-          setAlert({
-            type: "error",
-            message: "Errore nella creazione della lista",
-          });
+        const ok = await editListOffline(editListId, newListName, newListColor, newListCategory);
+        if (ok) {
+          setAlert({ type: "success", message: "Lista modificata con successo!" });
+        } else {
+          setAlert({ type: "error", message: "Errore nella modifica della lista" });
           return;
         }
-        setAlert({ type: "success", message: "Lista creata con successo!" });
+        setEditListId(null);
+      } else {
+        const result = await createListOffline(newListName, newListColor, newListCategory);
+        if (result.success) {
+          setAlert({ type: "success", message: "Lista creata con successo!" });
+        } else {
+          setAlert({ type: "error", message: "Errore nella creazione della lista" });
+          return;
+        }
       }
       fetchLists();
       setNewListName("");
@@ -390,7 +379,7 @@ export default function Home() {
 
   const deleteListAsync = async (id: number) => {
     try {
-      await deleteList(id);
+      await deleteListOffline(id);
       fetchLists();
       setShowDeleteConfirm(null);
       setAlert({ type: "success", message: "Lista eliminata" });
@@ -416,7 +405,7 @@ export default function Home() {
         }
       );
     } else {
-      await deleteList(id);
+      await deleteListOffline(id);
       fetchLists();
       setShowDeleteConfirm(null);
       setAlert({ type: "success", message: "Lista eliminata" });
@@ -425,12 +414,14 @@ export default function Home() {
 
   const handleArchiveList = async (id: number, isCurrentlyArchived: boolean) => {
     try {
-      if (isCurrentlyArchived) {
-        await unarchiveList(id);
-        setAlert({ type: "success", message: "Lista ripristinata" });
+      const ok = await archiveListOffline(id, !isCurrentlyArchived);
+      if (ok) {
+        setAlert({
+          type: "success",
+          message: isCurrentlyArchived ? "Lista ripristinata" : "Lista archiviata",
+        });
       } else {
-        await archiveList(id);
-        setAlert({ type: "success", message: "Lista archiviata" });
+        setAlert({ type: "error", message: "Errore durante l'operazione" });
       }
       fetchLists();
     } catch (error) {
@@ -448,22 +439,15 @@ export default function Home() {
       return;
     }
 
-    const url = editCatId
-      ? `${API_URL}/categories/${editCatId}/`
-      : `${API_URL}/categories/`;
-    const method = editCatId ? "PATCH" : "POST";
-
     try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          Authorization: `Bearer ${getAccessToken()}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: catName }),
-      });
+      let ok: boolean;
+      if (editCatId) {
+        ok = await editCategoryOffline(editCatId, catName);
+      } else {
+        ok = await createCategoryOffline(catName);
+      }
 
-      if (!res.ok) {
+      if (!ok) {
         setAlert({
           type: "error",
           message: "Errore nella gestione della categoria",

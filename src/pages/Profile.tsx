@@ -12,6 +12,7 @@ import {
 } from "../api/auth";
 import { Bell, BellOff, Key, LogOut } from "lucide-react";
 import { useFirebaseNotifications } from "../hooks/useFirebaseNotifications";
+import { useNetwork } from "../context/NetworkContext";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -32,6 +33,10 @@ export default function Profile() {
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
   const { requestPermission, notificationPermission } = useFirebaseNotifications();
+  const { isOnline } = useNetwork();
+
+  const offlineAlert = () =>
+    showAlert("Sei offline. Questa operazione richiede una connessione internet.", "error");
 
   useEffect(() => {
     gsap.fromTo(
@@ -105,6 +110,7 @@ export default function Profile() {
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isOnline) { offlineAlert(); return; }
     const file = e.target.files?.[0];
     if (file) {
       setAvatarFile(file);
@@ -129,6 +135,7 @@ export default function Profile() {
   };
 
   const handleRemoveImage = async () => {
+    if (!isOnline) { offlineAlert(); return; }
     setAvatar(null);
     setAvatarFile(null);
     setClearPicture(true);
@@ -145,6 +152,8 @@ export default function Profile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isOnline) { offlineAlert(); return; }
+
     const formData = new FormData();
     formData.append("username", username);
     formData.append("email", email);
@@ -165,6 +174,8 @@ export default function Profile() {
 
   const handleDeactivate = async () => {
     setShowConfirmModal(false);
+    if (!isOnline) { offlineAlert(); return; }
+
     const res = await deactivateAccount();
     if (res.message === "Account disattivato") {
       showAlert("Account disattivato correttamente.", "success");
@@ -175,6 +186,8 @@ export default function Profile() {
   };
 
   const handleToggleNotifications = async () => {
+    if (!isOnline) { offlineAlert(); return; }
+
     const newValue = !pushNotificationsEnabled;
     setIsTogglingNotifications(true);
 
@@ -243,6 +256,8 @@ export default function Profile() {
 
   const handleRequestPasswordReset = async () => {
     setShowResetPasswordModal(false);
+
+    if (!isOnline) { offlineAlert(); return; }
 
     try {
       const response = await fetch("https://bale231.pythonanywhere.com/api/password-reset/request/", {
