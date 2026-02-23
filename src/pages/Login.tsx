@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { login } from "../api/auth";
 import { getCurrentUserOfflineFirst } from "../services/offlineService";
 import gsap from "gsap";
-import { Eye, EyeOff, User, AtSign } from "lucide-react";
+import { Eye, EyeOff, User, AtSign, FileDown } from "lucide-react";
 import { useNetwork } from "../context/NetworkContext";
 
 export default function Login() {
@@ -371,6 +371,15 @@ export default function Login() {
             Registrati
           </Link>
         </p>
+
+        <a
+          href="/GUIDA_UTENTE_TODOAPP.pdf"
+          download="Guida_Utente_ToDoApp.pdf"
+          className="flex items-center justify-center gap-2 mt-6 px-4 py-2.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-600 hover:text-blue-600 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow"
+        >
+          <FileDown size={18} />
+          Scarica la guida utente
+        </a>
       </div>
     </div>
   );
