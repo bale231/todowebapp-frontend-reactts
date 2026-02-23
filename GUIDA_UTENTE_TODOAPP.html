@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guida Utente - ToDoApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+
+        .cover {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+        }
+
+        .cover h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .cover .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .cover .version {
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .toc {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .toc h2 {
+            color: #3b82f6;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .toc a:hover {
+            color: #3b82f6;
+        }
+
+        section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #3b82f6;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        h3 {
+            color: #6366f1;
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #8b5cf6;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-left: 4px solid #3b82f6;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 4px solid #f59e0b;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 4px solid #ef4444;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 4px solid #10b981;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 24px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        .color-sample {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 8px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .blue { background: #3b82f6; }
+        .green { background: #22c55e; }
+        .yellow { background: #eab308; }
+        .red { background: #ef4444; }
+        .purple { background: #8b5cf6; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            background: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 20px;
+            }
+
+            section {
+                box-shadow: none;
+                border: 1px solid #e5e7eb;
+                page-break-inside: avoid;
+            }
+
+            .cover {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COPERTINA -->
+    <div class="cover">
+        <h1>ToDoApp</h1>
+        <p class="subtitle">Guida Utente Completa</p>
+        <p class="version">Versione 1.2.0</p>
+    </div>
+
+    <!-- INDICE -->
+    <div class="toc">
+        <h2>Indice</h2>
+        <ul>
+            <li><a href="#intro">1. Introduzione <span>3</span></a></li>
+            <li><a href="#requisiti">2. Requisiti e Installazione <span>4</span></a></li>
+            <li><a href="#account">3. Gestione Account <span>5</span></a></li>
+            <li><a href="#liste">4. Gestione Liste <span>7</span></a></li>
+            <li><a href="#todo">5. Gestione To-Do <span>10</span></a></li>
+            <li><a href="#categorie">6. Categorie <span>13</span></a></li>
+            <li><a href="#condivisione">7. Condivisione e Social <span>14</span></a></li>
+            <li><a href="#notifiche">8. Notifiche <span>16</span></a></li>
+            <li><a href="#offline">9. Modalita Offline <span>17</span></a></li>
+            <li><a href="#personalizzazione">10. Personalizzazione <span>18</span></a></li>
+            <li><a href="#faq">11. Domande Frequenti (FAQ) <span>19</span></a></li>
+        </ul>
+    </div>
+
+    <!-- 1. INTRODUZIONE -->
+    <section id="intro">
+        <h2>1. Introduzione</h2>
+
+        <p>Benvenuto in <strong>ToDoApp</strong>, l'applicazione web progressiva (PWA) pensata per aiutarti a organizzare le tue attivita quotidiane in modo semplice, intuitivo e collaborativo.</p>
+
+        <h3>Cosa puoi fare con ToDoApp?</h3>
+
+        <div class="feature-box">
+            <ul>
+                <li><strong>Creare liste personalizzate</strong> con colori distintivi</li>
+                <li><strong>Organizzare le liste in categorie</strong> per una gestione ottimale</li>
+                <li><strong>Aggiungere to-do</strong> con quantita e unita di misura</li>
+                <li><strong>Condividere liste</strong> con amici e familiari</li>
+                <li><strong>Lavorare offline</strong> e sincronizzare quando torni online</li>
+                <li><strong>Ricevere notifiche</strong> per restare sempre aggiornato</li>
+                <li><strong>Installare l'app</strong> sul tuo dispositivo come un'app nativa</li>
+            </ul>
+        </div>
+
+        <h3>Caratteristiche principali</h3>
+
+        <table>
+            <tr>
+                <th>Funzionalita</th>
+                <th>Descrizione</th>
+            </tr>
+            <tr>
+                <td>Design moderno</td>
+                <td>Interfaccia glassmorphism con animazioni fluide</td>
+            </tr>
+            <tr>
+                <td>Dark/Light Mode</td>
+                <td>Scegli il tema che preferisci</td>
+            </tr>
+            <tr>
+                <td>Responsive</td>
+                <td>Funziona perfettamente su mobile, tablet e desktop</td>
+            </tr>
+            <tr>
+                <td>PWA</td>
+                <td>Installabile e utilizzabile offline</td>
+            </tr>
+            <tr>
+                <td>Collaborativa</td>
+                <td>Condividi liste con altri utenti</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- 2. REQUISITI E INSTALLAZIONE -->
+    <section id="requisiti">
+        <h2>2. Requisiti e Installazione</h2>
+
+        <h3>Requisiti di sistema</h3>
+        <p>ToDoApp funziona su qualsiasi browser moderno:</p>
+        <ul>
+            <li>Google Chrome (consigliato)</li>
+            <li>Mozilla Firefox</li>
+            <li>Microsoft Edge</li>
+            <li>Safari (iOS/macOS)</li>
+            <li>Samsung Internet</li>
+        </ul>
+
+        <h3>Come accedere all'app</h3>
+        <p>Visita semplicemente l'indirizzo web dell'applicazione dal tuo browser. Non e necessario scaricare nulla dall'App Store o Play Store.</p>
+
+        <h3>Installazione come PWA</h3>
+        <p>Puoi installare ToDoApp sul tuo dispositivo per un accesso rapido:</p>
+
+        <h4>Su Android (Chrome)</h4>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Apri l'app nel browser Chrome</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Tocca il menu (tre puntini in alto a destra)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Seleziona "Aggiungi a schermata Home"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Conferma l'installazione</div>
+        </div>
+
+        <h4>Su iPhone/iPad (Safari)</h4>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Apri l'app in Safari</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Tocca l'icona di condivisione (quadrato con freccia)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Scorri e seleziona "Aggiungi a Home"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Tocca "Aggiungi" per confermare</div>
+        </div>
+
+        <h4>Su Desktop (Chrome/Edge)</h4>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Apri l'app nel browser</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Clicca sull'icona di installazione nella barra degli indirizzi</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Clicca "Installa" nel popup</div>
+        </div>
+
+        <div class="success-box">
+            <strong>Vantaggi dell'installazione:</strong> L'app si aprira come un'applicazione nativa, senza la barra del browser, e sara accessibile direttamente dalla schermata home o dal menu Start.
+        </div>
+    </section>
+
+    <!-- 3. GESTIONE ACCOUNT -->
+    <section id="account">
+        <h2>3. Gestione Account</h2>
+
+        <h3>Registrazione</h3>
+        <p>Per utilizzare ToDoApp devi creare un account gratuito:</p>
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Dalla pagina di login, clicca su "Registrati"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Inserisci un username univoco</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Inserisci la tua email</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Crea una password sicura (almeno 8 caratteri, una maiuscola e un numero)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">Conferma la password</div>
+        </div>
+        <div class="step">
+            <div class="step-number">6</div>
+            <div class="step-content">Clicca "Registrati"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">7</div>
+            <div class="step-content"><strong>Importante:</strong> Controlla la tua email e clicca sul link di verifica</div>
+        </div>
+
+        <div class="warning-box">
+            <strong>Attenzione:</strong> Non potrai effettuare il login finche non avrai verificato il tuo indirizzo email.
+        </div>
+
+        <h3>Login</h3>
+        <p>Una volta verificata l'email, puoi accedere:</p>
+        <ul>
+            <li>Scegli se accedere con <strong>Username</strong> o <strong>Email</strong> usando i pulsanti in alto</li>
+            <li>Inserisci le tue credenziali</li>
+            <li>Attiva "Rimani loggato" se vuoi mantenere l'accesso</li>
+            <li>Clicca "Accedi"</li>
+        </ul>
+
+        <h3>Password dimenticata</h3>
+        <p>Se hai dimenticato la password:</p>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Dalla pagina di login, clicca "Hai dimenticato la password?"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Inserisci la tua email</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Controlla la tua casella di posta</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Clicca sul link e imposta una nuova password</div>
+        </div>
+
+        <h3>Modifica profilo</h3>
+        <p>Dalla pagina <strong>Profilo</strong> puoi:</p>
+        <ul>
+            <li><strong>Modificare la foto profilo:</strong> Tocca l'immagine del profilo per caricarne una nuova</li>
+            <li><strong>Rimuovere la foto:</strong> Usa il pulsante "Rimuovi immagine"</li>
+            <li><strong>Modificare username:</strong> Clicca "Modifica profilo", cambia il nome e salva</li>
+            <li><strong>Modificare email:</strong> Clicca "Modifica profilo", cambia l'email e salva</li>
+            <li><strong>Cambiare password:</strong> Clicca "Cambia la password" per ricevere un'email di reset</li>
+        </ul>
+
+        <h3>Logout</h3>
+        <p>Per uscire dall'account:</p>
+        <ul>
+            <li>Vai nella pagina <strong>Profilo</strong></li>
+            <li>Clicca il pulsante "Esci dall'account"</li>
+        </ul>
+
+        <h3>Disattivazione account</h3>
+        <div class="warning-box">
+            <strong>Attenzione:</strong> La disattivazione dell'account e un'operazione irreversibile. Tutti i tuoi dati verranno eliminati.
+        </div>
+        <p>Per disattivare l'account:</p>
+        <ul>
+            <li>Vai nella pagina <strong>Profilo</strong></li>
+            <li>Scorri fino in fondo e clicca "Disattiva il mio account"</li>
+            <li>Conferma l'operazione nel popup</li>
+        </ul>
+    </section>
+
+    <!-- 4. GESTIONE LISTE -->
+    <section id="liste">
+        <h2>4. Gestione Liste</h2>
+
+        <h3>La Home Page</h3>
+        <p>Dopo il login, verrai portato alla <strong>Home Page</strong> dove puoi vedere tutte le tue liste To-Do organizzate per categoria.</p>
+
+        <h3>Creare una nuova lista</h3>
+
+        <h4>Su Desktop</h4>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Clicca sul pulsante blu "+" in basso a sinistra</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Seleziona "Nuova Lista"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Inserisci il nome della lista</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Scegli un colore</div>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">Seleziona una categoria (opzionale)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">6</div>
+            <div class="step-content">Clicca "Crea"</div>
+        </div>
+
+        <h4>Su Mobile</h4>
+        <p>Usa la barra di navigazione in basso e tocca l'icona "+" per creare una nuova lista.</p>
+
+        <h3>Colori disponibili</h3>
+        <p>Puoi personalizzare ogni lista con uno dei seguenti colori:</p>
+        <ul>
+            <li><span class="color-sample blue"></span> <strong>Blu</strong> - Colore predefinito</li>
+            <li><span class="color-sample green"></span> <strong>Verde</strong> - Ideale per liste completate o importanti</li>
+            <li><span class="color-sample yellow"></span> <strong>Giallo</strong> - Per liste in corso o da tenere d'occhio</li>
+            <li><span class="color-sample red"></span> <strong>Rosso</strong> - Per liste urgenti</li>
+            <li><span class="color-sample purple"></span> <strong>Viola</strong> - Per liste personali o speciali</li>
+        </ul>
+
+        <h3>Modificare una lista</h3>
+        <p>Per modificare nome, colore o categoria di una lista:</p>
+
+        <h4>Metodo 1: Modalita modifica</h4>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Attiva la "Modalita modifica" dal menu</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Clicca sull'icona matita sulla lista desiderata</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Modifica i campi desiderati</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Clicca "Salva"</div>
+        </div>
+
+        <h4>Metodo 2: Swipe (Mobile)</h4>
+        <p>Scorri la lista verso sinistra per vedere le opzioni rapide: Modifica, Archivia, Elimina.</p>
+
+        <h3>Eliminare una lista</h3>
+        <div class="warning-box">
+            <strong>Attenzione:</strong> L'eliminazione di una lista cancellera anche tutte le to-do al suo interno.
+        </div>
+        <ul>
+            <li>In modalita modifica, clicca sull'icona cestino</li>
+            <li>Oppure swipe verso sinistra (su mobile)</li>
+            <li>Conferma l'eliminazione</li>
+        </ul>
+
+        <h3>Archiviare una lista</h3>
+        <p>Se non vuoi eliminare una lista ma non la usi piu, puoi archiviarla:</p>
+        <ul>
+            <li>In modalita modifica, clicca sull'icona archivio</li>
+            <li>La lista verra spostata nell'archivio</li>
+        </ul>
+
+        <h4>Visualizzare l'archivio</h4>
+        <ul>
+            <li>Clicca il pulsante "Archivio" nella Home</li>
+            <li>Vedrai tutte le liste archiviate</li>
+            <li>Puoi ripristinare una lista cliccando sull'icona di ripristino</li>
+        </ul>
+
+        <h3>Ordinamento liste</h3>
+        <p>Puoi ordinare le tue liste in tre modi diversi:</p>
+        <table>
+            <tr>
+                <th>Ordinamento</th>
+                <th>Descrizione</th>
+            </tr>
+            <tr>
+                <td>Per creazione</td>
+                <td>Le liste piu recenti appaiono per prime</td>
+            </tr>
+            <tr>
+                <td>Alfabetico</td>
+                <td>Ordine dalla A alla Z</td>
+            </tr>
+            <tr>
+                <td>Per completezza</td>
+                <td>Le liste meno complete appaiono per prime</td>
+            </tr>
+        </table>
+        <p>Per cambiare ordinamento, usa il pulsante "Filtro" dal menu o dalla barra di navigazione.</p>
+
+        <h3>Ricerca</h3>
+        <p>Usa la funzione <strong>Cerca</strong> per trovare rapidamente liste o to-do:</p>
+        <ul>
+            <li>Clicca sull'icona lente d'ingrandimento</li>
+            <li>Digita il termine da cercare</li>
+            <li>I risultati mostreranno liste il cui nome corrisponde o che contengono to-do corrispondenti</li>
+        </ul>
+    </section>
+
+    <!-- 5. GESTIONE TO-DO -->
+    <section id="todo">
+        <h2>5. Gestione To-Do</h2>
+
+        <h3>Accedere a una lista</h3>
+        <p>Per vedere le to-do di una lista, semplicemente <strong>clicca sulla lista</strong> dalla Home Page.</p>
+
+        <h3>Creare una nuova To-Do</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Scrivi il nome della to-do nel campo di testo in alto</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Clicca il pulsante "+" o premi Invio</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Si aprira un popup per aggiungere dettagli</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">(Opzionale) Inserisci quantita e unita di misura</div>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">Clicca "Aggiungi"</div>
+        </div>
+
+        <h3>Quantita e Unita</h3>
+        <div class="feature-box">
+            Puoi aggiungere <strong>quantita</strong> e <strong>unita di misura</strong> alle tue to-do. Perfetto per liste della spesa!
+            <br><br>
+            <strong>Esempi:</strong>
+            <ul>
+                <li>Latte - 2 litri</li>
+                <li>Uova - 6 pz</li>
+                <li>Farina - 1 kg</li>
+                <li>Biscotti - 3 cf (confezioni)</li>
+            </ul>
+        </div>
+
+        <h3>Completare una To-Do</h3>
+        <p>Per segnare una to-do come completata:</p>
+        <ul>
+            <li>Clicca sull'icona <strong>checkbox verde</strong> a sinistra della to-do</li>
+            <li>La to-do verra barrata e spostata tra quelle completate</li>
+            <li>Clicca di nuovo per rimuovere il completamento</li>
+        </ul>
+
+        <h3>Modificare una To-Do</h3>
+        <h4>Metodo 1: Modalita modifica</h4>
+        <ul>
+            <li>Attiva la modalita modifica dal menu</li>
+            <li>Clicca sull'icona matita sulla to-do</li>
+            <li>Modifica titolo, quantita o unita</li>
+            <li>Clicca "Salva"</li>
+        </ul>
+
+        <h4>Metodo 2: Swipe (Mobile)</h4>
+        <ul>
+            <li>Scorri la to-do verso sinistra</li>
+            <li>Tocca "Modifica"</li>
+        </ul>
+
+        <h3>Eliminare una To-Do</h3>
+        <ul>
+            <li>In modalita modifica, clicca l'icona cestino</li>
+            <li>Oppure swipe verso sinistra (su mobile) e tocca "Elimina"</li>
+        </ul>
+
+        <h3>Eliminazione multipla</h3>
+        <p>Per eliminare piu to-do contemporaneamente:</p>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Attiva la modalita modifica</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Seleziona le to-do usando le checkbox</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Puoi usare "Seleziona tutte" per selezionarle tutte</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Clicca "Elimina selezionate"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">Conferma l'eliminazione</div>
+        </div>
+
+        <h3>Spostare una To-Do</h3>
+        <p>Puoi spostare una to-do in un'altra lista:</p>
+        <ul>
+            <li>Attiva la modalita modifica</li>
+            <li>Clicca sull'icona con le frecce (Sposta)</li>
+            <li>Seleziona la lista di destinazione</li>
+            <li>Conferma lo spostamento</li>
+        </ul>
+
+        <h3>Riordinare le To-Do</h3>
+        <p>Puoi cambiare l'ordine delle to-do con il <strong>drag & drop</strong>:</p>
+        <ul>
+            <li>Tieni premuto sull'icona "hamburger" (tre linee) a destra della to-do</li>
+            <li>Trascina la to-do nella posizione desiderata</li>
+            <li>Rilascia per confermare</li>
+        </ul>
+        <div class="tip-box">
+            <strong>Nota:</strong> Il drag & drop funziona solo quando l'ordinamento e impostato su "Per creazione". Con altri ordinamenti, la posizione e determinata automaticamente.
+        </div>
+
+        <h3>Ordinamento To-Do</h3>
+        <p>Puoi ordinare le to-do in tre modi:</p>
+        <table>
+            <tr>
+                <th>Ordinamento</th>
+                <th>Descrizione</th>
+            </tr>
+            <tr>
+                <td>Per creazione</td>
+                <td>Ordine manuale personalizzabile con drag & drop</td>
+            </tr>
+            <tr>
+                <td>Alfabetico</td>
+                <td>Ordine dalla A alla Z</td>
+            </tr>
+            <tr>
+                <td>Per completezza</td>
+                <td>Le to-do non completate appaiono per prime</td>
+            </tr>
+        </table>
+
+        <h3>Ricerca To-Do</h3>
+        <p>All'interno di una lista, puoi cercare to-do specifiche:</p>
+        <ul>
+            <li>Clicca sull'icona di ricerca</li>
+            <li>Digita il termine da cercare</li>
+            <li>Le to-do verranno filtrate in tempo reale</li>
+        </ul>
+    </section>
+
+    <!-- 6. CATEGORIE -->
+    <section id="categorie">
+        <h2>6. Categorie</h2>
+
+        <p>Le <strong>categorie</strong> ti permettono di organizzare le tue liste in gruppi tematici.</p>
+
+        <h3>Creare una categoria</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Dalla Home, clicca il pulsante "Categoria" (giallo)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Inserisci il nome della categoria</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Clicca "Crea"</div>
+        </div>
+
+        <h3>Assegnare una lista a una categoria</h3>
+        <ul>
+            <li>Durante la creazione di una lista, seleziona la categoria dal menu a tendina</li>
+            <li>Oppure modifica una lista esistente e cambia la categoria</li>
+        </ul>
+
+        <h3>Filtrare per categoria</h3>
+        <p>Nella Home, usa il menu a tendina centrale per filtrare le liste:</p>
+        <ul>
+            <li><strong>"Tutte le categorie"</strong>: Mostra tutte le liste</li>
+            <li><strong>Nome categoria</strong>: Mostra solo le liste di quella categoria</li>
+        </ul>
+
+        <h3>Modificare una categoria</h3>
+        <ul>
+            <li>Seleziona la categoria dal filtro</li>
+            <li>Clicca sull'icona matita accanto al menu</li>
+            <li>Modifica il nome</li>
+            <li>Salva</li>
+        </ul>
+
+        <h3>Ordinamento categorie</h3>
+        <p>Puoi attivare l'ordinamento alfabetico delle categorie:</p>
+        <ul>
+            <li>Dal menu FAB (desktop), clicca su "A-Z"</li>
+            <li>Le categorie verranno ordinate alfabeticamente</li>
+        </ul>
+
+        <div class="tip-box">
+            <strong>Suggerimento:</strong> Crea categorie come "Casa", "Lavoro", "Spesa", "Progetti" per organizzare meglio le tue liste!
+        </div>
+    </section>
+
+    <!-- 7. CONDIVISIONE E SOCIAL -->
+    <section id="condivisione">
+        <h2>7. Condivisione e Social</h2>
+
+        <h3>Sistema di amicizia</h3>
+        <p>Per condividere liste con altri utenti, devi prima aggiungerli come amici.</p>
+
+        <h4>Trovare utenti</h4>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Dalla Home, clicca su "Utenti" (icona persone blu)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Cerca per username o nome</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Clicca "Aggiungi amico" sull'utente desiderato</div>
+        </div>
+
+        <h4>Gestire le richieste di amicizia</h4>
+        <ul>
+            <li>Clicca su "Richieste" (icona verde) dalla Home</li>
+            <li>Vedrai le richieste ricevute e inviate</li>
+            <li>Accetta o rifiuta le richieste ricevute</li>
+        </ul>
+
+        <h4>Visualizzare gli amici</h4>
+        <ul>
+            <li>Clicca su "Amici" (icona viola) dalla Home</li>
+            <li>Vedrai la lista di tutti i tuoi amici</li>
+        </ul>
+
+        <h3>Condividere una lista</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Attiva la modalita modifica</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Clicca sull'icona di condivisione (viola) sulla lista</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Seleziona gli amici con cui condividere</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Scegli i permessi (solo lettura o modifica)</div>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">Conferma la condivisione</div>
+        </div>
+
+        <h3>Liste condivise</h3>
+        <p>Le liste condivise con te appariranno nella tua Home con un badge "Condivisa da [nome]".</p>
+
+        <h4>Cosa puoi fare con le liste condivise?</h4>
+        <table>
+            <tr>
+                <th>Azione</th>
+                <th>Solo lettura</th>
+                <th>Modifica</th>
+            </tr>
+            <tr>
+                <td>Visualizzare to-do</td>
+                <td>Si</td>
+                <td>Si</td>
+            </tr>
+            <tr>
+                <td>Aggiungere to-do</td>
+                <td>No</td>
+                <td>Si</td>
+            </tr>
+            <tr>
+                <td>Completare to-do</td>
+                <td>No</td>
+                <td>Si</td>
+            </tr>
+            <tr>
+                <td>Modificare to-do</td>
+                <td>No</td>
+                <td>Si</td>
+            </tr>
+            <tr>
+                <td>Eliminare to-do</td>
+                <td>No</td>
+                <td>Si</td>
+            </tr>
+        </table>
+
+        <h3>Tracciamento modifiche</h3>
+        <p>Nelle liste condivise, puoi vedere chi ha aggiunto o modificato ogni to-do. Un piccolo badge sotto la to-do indica "Aggiunta da..." o "Modificata da...".</p>
+
+        <h3>Condividere categorie</h3>
+        <p>Puoi anche condividere intere categorie con i tuoi amici, includendo automaticamente tutte le liste al loro interno.</p>
+    </section>
+
+    <!-- 8. NOTIFICHE -->
+    <section id="notifiche">
+        <h2>8. Notifiche</h2>
+
+        <h3>Tipi di notifiche</h3>
+        <p>ToDoApp supporta due tipi di notifiche:</p>
+
+        <h4>Notifiche in-app</h4>
+        <p>Sempre attive. Appaiono come badge nell'icona campanella nella barra di navigazione.</p>
+        <ul>
+            <li>Richieste di amicizia</li>
+            <li>Accettazione richieste</li>
+            <li>Liste condivise con te</li>
+            <li>Modifiche alle liste condivise</li>
+        </ul>
+
+        <h4>Notifiche push</h4>
+        <p>Opzionali. Arrivano direttamente sul tuo dispositivo anche quando l'app e chiusa.</p>
+
+        <h3>Attivare le notifiche push</h3>
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">Vai nella pagina Profilo</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">Trova la sezione "Notifiche Push"</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">Attiva l'interruttore</div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">Consenti le notifiche quando il browser lo richiede</div>
+        </div>
+
+        <div class="tip-box">
+            <strong>Nota:</strong> Se hai gia bloccato le notifiche nel browser, dovrai sbloccarle dalle impostazioni del browser.
+        </div>
+
+        <h3>Disattivare le notifiche push</h3>
+        <p>Puoi disattivare le notifiche push in qualsiasi momento dalla pagina Profilo. Le notifiche in-app rimarranno sempre attive.</p>
+    </section>
+
+    <!-- 9. MODALITÀ OFFLINE -->
+    <section id="offline">
+        <h2>9. Modalita Offline</h2>
+
+        <div class="feature-box">
+            ToDoApp funziona anche <strong>senza connessione internet</strong>! Puoi visualizzare e modificare le tue liste ovunque ti trovi.
+        </div>
+
+        <h3>Come funziona?</h3>
+        <p>L'app salva automaticamente i tuoi dati sul dispositivo. Quando sei offline:</p>
+        <ul>
+            <li>Puoi vedere tutte le tue liste e to-do</li>
+            <li>Puoi creare nuove liste e to-do</li>
+            <li>Puoi completare e modificare to-do esistenti</li>
+            <li>Le modifiche vengono salvate localmente</li>
+        </ul>
+
+        <h3>Sincronizzazione</h3>
+        <p>Quando torni online:</p>
+        <ul>
+            <li>Le modifiche vengono sincronizzate automaticamente con il server</li>
+            <li>Vedrai un banner "Sei di nuovo online" verde</li>
+            <li>Puoi vedere quante modifiche sono in coda nella barra in alto</li>
+        </ul>
+
+        <h3>Banner offline</h3>
+        <p>Quando sei offline, vedrai un banner arancione in alto che indica "Sei offline". Questo ti ricorda che stai lavorando in modalita locale.</p>
+
+        <h3>Operazioni solo online</h3>
+        <div class="warning-box">
+            Alcune operazioni richiedono una connessione internet e non possono essere eseguite offline:
+            <ul>
+                <li>Login e registrazione</li>
+                <li>Modifica email e password</li>
+                <li>Gestione amicizie</li>
+                <li>Condivisione liste</li>
+                <li>Modifica immagine profilo</li>
+                <li>Disattivazione account</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 10. PERSONALIZZAZIONE -->
+    <section id="personalizzazione">
+        <h2>10. Personalizzazione</h2>
+
+        <h3>Tema chiaro/scuro</h3>
+        <p>ToDoApp supporta sia il tema chiaro che quello scuro:</p>
+        <ul>
+            <li>Clicca sull'icona sole/luna nella barra di navigazione</li>
+            <li>Il tema cambia istantaneamente</li>
+            <li>La preferenza viene salvata automaticamente</li>
+        </ul>
+
+        <h3>Colori liste</h3>
+        <p>Ogni lista puo avere un colore diverso per identificarla rapidamente:</p>
+        <ul>
+            <li><span class="color-sample blue"></span> Blu</li>
+            <li><span class="color-sample green"></span> Verde</li>
+            <li><span class="color-sample yellow"></span> Giallo</li>
+            <li><span class="color-sample red"></span> Rosso</li>
+            <li><span class="color-sample purple"></span> Viola</li>
+        </ul>
+
+        <h3>Immagine profilo</h3>
+        <p>Personalizza il tuo profilo con un'immagine:</p>
+        <ul>
+            <li>Vai nella pagina Profilo</li>
+            <li>Tocca l'immagine del profilo</li>
+            <li>Seleziona un'immagine dal tuo dispositivo</li>
+            <li>L'immagine viene caricata automaticamente</li>
+        </ul>
+    </section>
+
+    <!-- 11. FAQ -->
+    <section id="faq">
+        <h2>11. Domande Frequenti (FAQ)</h2>
+
+        <h3>Ho dimenticato la password, cosa faccio?</h3>
+        <p>Dalla pagina di login, clicca su "Hai dimenticato la password?" e segui le istruzioni per reimpostarla via email.</p>
+
+        <h3>Perche non ricevo l'email di verifica?</h3>
+        <p>Controlla la cartella spam. Se non trovi l'email, prova a registrarti di nuovo con lo stesso indirizzo.</p>
+
+        <h3>Posso usare l'app su piu dispositivi?</h3>
+        <p>Si! Accedi con le tue credenziali su qualsiasi dispositivo e i tuoi dati saranno sincronizzati automaticamente.</p>
+
+        <h3>I miei dati sono al sicuro?</h3>
+        <p>Si, i tuoi dati sono crittografati e salvati in modo sicuro. Non condividiamo i tuoi dati con terze parti.</p>
+
+        <h3>Posso recuperare una lista eliminata?</h3>
+        <p>Purtroppo no. L'eliminazione e permanente. Ti consigliamo di usare l'archiviazione invece dell'eliminazione se non sei sicuro.</p>
+
+        <h3>Perche alcune funzioni non funzionano offline?</h3>
+        <p>Alcune operazioni (login, condivisione, gestione account) richiedono la comunicazione con il server e quindi una connessione internet attiva.</p>
+
+        <h3>Come posso contattare il supporto?</h3>
+        <p>Usa il widget di supporto nell'app (icona messaggio in basso a destra) per inviare una segnalazione.</p>
+
+        <h3>L'app e gratuita?</h3>
+        <p>Si, ToDoApp e completamente gratuita!</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p><strong>ToDoApp</strong> - Versione 1.2.0</p>
+        <p>Visita il nostro sito: <a href="https://todowebapp-websites.vercel.app/" target="_blank">todowebapp-websites.vercel.app</a></p>
+        <p>&copy; 2024 ToDoApp. Tutti i diritti riservati.</p>
+    </footer>
+
+</body>
+</html>
