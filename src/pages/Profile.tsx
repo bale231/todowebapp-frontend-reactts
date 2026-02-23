@@ -10,7 +10,7 @@ import {
   logout,
 } from "../api/auth";
 import { getCurrentUserOfflineFirst } from "../services/offlineService";
-import { Bell, BellOff, Key, LogOut } from "lucide-react";
+import { Bell, BellOff, Key, LogOut, Globe } from "lucide-react";
 import { useFirebaseNotifications } from "../hooks/useFirebaseNotifications";
 import { useNetwork } from "../context/NetworkContext";
 
@@ -592,6 +592,17 @@ export default function Profile() {
           >
             Disattiva il mio account
           </button>
+
+          {/* Link al sito web */}
+          <a
+            href="https://todowebapp-websites.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center gap-2 mt-6 py-2 transition-colors"
+          >
+            <Globe size={16} />
+            Visita il nostro sito web
+          </a>
         </form>
       </div>
 
