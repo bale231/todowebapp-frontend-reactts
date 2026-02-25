@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { MessageCircle, X, Send, HelpCircle, Bug, Lightbulb, Bot, Mail, ArrowUp } from "lucide-react";
 import { getAIResponse } from "../data/appKnowledgeBase";
+import { sendAIChatMessage } from "../api/aiChat";
 import gsap from "gsap";
 
 interface SupportWidgetProps {
@@ -156,7 +157,7 @@ export default function SupportWidget({
     }
   };
 
-  const handleSendMessage = (text?: string) => {
+  const handleSendMessage = async (text?: string) => {
     const msg = text || chatInput.trim();
     if (!msg || isTyping) return;
 
@@ -170,7 +171,32 @@ export default function SupportWidget({
     setChatInput("");
     setIsTyping(true);
 
-    // Simulate typing delay
+    // Build conversation history for AI context
+    const history = chatMessages
+      .filter((m) => m.id !== 0)
+      .map((m) => ({
+        role: m.sender === "user" ? "user" as const : "assistant" as const,
+        content: m.text,
+      }));
+
+    try {
+      // Try real AI first
+      if (navigator.onLine) {
+        const response = await sendAIChatMessage(msg, history);
+        const botMsg: ChatMessage = {
+          id: Date.now() + 1,
+          text: response.reply,
+          sender: "bot",
+        };
+        setChatMessages((prev) => [...prev, botMsg]);
+        setIsTyping(false);
+        return;
+      }
+    } catch {
+      // Fall through to local fallback
+    }
+
+    // Fallback: local keyword matching (works offline)
     setTimeout(() => {
       const response = getAIResponse(msg);
       const botMsg: ChatMessage = {
@@ -180,7 +206,7 @@ export default function SupportWidget({
       };
       setChatMessages((prev) => [...prev, botMsg]);
       setIsTyping(false);
-    }, 500 + Math.random() * 500);
+    }, 300);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
