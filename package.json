@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ToDoApp - Gestisci le tue attivita",
   "author": "ToDoApp Team",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "npx tsc -b && vite build",
