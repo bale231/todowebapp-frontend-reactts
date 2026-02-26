@@ -76,14 +76,14 @@ export default function Navbar() {
       >
         {theme === "dark" ? (
           <img
-            src="/assets/logo-themedark.png"
+            src="./assets/logo-themedark.png"
             alt="ToDoApp Logo"
             className="transition-opacity duration-500 ease-in-out"
             width={160}
           />
         ) : (
           <img
-            src="/assets/logo-themelight.png"
+            src="./assets/logo-themelight.png"
             alt="ToDoApp Logo"
             className="transition-opacity duration-500 ease-in-out"
             width={160}
