@@ -4,7 +4,6 @@ const path = require("path");
 let mainWindow = null;
 
 function createWindow() {
-  // Get the correct base path (works both in dev and production)
   const appPath = app.getAppPath();
 
   const iconPath = app.isPackaged
@@ -22,14 +21,12 @@ function createWindow() {
     title: "ToDoApp",
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(appPath, "electron/preload.cjs"),
+      preload: path.join(appPath, "preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
 
-  // In production, load the built files
-  // In development, load the Vite dev server
   if (!app.isPackaged) {
     mainWindow.loadURL("http://localhost:5173");
     mainWindow.webContents.openDevTools();
@@ -37,7 +34,6 @@ function createWindow() {
     mainWindow.loadFile(path.join(appPath, "dist/index.html"));
   }
 
-  // Open external links in the default browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("http")) {
       shell.openExternal(url);
@@ -45,7 +41,6 @@ function createWindow() {
     return { action: "deny" };
   });
 
-  // Handle mailto links
   mainWindow.webContents.on("will-navigate", (event, url) => {
     if (url.startsWith("mailto:")) {
       event.preventDefault();

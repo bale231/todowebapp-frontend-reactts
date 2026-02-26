@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ToDoApp - Gestisci le tue attivita",
   "author": "ToDoApp Team",
-  "main": "electron/main.cjs",
+  "main": "main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "npx tsc -b && vite build",
@@ -64,7 +64,8 @@
     "asar": true,
     "files": [
       "dist/**/*",
-      "electron/**/*",
+      "main.cjs",
+      "preload.cjs",
       "package.json"
     ],
     "extraResources": [
