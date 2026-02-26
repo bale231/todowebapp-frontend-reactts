@@ -1,5 +1,6 @@
-const { app, BrowserWindow, shell, nativeImage } = require("electron");
+const { app, BrowserWindow, shell, nativeImage, protocol } = require("electron");
 const path = require("path");
+const url = require("url");
 
 let mainWindow = null;
 
@@ -9,6 +10,7 @@ function createWindow() {
   // Debug: log paths
   console.log("App path:", appPath);
   console.log("Is packaged:", app.isPackaged);
+  console.log("__dirname:", __dirname);
 
   const iconPath = app.isPackaged
     ? path.join(process.resourcesPath, "icon.png")
@@ -16,7 +18,7 @@ function createWindow() {
 
   const icon = nativeImage.createFromPath(iconPath);
 
-  // Preload path - same location as main.cjs
+  // Preload path
   const preloadPath = path.join(__dirname, "preload.cjs");
   console.log("Preload path:", preloadPath);
 
@@ -40,9 +42,18 @@ function createWindow() {
   if (!app.isPackaged) {
     mainWindow.loadURL("http://localhost:5173");
   } else {
-    const indexPath = path.join(__dirname, "dist", "index.html");
+    // Use URL format for proper file:// loading from asar
+    const indexPath = path.join(appPath, "dist", "index.html");
     console.log("Index path:", indexPath);
-    mainWindow.loadFile(indexPath);
+
+    const startUrl = url.format({
+      pathname: indexPath,
+      protocol: "file:",
+      slashes: true,
+    });
+    console.log("Start URL:", startUrl);
+
+    mainWindow.loadURL(startUrl);
   }
 
   // Always open DevTools for debugging (remove this later)
@@ -57,10 +68,10 @@ function createWindow() {
   });
 
   // Handle mailto links
-  mainWindow.webContents.on("will-navigate", (event, url) => {
-    if (url.startsWith("mailto:")) {
+  mainWindow.webContents.on("will-navigate", (event, navigationUrl) => {
+    if (navigationUrl.startsWith("mailto:")) {
       event.preventDefault();
-      shell.openExternal(url);
+      shell.openExternal(navigationUrl);
     }
   });
 
