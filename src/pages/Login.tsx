@@ -188,7 +188,7 @@ export default function Login() {
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center gap-4">
           <img
-            src="/assets/logo-themelight.png"
+            src="./assets/logo-themelight.png"
             alt="ToDoApp Logo"
             width={200}
             className="animate-pulse"
@@ -205,7 +205,7 @@ export default function Login() {
         <div className="flex justify-center w-full mb-6">
           <img
             ref={logoRef}
-            src="/assets/logo-themelight.png"
+            src="./assets/logo-themelight.png"
             alt="ToDoApp Logo"
             width={270}
             className="transition-opacity duration-500 ease-in-out text-center"

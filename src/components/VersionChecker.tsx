@@ -13,7 +13,7 @@ export default function VersionChecker() {
       console.log('🔍 Inizio controllo versione...');
       
       try {
-        const res = await fetch('/version.json?t=' + Date.now(), { 
+        const res = await fetch('./version.json?t=' + Date.now(), { 
           cache: 'no-store' 
         });
         
