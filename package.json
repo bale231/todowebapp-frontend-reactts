@@ -63,7 +63,11 @@
     },
     "asar": false,
     "files": [
-      "dist/**/*",
+      {
+        "from": "dist",
+        "to": "dist",
+        "filter": ["**/*"]
+      },
       "main.cjs",
       "preload.cjs",
       "package.json"
