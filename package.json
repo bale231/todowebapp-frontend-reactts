@@ -76,7 +76,8 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/assets/apple-touch-icon.png"
+      "icon": "public/assets/apple-touch-icon.png",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
