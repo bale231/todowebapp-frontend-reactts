@@ -76,15 +76,11 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/assets/apple-touch-icon.png",
       "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "public/assets/apple-touch-icon.png",
-      "uninstallerIcon": "public/assets/apple-touch-icon.png",
-      "installerHeaderIcon": "public/assets/apple-touch-icon.png"
+      "allowToChangeInstallationDirectory": true
     },
     "mac": {
       "target": "dmg",
