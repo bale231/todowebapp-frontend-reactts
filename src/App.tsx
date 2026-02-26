@@ -1,4 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+
+// Use HashRouter for Electron (file:// protocol), BrowserRouter for web
+const isElectron = typeof window !== 'undefined' && (window as any).electronAPI?.isElectron
+const Router = isElectron ? HashRouter : BrowserRouter
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
