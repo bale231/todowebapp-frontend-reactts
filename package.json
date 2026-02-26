@@ -57,13 +57,21 @@
   "build": {
     "appId": "com.todoapp.desktop",
     "productName": "ToDoApp",
+    "electronVersion": "33.0.0",
     "directories": {
       "output": "release"
     },
+    "asar": true,
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "public/assets/**/*"
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "public/assets/apple-touch-icon.png",
+        "to": "icon.png"
+      }
     ],
     "win": {
       "target": "nsis",

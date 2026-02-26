@@ -4,9 +4,14 @@ const path = require("path");
 let mainWindow = null;
 
 function createWindow() {
-  const icon = nativeImage.createFromPath(
-    path.join(__dirname, "../public/assets/apple-touch-icon.png")
-  );
+  // Get the correct base path (works both in dev and production)
+  const appPath = app.getAppPath();
+
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, "icon.png")
+    : path.join(appPath, "public/assets/apple-touch-icon.png");
+
+  const icon = nativeImage.createFromPath(iconPath);
 
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -17,7 +22,7 @@ function createWindow() {
     title: "ToDoApp",
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
+      preload: path.join(appPath, "electron/preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -25,11 +30,11 @@ function createWindow() {
 
   // In production, load the built files
   // In development, load the Vite dev server
-  if (process.env.NODE_ENV === "development") {
+  if (!app.isPackaged) {
     mainWindow.loadURL("http://localhost:5173");
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
+    mainWindow.loadFile(path.join(appPath, "dist/index.html"));
   }
 
   // Open external links in the default browser
