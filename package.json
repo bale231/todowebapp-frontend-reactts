@@ -61,7 +61,7 @@
     "directories": {
       "output": "release"
     },
-    "asar": true,
+    "asar": false,
     "files": [
       "dist/**/*",
       "main.cjs",
