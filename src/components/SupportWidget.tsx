@@ -135,6 +135,23 @@ export default function SupportWidget({
     }
   }, [chatMessages, isTyping]);
 
+  // Block body scroll when chat is open on mobile
+  useEffect(() => {
+    const isMobile = window.innerWidth < 500;
+    if (isOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.height = "100%";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.height = "";
+    };
+  }, [isOpen]);
+
   const handleOpen = () => {
     setIsOpen(true);
   };
@@ -250,7 +267,7 @@ export default function SupportWidget({
   };
 
   return (
-    <div ref={widgetRef} className="fixed bottom-24 right-4 z-50 lg:bottom-8">
+    <div ref={widgetRef} className="fixed bottom-24 right-4 z-[9999] lg:bottom-8">
       {/* Chat bubble button */}
       {!isOpen && (
         <button
@@ -269,7 +286,7 @@ export default function SupportWidget({
         <div
           ref={panelRef}
           className="w-[calc(100vw-32px)] sm:w-96 max-w-[384px] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
-          style={{ maxHeight: "min(70vh, 520px)" }}
+          style={{ maxHeight: "min(70dvh, 520px)" }}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex-shrink-0">

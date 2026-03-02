@@ -138,6 +138,11 @@ export default function UsersPage() {
           />
           <input
             type="text"
+            inputMode="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             placeholder="Cerca per username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
