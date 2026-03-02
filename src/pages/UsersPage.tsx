@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search } from "lucide-react";
 import { fetchUsers, sendFriendRequest, User } from "../api/friends";
@@ -21,6 +21,9 @@ export default function UsersPage() {
     message: string;
   } | null>(null);
 
+  // Ref per AbortController - cancella richieste API pendenti
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
     // Debounce search
     const timer = setTimeout(() => {
@@ -29,17 +32,35 @@ export default function UsersPage() {
       } else {
         setUsers([]);
       }
-    }, 500);
+    }, 300); // Ridotto da 500ms a 300ms per risposta più veloce
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Cancella eventuali richieste pendenti quando cambia la query
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [searchQuery]);
 
   const loadUsers = async (search?: string) => {
+    // Cancella richiesta precedente se esiste
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Crea nuovo AbortController per questa richiesta
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     try {
-      const data = await fetchUsers(search);
+      const data = await fetchUsers(search, abortControllerRef.current.signal);
       setUsers(data);
     } catch (error) {
+      // Ignora errori di abort (sono intenzionali)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error(error);
     } finally {
       setLoading(false);
@@ -137,12 +158,18 @@ export default function UsersPage() {
             size={20}
           />
           <input
-            type="text"
-            inputMode="text"
+            type="search"
+            inputMode="search"
+            name="friend-search-field"
+            id="friend-search-field"
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
+            data-form-type="other"
+            data-lpignore="true"
+            data-1p-ignore="true"
+            aria-autocomplete="none"
             placeholder="Cerca per username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
