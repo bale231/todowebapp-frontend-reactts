@@ -82,7 +82,7 @@
       "target": "nsis",
       "signAndEditExecutable": false,
       "artifactName": "ToDoApp-Setup.${ext}",
-      "icon": "public/assets/icon.ico"
+      "icon": "public/assets/apple-touch-icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -90,12 +90,12 @@
     },
     "mac": {
       "target": "dmg",
-      "icon": "public/assets/apple-touch-icon.png",
+      "icon": "public/assets/apple-touch-icon.ico",
       "category": "public.app-category.productivity"
     },
     "linux": {
       "target": ["AppImage", "deb"],
-      "icon": "public/assets/apple-touch-icon.png",
+      "icon": "public/assets/apple-touch-icon.ico",
       "category": "Office"
     }
   }
