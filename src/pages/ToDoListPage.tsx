@@ -65,6 +65,8 @@ interface Todo {
     username: string;
     full_name: string;
   } | null;
+  // Internal field to track original position for stable sorting
+  _originalIndex?: number;
 }
 
 const colorThemes: Record<string, string> = {
@@ -175,13 +177,17 @@ export default function ToDoListPage() {
 
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
-      try {
-        setIsLoadingTodos(true);
-        const data = await fetchListDetailsOfflineFirst(id!);
-
+      // Helper to update UI with list data
+      const updateUIWithData = (data: typeof todos extends (infer T)[] ? { todos: T[]; name: string; color?: string; is_shared?: boolean; is_owner?: boolean; sort_order?: string } : never, isBackgroundUpdate = false) => {
         if (!data) return;
 
-        setTodos(data.todos);
+        // Assign _originalIndex to each todo to preserve original order
+        const todosWithIndex = data.todos.map((todo, index) => ({
+          ...todo,
+          _originalIndex: todo._originalIndex ?? index,
+        }));
+
+        setTodos(todosWithIndex);
 
         if (!preserveSort) {
           setSortOption((data as any).sort_order || "created");
@@ -194,22 +200,39 @@ export default function ToDoListPage() {
         setIsShared(data.is_shared || false);
         setIsOwner(data.is_owner !== false);
 
-        // Carica le informazioni di condivisione usando l'API dedicata
-        try {
-          const shares = await getListShares(Number(id));
-          if (shares && shares.length > 0) {
-            const mapped = shares.map(s => ({ username: s.username, full_name: s.full_name }));
-            setSharedWith(mapped);
-          } else {
-            setSharedWith([]);
-          }
-        } catch (error) {
-          console.error("Errore caricamento condivisioni:", error);
-          setSharedWith([]);
+        // Animate only on first load, not background updates
+        if (!isBackgroundUpdate) {
+          setTimeout(() => animateTodos(), 50);
+        }
+      };
+
+      try {
+        setIsLoadingTodos(true);
+
+        // Fetch with callback for background updates
+        const data = await fetchListDetailsOfflineFirst(id!, (freshData) => {
+          // This callback fires when fresh data arrives from backend
+          updateUIWithData(freshData as any, true);
+        });
+
+        if (data) {
+          updateUIWithData(data as any, false);
         }
 
-        // Animate only on first visit to this list in current session
-        setTimeout(() => animateTodos(), 50);
+        // Load shares in background (non-blocking)
+        getListShares(Number(id))
+          .then((shares) => {
+            if (shares && shares.length > 0) {
+              const mapped = shares.map(s => ({ username: s.username, full_name: s.full_name }));
+              setSharedWith(mapped);
+            } else {
+              setSharedWith([]);
+            }
+          })
+          .catch((error) => {
+            console.error("Errore caricamento condivisioni:", error);
+            setSharedWith([]);
+          });
       } finally {
         setIsLoadingTodos(false);
       }
@@ -247,10 +270,19 @@ export default function ToDoListPage() {
       return;
     }
 
-    // OPTIMISTIC: Update UI immediately
+    // OPTIMISTIC: Update UI immediately - add to START of array
     const result = await createTodoOffline(Number(id), title, qty, unit);
     if (result.tempTodo) {
-      setTodos((prev) => [...prev, result.tempTodo as Todo]);
+      setTodos((prev) => {
+        // Assign _originalIndex = -1 to new todo so it stays at top
+        // Then shift all existing indices by 1
+        const newTodo = { ...result.tempTodo, _originalIndex: -1 } as Todo;
+        const updatedPrev = prev.map((t) => ({
+          ...t,
+          _originalIndex: (t._originalIndex ?? 0) + 1,
+        }));
+        return [newTodo, ...updatedPrev];
+      });
     }
 
     setTitle("");
@@ -268,15 +300,25 @@ export default function ToDoListPage() {
         sorted.sort((a, b) => a.title.localeCompare(b.title, 'it', { sensitivity: 'base' }));
         break;
       case "completed":
-        // Non completati prima, poi completati
+        // Non completati prima, poi completati - maintain original order within each group
         sorted.sort((a, b) => {
-          if (a.completed === b.completed) return 0;
-          return a.completed ? 1 : -1;
+          if (a.completed !== b.completed) {
+            return a.completed ? 1 : -1;
+          }
+          // Within same completion status, maintain original order using _originalIndex
+          const aIdx = a._originalIndex ?? 0;
+          const bIdx = b._originalIndex ?? 0;
+          return aIdx - bIdx;
         });
         break;
       case "created":
       default:
-        // Keep original order (by id, which corresponds to creation order)
+        // Restore original order using _originalIndex
+        sorted.sort((a, b) => {
+          const aIdx = a._originalIndex ?? 0;
+          const bIdx = b._originalIndex ?? 0;
+          return aIdx - bIdx;
+        });
         break;
     }
     return sorted;
@@ -360,8 +402,12 @@ export default function ToDoListPage() {
     const newIndex = todos.findIndex((t) => t.id === Number(over.id));
     const newTodos = arrayMove(todos, oldIndex, newIndex);
 
-    // OPTIMISTIC: Update UI immediately
-    setTodos(newTodos);
+    // OPTIMISTIC: Update UI immediately - reassign _originalIndex after drag
+    const todosWithNewIndices = newTodos.map((todo, index) => ({
+      ...todo,
+      _originalIndex: index,
+    }));
+    setTodos(todosWithNewIndices);
 
     // Sync to backend in background (no await needed)
     const newOrder = newTodos.map((t) => t.id);
