@@ -29,17 +29,15 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import {
-  reorderTodos,
-  updateSortOrder,
-  moveTodo,
-} from "../api/todos";
-import {
   fetchListDetailsOfflineFirst,
   fetchListsOfflineFirst,
   createTodoOffline,
   toggleTodoOffline,
   deleteTodoOffline,
   updateTodoOffline,
+  reorderTodosOffline,
+  updateSortOrderOffline,
+  moveTodoOffline,
 } from "../services/offlineService";
 import { getListShares } from "../api/sharing";
 import { useTheme } from "../context/ThemeContext";
@@ -262,13 +260,40 @@ export default function ToDoListPage() {
     // No fetchTodos() needed - state already updated
   };
 
-  const handleToggle = async (todoId: number) => {
+  // Helper function to sort todos locally
+  const sortTodosLocally = useCallback((todosToSort: Todo[], sortBy: "created" | "alphabetical" | "completed"): Todo[] => {
+    const sorted = [...todosToSort];
+    switch (sortBy) {
+      case "alphabetical":
+        sorted.sort((a, b) => a.title.localeCompare(b.title, 'it', { sensitivity: 'base' }));
+        break;
+      case "completed":
+        // Non completati prima, poi completati
+        sorted.sort((a, b) => {
+          if (a.completed === b.completed) return 0;
+          return a.completed ? 1 : -1;
+        });
+        break;
+      case "created":
+      default:
+        // Keep original order (by id, which corresponds to creation order)
+        break;
+    }
+    return sorted;
+  }, []);
+
+  const handleToggle = (todoId: number) => {
     // OPTIMISTIC: Update UI immediately
-    setTodos((prev) =>
-      prev.map((todo) =>
+    setTodos((prev) => {
+      const updated = prev.map((todo) =>
         todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+      );
+      // If sorted by completion, re-sort to maintain order
+      if (sortOption === "completed") {
+        return sortTodosLocally(updated, "completed");
+      }
+      return updated;
+    });
     // Sync to backend in background (no await needed)
     toggleTodoOffline(todoId);
   };
@@ -280,16 +305,21 @@ export default function ToDoListPage() {
     deleteTodoOffline(todoId);
   };
 
-  const handleEdit = async () => {
+  const handleEdit = () => {
     if (editedTodo) {
       // OPTIMISTIC: Update UI immediately
-      setTodos((prev) =>
-        prev.map((todo) =>
+      setTodos((prev) => {
+        const updated = prev.map((todo) =>
           todo.id === editedTodo.id
             ? { ...todo, title: editedTodo.title, quantity: editedTodo.quantity, unit: editedTodo.unit }
             : todo
-        )
-      );
+        );
+        // If sorted alphabetically, re-sort to maintain order
+        if (sortOption === "alphabetical") {
+          return sortTodosLocally(updated, "alphabetical");
+        }
+        return updated;
+      });
       // Sync to backend in background (no await needed)
       updateTodoOffline(
         editedTodo.id,
@@ -298,20 +328,20 @@ export default function ToDoListPage() {
         editedTodo.unit
       );
       setEditedTodo(null);
-      // No fetchTodos() needed - state already updated
     }
   };
 
   // Gestisce lo spostamento della todo
-  const handleMoveTodo = async (newListId: number) => {
+  const handleMoveTodo = (newListId: number) => {
     if (!todoToMove) return;
 
     // OPTIMISTIC: Remove from current list immediately
     setTodos((prev) => prev.filter((todo) => todo.id !== todoToMove.id));
     setShowMoveModal(false);
     setTodoToMove(null);
-    // Sync to backend (this still awaits since moveTodo doesn't support optimistic yet)
-    moveTodo(todoToMove.id, newListId);
+
+    // Sync to backend in background (no await needed)
+    moveTodoOffline(todoToMove.id, newListId);
   };
 
   const handleDragStart = () => {
@@ -319,7 +349,7 @@ export default function ToDoListPage() {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = (event: any) => {
     setIsDragging(false);
     if (sortOption === "alphabetical") return;
 
@@ -329,42 +359,36 @@ export default function ToDoListPage() {
     const oldIndex = todos.findIndex((t) => t.id === Number(active.id));
     const newIndex = todos.findIndex((t) => t.id === Number(over.id));
     const newTodos = arrayMove(todos, oldIndex, newIndex);
+
+    // OPTIMISTIC: Update UI immediately
     setTodos(newTodos);
 
+    // Sync to backend in background (no await needed)
     const newOrder = newTodos.map((t) => t.id);
-    await reorderTodos(id, newOrder);
+    reorderTodosOffline(id!, newOrder);
   };
 
-  const handleSortChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSort = e.target.value as "created" | "alphabetical" | "completed";
     if (!id) return;
 
-    await updateSortOrder(id, newSort);
+    // OPTIMISTIC: Update UI immediately
     setSortOption(newSort);
-    fetchTodos(true);
+    setTodos((prev) => sortTodosLocally(prev, newSort));
+
+    // Sync to backend in background (no await needed)
+    updateSortOrderOffline(id, newSort);
   };
 
-  const handleSortOptionSelect = async (newSort: "created" | "alphabetical" | "completed") => {
+  const handleSortOptionSelect = (newSort: "created" | "alphabetical" | "completed") => {
     if (!id) return;
 
-    try {
-      console.log("📤 Updating sort order to:", newSort);
+    // OPTIMISTIC: Update UI immediately
+    setSortOption(newSort);
+    setTodos((prev) => sortTodosLocally(prev, newSort));
 
-      // Prima aggiorna il backend
-      const result = await updateSortOrder(id, newSort);
-      console.log("📥 Backend response:", result);
-
-      // Aggiorna lo stato locale
-      setSortOption(newSort);
-
-      // Delay per dare tempo al backend di processare
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Ricarica i todos dal backend (ordinati)
-      await fetchTodos(false);
-    } catch (error) {
-      console.error("❌ Errore ordinamento:", error);
-    }
+    // Sync to backend in background (no await needed)
+    updateSortOrderOffline(id, newSort);
   };
 
   // Chiude il menu sort con animazione
@@ -826,11 +850,14 @@ export default function ToDoListPage() {
                   Annulla
                 </button>
                 <button
-                  onClick={async () => {
-                    await Promise.all(selectedIds.map((i) => deleteTodoOffline(i)));
+                  onClick={() => {
+                    // OPTIMISTIC: Remove from UI immediately
+                    setTodos((prev) => prev.filter((todo) => !selectedIds.includes(todo.id)));
                     setShowBulkConfirm(false);
+
+                    // Sync to backend in background (no await needed)
+                    selectedIds.forEach((i) => deleteTodoOffline(i));
                     setSelectedIds([]);
-                    fetchTodos();
                   }}
                   className="px-4 py-2 bg-red-600/80 backdrop-blur-sm border border-red-300/30 text-white rounded-lg hover:bg-red-600/90 transition-all"
                 >

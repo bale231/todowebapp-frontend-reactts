@@ -805,5 +805,244 @@ export async function getCurrentUserOfflineFirst(): Promise<LocalUserProfile | n
   };
 }
 
+// --- REORDER & SORT ---
+
+/**
+ * Reorder todos with optimistic updates.
+ * Updates local DB immediately, then syncs to backend in background.
+ */
+export async function reorderTodosOffline(
+  listId: number | string,
+  order: number[]
+): Promise<boolean> {
+  const id = Number(listId);
+
+  // OPTIMISTIC: Reorder locally FIRST
+  const local = await getLocalList(id);
+  if (local) {
+    // Create a map of id -> todo
+    const todoMap = new Map(local.todos.map((t) => [t.id, t]));
+    // Reorder based on the new order
+    const reordered = order
+      .map((todoId) => todoMap.get(todoId))
+      .filter((t): t is NonNullable<typeof t> => t !== undefined);
+    // Add any todos that weren't in the order array (edge case)
+    const orderedIds = new Set(order);
+    const remaining = local.todos.filter((t) => !orderedIds.has(t.id));
+    local.todos = [...reordered, ...remaining];
+    await saveListToLocal(local);
+  }
+
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/${listId}/reorder/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ order }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(new RegExp(`^list:${listId}`));
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "REORDER_TODOS",
+            endpoint: `${API_URL}/lists/${listId}/reorder/`,
+            method: "POST",
+            body: JSON.stringify({ order }),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "REORDER_TODOS",
+          endpoint: `${API_URL}/lists/${listId}/reorder/`,
+          method: "POST",
+          body: JSON.stringify({ order }),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
+  await addToSyncQueue({
+    action: "REORDER_TODOS",
+    endpoint: `${API_URL}/lists/${listId}/reorder/`,
+    method: "POST",
+    body: JSON.stringify({ order }),
+    headers: authHeaders(),
+    timestamp: Date.now(),
+    retries: 0,
+  });
+
+  return true;
+}
+
+/**
+ * Update sort order with optimistic updates.
+ * Updates local DB immediately, then syncs to backend in background.
+ */
+export async function updateSortOrderOffline(
+  listId: number | string,
+  sortOrder: string
+): Promise<boolean> {
+  const id = Number(listId);
+
+  // OPTIMISTIC: Update locally FIRST
+  const local = await getLocalList(id);
+  if (local) {
+    // Store sort_order in the list object
+    (local as any).sort_order = sortOrder;
+    await saveListToLocal(local);
+  }
+
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/${id}/sort_order/`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify({ sort_order: sortOrder }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(new RegExp(`^list:${id}`));
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "UPDATE_SORT_ORDER",
+            endpoint: `${API_URL}/lists/${id}/sort_order/`,
+            method: "PATCH",
+            body: JSON.stringify({ sort_order: sortOrder }),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "UPDATE_SORT_ORDER",
+          endpoint: `${API_URL}/lists/${id}/sort_order/`,
+          method: "PATCH",
+          body: JSON.stringify({ sort_order: sortOrder }),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
+  await addToSyncQueue({
+    action: "UPDATE_SORT_ORDER",
+    endpoint: `${API_URL}/lists/${id}/sort_order/`,
+    method: "PATCH",
+    body: JSON.stringify({ sort_order: sortOrder }),
+    headers: authHeaders(),
+    timestamp: Date.now(),
+    retries: 0,
+  });
+
+  return true;
+}
+
+/**
+ * Move todo with optimistic updates.
+ * Updates local DB immediately, then syncs to backend in background.
+ */
+export async function moveTodoOffline(
+  todoId: number,
+  newListId: number
+): Promise<boolean> {
+  // OPTIMISTIC: Move locally FIRST
+  const allLists = await getLocalLists();
+  let movedTodo: any = null;
+
+  // Find and remove from current list
+  for (const list of allLists) {
+    const idx = list.todos.findIndex((t) => t.id === todoId);
+    if (idx !== -1) {
+      movedTodo = list.todos[idx];
+      list.todos.splice(idx, 1);
+      await saveListToLocal(list);
+      break;
+    }
+  }
+
+  // Add to new list
+  if (movedTodo) {
+    const targetList = await getLocalList(newListId);
+    if (targetList) {
+      targetList.todos.push(movedTodo);
+      await saveListToLocal(targetList);
+    }
+  }
+
+  if (navigator.onLine && todoId > 0) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/todos/${todoId}/move/`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify({ new_list_id: newListId }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(/^lists?:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "MOVE_TODO",
+            endpoint: `${API_URL}/todos/${todoId}/move/`,
+            method: "PATCH",
+            body: JSON.stringify({ new_list_id: newListId }),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "MOVE_TODO",
+          endpoint: `${API_URL}/todos/${todoId}/move/`,
+          method: "PATCH",
+          body: JSON.stringify({ new_list_id: newListId }),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync (only for real todos)
+  if (todoId > 0) {
+    await addToSyncQueue({
+      action: "MOVE_TODO",
+      endpoint: `${API_URL}/todos/${todoId}/move/`,
+      method: "PATCH",
+      body: JSON.stringify({ new_list_id: newListId }),
+      headers: authHeaders(),
+      timestamp: Date.now(),
+      retries: 0,
+    });
+  }
+
+  return true;
+}
+
 // Re-export auth headers for components that need them
 export { authHeaders, authHeadersNoContentType };
