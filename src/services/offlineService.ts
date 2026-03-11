@@ -47,59 +47,84 @@ function authHeadersNoContentType(): Record<string, string> {
 
 // --- LISTS ---
 
-export async function fetchListsOfflineFirst(): Promise<LocalTodoList[]> {
-  // 1. Return local data if available
+/**
+ * Fetch lists with TRUE offline-first strategy.
+ * Returns local data IMMEDIATELY, then fetches from API in background.
+ * Use onUpdate callback to receive fresh data when available.
+ */
+export async function fetchListsOfflineFirst(
+  onUpdate?: (data: LocalTodoList[]) => void
+): Promise<LocalTodoList[]> {
+  // 1. Return local data IMMEDIATELY
   const local = await getLocalLists();
 
   if (!navigator.onLine) {
     return local;
   }
 
-  // 2. Fetch from API
-  try {
-    const res = await fetch(`${API_URL}/lists/`, {
-      method: "GET",
-      headers: authHeaders(),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        await saveListsToLocal(data);
-        return data;
+  // 2. Fetch from API in BACKGROUND (don't block)
+  fetch(`${API_URL}/lists/`, {
+    method: "GET",
+    headers: authHeaders(),
+  })
+    .then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          await saveListsToLocal(data);
+          // Notify caller if callback provided
+          if (onUpdate) {
+            onUpdate(data);
+          }
+        }
       }
-    }
-  } catch {
-    // Network error: return local data
-  }
+    })
+    .catch(() => {
+      // Network error: silently ignore, we already have local data
+    });
 
+  // Return local data immediately
   return local;
 }
 
+/**
+ * Fetch list details with TRUE offline-first strategy.
+ * Returns local data IMMEDIATELY, then fetches from API in background.
+ * Use onUpdate callback to receive fresh data when available.
+ */
 export async function fetchListDetailsOfflineFirst(
-  listId: number | string
+  listId: number | string,
+  onUpdate?: (data: LocalTodoList) => void
 ): Promise<LocalTodoList | null> {
   const id = Number(listId);
 
+  // 1. Return local data IMMEDIATELY
+  const local = await getLocalList(id);
+
   if (!navigator.onLine) {
-    const local = await getLocalList(id);
     return local || null;
   }
 
-  try {
-    const res = await fetch(`${API_URL}/lists/${id}/`, {
-      method: "GET",
-      headers: authHeaders(),
+  // 2. Fetch from API in BACKGROUND (don't block)
+  fetch(`${API_URL}/lists/${id}/`, {
+    method: "GET",
+    headers: authHeaders(),
+  })
+    .then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        await saveListToLocal(data);
+        // Notify caller if callback provided
+        if (onUpdate) {
+          onUpdate(data);
+        }
+      }
+    })
+    .catch(() => {
+      // Network error: silently ignore, we already have local data
     });
-    if (res.ok) {
-      const data = await res.json();
-      await saveListToLocal(data);
-      return data;
-    }
-  } catch {
-    // fallback to local
-  }
 
-  const local = await getLocalList(id);
+  // Return local data immediately (may be null on first load)
   return local || null;
 }
 
@@ -407,10 +432,10 @@ export async function createTodoOffline(
     unit: unit ?? null,
   };
 
-  // OPTIMISTIC: Update local DB immediately
+  // OPTIMISTIC: Update local DB immediately - add to START of array
   const local = await getLocalList(Number(listId));
   if (local) {
-    local.todos = [...local.todos, tempTodo];
+    local.todos = [tempTodo, ...local.todos];
     await saveListToLocal(local);
   }
 
@@ -692,35 +717,50 @@ export async function updateTodoOffline(
 
 // --- CATEGORIES ---
 
-export async function fetchCategoriesOfflineFirst(): Promise<LocalCategory[]> {
+/**
+ * Fetch categories with TRUE offline-first strategy.
+ * Returns local data IMMEDIATELY, then fetches from API in background.
+ * Use onUpdate callback to receive fresh data when available.
+ */
+export async function fetchCategoriesOfflineFirst(
+  onUpdate?: (data: LocalCategory[]) => void
+): Promise<LocalCategory[]> {
+  // 1. Return local data IMMEDIATELY
   const local = await getLocalCategories();
 
   if (!navigator.onLine) {
     return local;
   }
 
-  try {
-    const token =
-      localStorage.getItem("accessToken") ||
-      sessionStorage.getItem("accessToken") ||
-      "";
-    const res = await fetch(`${API_URL}/categories/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        await saveCategoriesToLocal(data);
-        return data;
-      }
-    }
-  } catch {
-    // fallback to local
-  }
+  // 2. Fetch from API in BACKGROUND (don't block)
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken") ||
+    "";
 
+  fetch(`${API_URL}/categories/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
+    .then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          await saveCategoriesToLocal(data);
+          // Notify caller if callback provided
+          if (onUpdate) {
+            onUpdate(data);
+          }
+        }
+      }
+    })
+    .catch(() => {
+      // Network error: silently ignore, we already have local data
+    });
+
+  // Return local data immediately
   return local;
 }
 

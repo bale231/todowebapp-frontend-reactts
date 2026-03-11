@@ -267,7 +267,13 @@ export default function Home() {
   const fetchLists = async () => {
     try {
       setIsLoadingLists(true);
-      const data = await fetchListsOfflineFirst();
+      // Offline-first: show local data immediately, update when fresh data arrives
+      const data = await fetchListsOfflineFirst((freshData) => {
+        // Background update callback - update UI with fresh data
+        if (Array.isArray(freshData)) {
+          setLists(freshData);
+        }
+      });
       if (Array.isArray(data)) {
         setLists(data);
       } else {
@@ -282,7 +288,14 @@ export default function Home() {
 
   const fetchCategories = async () => {
     try {
-      const data = await fetchCategoriesOfflineFirst();
+      // Offline-first: show local data immediately, update when fresh data arrives
+      const data = await fetchCategoriesOfflineFirst((freshData) => {
+        // Background update callback - update UI with fresh data
+        if (Array.isArray(freshData)) {
+          setCategories(freshData);
+          loadSelectedCategory(freshData);
+        }
+      });
       if (Array.isArray(data)) {
         setCategories(data);
         await loadSelectedCategory(data);
