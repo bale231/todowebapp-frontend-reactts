@@ -45,7 +45,7 @@ import SwipeableTodoItem from "../components/SwipeableTodoItem";
 import MoveTodoModal from "../components/MoveTodoModal";
 import BottomNav from "../components/BottomNav";
 import SearchBar from "../components/SearchBar";
-import LoadingOverlay from "../components/LoadingOverlay";
+import TodoSkeleton from "../components/TodoSkeleton";
 import { createPortal } from "react-dom";
 import { useThemeColor } from "../hooks/useThemeColor";
 
@@ -177,6 +177,9 @@ export default function ToDoListPage() {
 
   const fetchTodos = useCallback(
     async (preserveSort = false) => {
+      const MIN_LOADING_TIME = 300; // Minimum skeleton display time in ms
+      const startTime = Date.now();
+
       // Helper to update UI with list data
       const updateUIWithData = (data: typeof todos extends (infer T)[] ? { todos: T[]; name: string; color?: string; is_shared?: boolean; is_owner?: boolean; sort_order?: string } : never, isBackgroundUpdate = false) => {
         if (!data) return;
@@ -234,6 +237,12 @@ export default function ToDoListPage() {
             setSharedWith([]);
           });
       } finally {
+        // Ensure skeleton is shown for at least MIN_LOADING_TIME ms
+        const elapsed = Date.now() - startTime;
+        const remainingTime = MIN_LOADING_TIME - elapsed;
+        if (remainingTime > 0) {
+          await new Promise(resolve => setTimeout(resolve, remainingTime));
+        }
         setIsLoadingTodos(false);
       }
     },
@@ -650,8 +659,12 @@ export default function ToDoListPage() {
         </button>
       </div>
 
-      {/* Loading overlay with blur */}
-      {isLoadingTodos && <LoadingOverlay />}
+      {/* Loading skeleton */}
+      {isLoadingTodos && (
+        <div className="pb-32 lg:pb-8">
+          <TodoSkeleton count={6} />
+        </div>
+      )}
 
       {/* No results message */}
       {!isLoadingTodos && displayedTodos.length === 0 && searchQuery.trim() && (

@@ -288,6 +288,9 @@ export default function Home() {
   }, []);
 
   const fetchLists = async () => {
+    const MIN_LOADING_TIME = 300; // Minimum skeleton display time in ms
+    const startTime = Date.now();
+
     try {
       setIsLoadingLists(true);
       // Offline-first: show local data immediately, update when fresh data arrives
@@ -305,6 +308,12 @@ export default function Home() {
     } catch (err) {
       console.error("Errore nel caricamento liste:", err);
     } finally {
+      // Ensure skeleton is shown for at least MIN_LOADING_TIME ms
+      const elapsed = Date.now() - startTime;
+      const remainingTime = MIN_LOADING_TIME - elapsed;
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
       setIsLoadingLists(false);
     }
   };
