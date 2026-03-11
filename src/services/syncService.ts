@@ -225,21 +225,30 @@ export async function processSyncQueue(): Promise<number> {
 
   for (const entry of queue) {
     try {
+      // Always use fresh auth headers instead of stale stored ones
+      const freshHeaders = getAuthHeaders();
       const response = await fetch(entry.endpoint, {
         method: entry.method,
-        headers: entry.headers || { "Content-Type": "application/json" },
+        headers: freshHeaders,
         body: entry.body || undefined,
       });
 
       if (response.ok || response.status === 404) {
         // Success or resource no longer exists (already deleted server-side)
         await removeSyncQueueEntry(entry.id!);
+      } else if (response.status === 401) {
+        // Unauthorized: token may be expired, retry later (don't delete!)
+        console.warn(
+          `[SyncQueue] Entry ${entry.id} got 401 - will retry after token refresh`
+        );
+        remaining++;
+        await handleRetry(entry);
       } else if (response.status >= 500) {
         // Server error: retry later
         remaining++;
         await handleRetry(entry);
       } else {
-        // Client error (4xx): remove from queue, can't fix by retrying
+        // Other client errors (4xx except 401): remove from queue
         console.warn(
           `[SyncQueue] Removing entry ${entry.id} - client error ${response.status}`
         );
