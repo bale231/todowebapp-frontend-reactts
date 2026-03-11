@@ -64,16 +64,18 @@
     },
     "asar": true,
     "compression": "maximum",
+    "npmRebuild": false,
     "files": [
-      {
-        "from": "dist",
-        "to": "dist",
-        "filter": ["**/*"]
-      },
+      "dist/**/*",
       "main.cjs",
       "preload.cjs",
       "package.json",
-      "!node_modules/**/*"
+      "!**/node_modules/**/*",
+      "!src/**/*",
+      "!public/**/*",
+      "!**/*.ts",
+      "!**/*.tsx",
+      "!**/*.map"
     ],
     "extraResources": [
       {
