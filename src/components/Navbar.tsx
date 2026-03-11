@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
+import { RefreshCw } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { logout } from "../api/auth";
 import { getCurrentUserOfflineFirst } from "../services/offlineService";
+import { fullSync } from "../services/syncService";
+import { getSyncQueue } from "../db/database";
 import NotificationBadge from "./NotificationBadge";
 import ThemeToggle from "./ThemeToggle";
 
@@ -11,6 +14,9 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<"idle" | "success" | "error">("idle");
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,6 +74,49 @@ export default function Navbar() {
 
   const { theme } = useTheme();
 
+  const handleSync = async () => {
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    setSyncStatus("idle");
+    setSyncMessage(null);
+
+    try {
+      // Check pending items in queue
+      const queue = await getSyncQueue();
+
+      if (!navigator.onLine) {
+        setSyncStatus("error");
+        setSyncMessage(`Sei offline. ${queue.length} modifiche in attesa.`);
+        return;
+      }
+
+      await fullSync();
+
+      // Check if there are still items in queue after sync
+      const remainingQueue = await getSyncQueue();
+
+      if (remainingQueue.length > 0) {
+        setSyncStatus("error");
+        setSyncMessage(`${remainingQueue.length} modifiche non sincronizzate`);
+      } else {
+        setSyncStatus("success");
+        setSyncMessage("Sincronizzato!");
+      }
+    } catch (error) {
+      setSyncStatus("error");
+      const msg = error instanceof Error ? error.message : "Errore di sync";
+      setSyncMessage(msg);
+    } finally {
+      setIsSyncing(false);
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        setSyncStatus("idle");
+        setSyncMessage(null);
+      }, 3000);
+    }
+  };
+
   return (
     <nav className="w-full sticky top-0 h-[80px] pl-2 pr-6 flex items-center justify-between bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/20 shadow-lg z-50">
       <Link
@@ -92,6 +141,38 @@ export default function Navbar() {
       </Link>
 
       <div className="flex items-center gap-4">
+        {/* Sync button */}
+        <div className="relative">
+          <button
+            onClick={handleSync}
+            disabled={isSyncing}
+            className={`p-2 rounded-full transition-all duration-200 ${
+              syncStatus === "success"
+                ? "text-green-500 bg-green-100 dark:bg-green-900/30"
+                : syncStatus === "error"
+                ? "text-red-500 bg-red-100 dark:bg-red-900/30"
+                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            }`}
+            title="Sincronizza"
+          >
+            <RefreshCw
+              className={`w-5 h-5 ${isSyncing ? "animate-spin" : ""}`}
+            />
+          </button>
+          {/* Sync message tooltip */}
+          {syncMessage && (
+            <div
+              className={`absolute top-full right-0 mt-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg z-50 ${
+                syncStatus === "success"
+                  ? "bg-green-500 text-white"
+                  : "bg-red-500 text-white"
+              }`}
+            >
+              {syncMessage}
+            </div>
+          )}
+        </div>
+
         <ThemeToggle />
 
         {/* 🔔 BADGE NOTIFICHE */}
