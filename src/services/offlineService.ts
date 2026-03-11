@@ -174,7 +174,7 @@ export async function createListOffline(
             endpoint: `${API_URL}/lists/`,
             method: "POST",
             body: JSON.stringify(body),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -252,7 +252,7 @@ export async function editListOffline(
             endpoint: `${API_URL}/lists/${listId}/`,
             method: "PUT",
             body: JSON.stringify(body),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -307,7 +307,7 @@ export async function deleteListOffline(listId: number): Promise<boolean> {
             action: "DELETE_LIST",
             endpoint: `${API_URL}/lists/${listId}/`,
             method: "DELETE",
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -371,7 +371,7 @@ export async function archiveListOffline(
             action: archive ? "ARCHIVE_LIST" : "UNARCHIVE_LIST",
             endpoint: `${API_URL}/lists/${listId}/${action}/`,
             method: "PATCH",
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -466,7 +466,7 @@ export async function createTodoOffline(
             endpoint: `${API_URL}/lists/${listId}/todos/`,
             method: "POST",
             body: JSON.stringify(body),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -533,7 +533,7 @@ export async function toggleTodoOffline(todoId: number): Promise<boolean> {
             action: "TOGGLE_TODO",
             endpoint: `${API_URL}/todos/${todoId}/toggle/`,
             method: "PATCH",
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -598,7 +598,7 @@ export async function deleteTodoOffline(todoId: number): Promise<boolean> {
             action: "DELETE_TODO",
             endpoint: `${API_URL}/todos/${todoId}/`,
             method: "DELETE",
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -679,7 +679,7 @@ export async function updateTodoOffline(
             endpoint: `${API_URL}/todos/${todoId}/update/`,
             method: "PATCH",
             body: JSON.stringify(body),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -733,16 +733,8 @@ export async function fetchCategoriesOfflineFirst(
   }
 
   // 2. Fetch from API in BACKGROUND (don't block)
-  const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken") ||
-    "";
-
   fetch(`${API_URL}/categories/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders(),
   })
     .then(async (res) => {
       if (res.ok) {
@@ -767,11 +759,6 @@ export async function fetchCategoriesOfflineFirst(
 export async function createCategoryOffline(
   name: string
 ): Promise<{ success: boolean; data?: LocalCategory }> {
-  const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken") ||
-    "";
-
   // OPTIMISTIC: Create locally FIRST
   const tempCat: LocalCategory = {
     id: -Date.now(),
@@ -785,10 +772,7 @@ export async function createCategoryOffline(
     // Send to backend in BACKGROUND (don't await)
     fetch(`${API_URL}/categories/`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: authHeaders(),
       body: JSON.stringify({ name }),
     })
       .then(async (res) => {
@@ -809,10 +793,7 @@ export async function createCategoryOffline(
             endpoint: `${API_URL}/categories/`,
             method: "POST",
             body: JSON.stringify({ name }),
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -825,10 +806,7 @@ export async function createCategoryOffline(
           endpoint: `${API_URL}/categories/`,
           method: "POST",
           body: JSON.stringify({ name }),
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           timestamp: Date.now(),
           retries: 0,
         });
@@ -844,11 +822,6 @@ export async function editCategoryOffline(
   categoryId: number,
   name: string
 ): Promise<boolean> {
-  const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken") ||
-    "";
-
   // OPTIMISTIC: Update locally FIRST
   const cats = await getLocalCategories();
   const cat = cats.find((c) => c.id === categoryId);
@@ -861,10 +834,7 @@ export async function editCategoryOffline(
     // Send to backend in BACKGROUND (don't await)
     fetch(`${API_URL}/categories/${categoryId}/`, {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: authHeaders(),
       body: JSON.stringify({ name }),
     })
       .then((res) => {
@@ -877,10 +847,7 @@ export async function editCategoryOffline(
             endpoint: `${API_URL}/categories/${categoryId}/`,
             method: "PATCH",
             body: JSON.stringify({ name }),
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -893,10 +860,7 @@ export async function editCategoryOffline(
           endpoint: `${API_URL}/categories/${categoryId}/`,
           method: "PATCH",
           body: JSON.stringify({ name }),
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           timestamp: Date.now(),
           retries: 0,
         });
@@ -911,10 +875,7 @@ export async function editCategoryOffline(
     endpoint: `${API_URL}/categories/${categoryId}/`,
     method: "PATCH",
     body: JSON.stringify({ name }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     timestamp: Date.now(),
     retries: 0,
   });
@@ -1012,7 +973,7 @@ export async function reorderTodosOffline(
             endpoint: `${API_URL}/lists/${listId}/reorder/`,
             method: "POST",
             body: JSON.stringify({ order }),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -1083,7 +1044,7 @@ export async function updateSortOrderOffline(
             endpoint: `${API_URL}/lists/${id}/sort_order/`,
             method: "PATCH",
             body: JSON.stringify({ sort_order: sortOrder }),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
@@ -1168,7 +1129,7 @@ export async function moveTodoOffline(
             endpoint: `${API_URL}/todos/${todoId}/move/`,
             method: "PATCH",
             body: JSON.stringify({ new_list_id: newListId }),
-            headers: authHeaders(),
+            headers: { "Content-Type": "application/json" },
             timestamp: Date.now(),
             retries: 0,
           });
