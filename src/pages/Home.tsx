@@ -288,7 +288,7 @@ export default function Home() {
   }, []);
 
   const fetchLists = async () => {
-    const MIN_LOADING_TIME = 300; // Minimum skeleton display time in ms
+    const MIN_LOADING_TIME = 800; // Minimum skeleton display time in ms
     const startTime = Date.now();
 
     try {
