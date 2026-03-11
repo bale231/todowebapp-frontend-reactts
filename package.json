@@ -58,6 +58,7 @@
     "appId": "com.todoapp.desktop",
     "productName": "ToDoApp",
     "electronVersion": "33.0.0",
+    "icon": "public/assets/apple-touch-icon.ico",
     "directories": {
       "output": "release"
     },
@@ -83,7 +84,8 @@
     "win": {
       "target": "nsis",
       "artifactName": "ToDoApp-Setup.${ext}",
-      "icon": "public/assets/apple-touch-icon.ico"
+      "icon": "public/assets/apple-touch-icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
