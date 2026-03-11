@@ -58,21 +58,24 @@
     "appId": "com.todoapp.desktop",
     "productName": "ToDoApp",
     "electronVersion": "33.0.0",
+    "icon": "public/assets/apple-touch-icon.ico",
     "directories": {
       "output": "release"
     },
     "asar": true,
     "compression": "maximum",
+    "npmRebuild": false,
     "files": [
-      {
-        "from": "dist",
-        "to": "dist",
-        "filter": ["**/*"]
-      },
+      "dist/**/*",
       "main.cjs",
       "preload.cjs",
       "package.json",
-      "!node_modules/**/*"
+      "!**/node_modules/**/*",
+      "!src/**/*",
+      "!public/**/*",
+      "!**/*.ts",
+      "!**/*.tsx",
+      "!**/*.map"
     ],
     "extraResources": [
       {
@@ -83,7 +86,8 @@
     "win": {
       "target": "nsis",
       "artifactName": "ToDoApp-Setup.${ext}",
-      "icon": "public/assets/apple-touch-icon.ico"
+      "icon": "public/assets/apple-touch-icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
