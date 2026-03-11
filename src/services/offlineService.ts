@@ -112,27 +112,7 @@ export async function createListOffline(
   const body: Record<string, any> = { name, color };
   if (categoryId !== undefined) body.category = categoryId;
 
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/lists/`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        invalidateCache(/^lists:/);
-        // Save to local DB
-        await saveListToLocal(data);
-        return { success: true, data };
-      }
-      return { success: false };
-    } catch {
-      // Fall through to offline handling
-    }
-  }
-
-  // Offline: create with temporary negative ID
+  // OPTIMISTIC: Create with temporary negative ID FIRST
   const tempId = -Date.now();
   const tempList: LocalTodoList = {
     id: tempId,
@@ -148,6 +128,50 @@ export async function createListOffline(
   };
   await saveListToLocal(tempList);
 
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          invalidateCache(/^lists:/);
+          const data = await res.json();
+          // Replace temp list with real one
+          await deleteLocalList(tempId);
+          await saveListToLocal(data);
+        } else {
+          // API failed: queue for retry
+          await addToSyncQueue({
+            action: "CREATE_LIST",
+            endpoint: `${API_URL}/lists/`,
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(async () => {
+        // Network error: queue for retry
+        await addToSyncQueue({
+          action: "CREATE_LIST",
+          endpoint: `${API_URL}/lists/`,
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return { success: true, data: tempList };
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: "CREATE_LIST",
     endpoint: `${API_URL}/lists/`,
@@ -171,26 +195,7 @@ export async function editListOffline(
   const body: Record<string, any> = { name, color };
   if (typeof categoryId !== "undefined") body.category = categoryId;
 
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/lists/${listId}/`, {
-        method: "PUT",
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        invalidateCache(/^lists?:/);
-        const updated = await res.json();
-        await saveListToLocal(updated);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Offline: update locally + queue
+  // OPTIMISTIC: Update locally FIRST
   const local = await getLocalList(listId);
   if (local) {
     local.name = name;
@@ -203,6 +208,48 @@ export async function editListOffline(
     await saveListToLocal(local);
   }
 
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/${listId}/`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          invalidateCache(/^lists?:/);
+          const updated = await res.json();
+          await saveListToLocal(updated);
+        } else {
+          // API failed: queue for retry
+          await addToSyncQueue({
+            action: "EDIT_LIST",
+            endpoint: `${API_URL}/lists/${listId}/`,
+            method: "PUT",
+            body: JSON.stringify(body),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(async () => {
+        // Network error: queue for retry
+        await addToSyncQueue({
+          action: "EDIT_LIST",
+          endpoint: `${API_URL}/lists/${listId}/`,
+          method: "PUT",
+          body: JSON.stringify(body),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: "EDIT_LIST",
     endpoint: `${API_URL}/lists/${listId}/`,
@@ -217,27 +264,46 @@ export async function editListOffline(
 }
 
 export async function deleteListOffline(listId: number): Promise<boolean> {
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/lists/${listId}/`, {
-        method: "DELETE",
-        headers: authHeaders(),
-      });
-      if (res.ok || res.status === 204) {
-        invalidateCache(/^lists?:/);
-        await deleteLocalList(listId);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Offline
+  // OPTIMISTIC: Delete locally FIRST
   await deleteLocalList(listId);
 
-  // Only queue sync if this wasn't a temp (offline-created) item
+  if (navigator.onLine && listId > 0) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/${listId}/`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    })
+      .then((res) => {
+        if (res.ok || res.status === 204) {
+          invalidateCache(/^lists?:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "DELETE_LIST",
+            endpoint: `${API_URL}/lists/${listId}/`,
+            method: "DELETE",
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "DELETE_LIST",
+          endpoint: `${API_URL}/lists/${listId}/`,
+          method: "DELETE",
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync (only for real items)
   if (listId > 0) {
     await addToSyncQueue({
       action: "DELETE_LIST",
@@ -258,34 +324,50 @@ export async function archiveListOffline(
 ): Promise<boolean> {
   const action = archive ? "archive" : "unarchive";
 
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/lists/${listId}/${action}/`, {
-        method: "PATCH",
-        headers: authHeaders(),
-      });
-      if (res.ok) {
-        invalidateCache(/^lists?:/);
-        const local = await getLocalList(listId);
-        if (local) {
-          local.is_archived = archive;
-          await saveListToLocal(local);
-        }
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Offline
+  // OPTIMISTIC: Update locally FIRST
   const local = await getLocalList(listId);
   if (local) {
     local.is_archived = archive;
     await saveListToLocal(local);
   }
 
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/${listId}/${action}/`, {
+      method: "PATCH",
+      headers: authHeaders(),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(/^lists?:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: archive ? "ARCHIVE_LIST" : "UNARCHIVE_LIST",
+            endpoint: `${API_URL}/lists/${listId}/${action}/`,
+            method: "PATCH",
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: archive ? "ARCHIVE_LIST" : "UNARCHIVE_LIST",
+          endpoint: `${API_URL}/lists/${listId}/${action}/`,
+          method: "PATCH",
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: archive ? "ARCHIVE_LIST" : "UNARCHIVE_LIST",
     endpoint: `${API_URL}/lists/${listId}/${action}/`,
@@ -644,32 +726,13 @@ export async function fetchCategoriesOfflineFirst(): Promise<LocalCategory[]> {
 
 export async function createCategoryOffline(
   name: string
-): Promise<boolean> {
-  if (navigator.onLine) {
-    try {
-      const token =
-        localStorage.getItem("accessToken") ||
-        sessionStorage.getItem("accessToken") ||
-        "";
-      const res = await fetch(`${API_URL}/categories/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name }),
-      });
-      if (res.ok) {
-        invalidateCache(/^categories:/);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
+): Promise<{ success: boolean; data?: LocalCategory }> {
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken") ||
+    "";
 
-  // Offline
+  // OPTIMISTIC: Create locally FIRST
   const tempCat: LocalCategory = {
     id: -Date.now(),
     name,
@@ -678,61 +741,75 @@ export async function createCategoryOffline(
   const cats = await getLocalCategories();
   await saveCategoriesToLocal([...cats, tempCat]);
 
-  const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken") ||
-    "";
-  await addToSyncQueue({
-    action: "CREATE_CATEGORY",
-    endpoint: `${API_URL}/categories/`,
-    method: "POST",
-    body: JSON.stringify({ name }),
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    timestamp: Date.now(),
-    retries: 0,
-  });
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/categories/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name }),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          invalidateCache(/^categories:/);
+          // Refresh categories from backend to get real ID
+          const newCats = await res.json();
+          if (newCats && newCats.id) {
+            // Replace temp with real
+            const currentCats = await getLocalCategories();
+            const filtered = currentCats.filter((c) => c.id !== tempCat.id);
+            await saveCategoriesToLocal([...filtered, newCats]);
+          }
+        } else {
+          // API failed: queue for retry
+          await addToSyncQueue({
+            action: "CREATE_CATEGORY",
+            endpoint: `${API_URL}/categories/`,
+            method: "POST",
+            body: JSON.stringify({ name }),
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(async () => {
+        // Network error: queue for retry
+        await addToSyncQueue({
+          action: "CREATE_CATEGORY",
+          endpoint: `${API_URL}/categories/`,
+          method: "POST",
+          body: JSON.stringify({ name }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
 
-  return true;
+    return { success: true, data: tempCat };
+  }
+
+  return { success: true, data: tempCat };
 }
 
 export async function editCategoryOffline(
   categoryId: number,
   name: string
 ): Promise<boolean> {
-  if (navigator.onLine) {
-    try {
-      const token =
-        localStorage.getItem("accessToken") ||
-        sessionStorage.getItem("accessToken") ||
-        "";
-      const res = await fetch(`${API_URL}/categories/${categoryId}/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name }),
-      });
-      if (res.ok) {
-        invalidateCache(/^categories:/);
-        const cats = await getLocalCategories();
-        const cat = cats.find((c) => c.id === categoryId);
-        if (cat) {
-          cat.name = name;
-          await saveCategoriesToLocal(cats);
-        }
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken") ||
+    "";
 
-  // Offline
+  // OPTIMISTIC: Update locally FIRST
   const cats = await getLocalCategories();
   const cat = cats.find((c) => c.id === categoryId);
   if (cat) {
@@ -740,10 +817,55 @@ export async function editCategoryOffline(
     await saveCategoriesToLocal(cats);
   }
 
-  const token =
-    localStorage.getItem("accessToken") ||
-    sessionStorage.getItem("accessToken") ||
-    "";
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/categories/${categoryId}/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(/^categories:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "EDIT_CATEGORY",
+            endpoint: `${API_URL}/categories/${categoryId}/`,
+            method: "PATCH",
+            body: JSON.stringify({ name }),
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "EDIT_CATEGORY",
+          endpoint: `${API_URL}/categories/${categoryId}/`,
+          method: "PATCH",
+          body: JSON.stringify({ name }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: "EDIT_CATEGORY",
     endpoint: `${API_URL}/categories/${categoryId}/`,

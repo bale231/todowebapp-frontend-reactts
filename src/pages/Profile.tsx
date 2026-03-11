@@ -109,67 +109,80 @@ export default function Profile() {
     });
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isOnline) { offlineAlert(); return; }
     const file = e.target.files?.[0];
     if (file) {
       setAvatarFile(file);
+      // OPTIMISTIC: Show preview immediately
       const reader = new FileReader();
       reader.onloadend = () => setAvatar(reader.result as string);
       reader.readAsDataURL(file);
       setClearPicture(false);
+      showAlert("Immagine aggiornata con successo", "success");
 
+      // Sync to backend in background (don't await)
       const formData = new FormData();
       formData.append("username", username);
       formData.append("email", email);
       formData.append("profile_picture", file);
 
-      const res = await updateProfile(formData);
-      if (res.message === "Profile updated") {
-        showAlert("Immagine aggiornata con successo", "success");
-        fetchUserData();
-      } else {
-        showAlert("Errore durante l'upload dell'immagine", "error");
-      }
+      updateProfile(formData)
+        .then((res) => {
+          if (res.message !== "Profile updated") {
+            showAlert("Errore durante l'upload dell'immagine", "error");
+          }
+        })
+        .catch(() => {
+          showAlert("Errore durante l'upload dell'immagine", "error");
+        });
     }
   };
 
-  const handleRemoveImage = async () => {
+  const handleRemoveImage = () => {
     if (!isOnline) { offlineAlert(); return; }
+    // OPTIMISTIC: Update UI immediately
     setAvatar(null);
     setAvatarFile(null);
     setClearPicture(true);
+    showAlert("Immagine rimossa con successo", "success");
+
+    // Sync to backend in background (don't await)
     const formData = new FormData();
     formData.append("username", username);
     formData.append("email", email);
     formData.append("clear_picture", "true");
-    const res = await updateProfile(formData);
-    if (res.message === "Profile updated") {
-      showAlert("Immagine rimossa con successo", "success");
-      fetchUserData();
-    }
+    updateProfile(formData).catch(() => {
+      showAlert("Errore durante la rimozione dell'immagine", "error");
+    });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isOnline) { offlineAlert(); return; }
 
+    // OPTIMISTIC: Update UI immediately
+    showAlert("Profilo aggiornato con successo", "success");
+    setAvatarFile(null);
+    setClearPicture(false);
+    setEditMode(false);
+
+    // Sync to backend in background (don't await)
     const formData = new FormData();
     formData.append("username", username);
     formData.append("email", email);
     if (avatarFile) formData.append("profile_picture", avatarFile);
     if (clearPicture) formData.append("clear_picture", "true");
 
-    const res = await updateProfile(formData);
-    if (res.message === "Profile updated") {
-      showAlert("Profilo aggiornato con successo", "success");
-      setAvatarFile(null);
-      setClearPicture(false);
-      setEditMode(false);
-      fetchUserData();
-    } else {
-      showAlert("Errore nell'aggiornamento del profilo", "error");
-    }
+    updateProfile(formData)
+      .then((res) => {
+        if (res.message !== "Profile updated") {
+          showAlert("Errore nell'aggiornamento del profilo", "error");
+        }
+      })
+      .catch(() => {
+        showAlert("Errore nell'aggiornamento del profilo", "error");
+      });
   };
 
   const handleDeactivate = async () => {
