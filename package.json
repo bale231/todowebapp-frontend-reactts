@@ -82,7 +82,6 @@
     ],
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false,
       "artifactName": "ToDoApp-Setup.${ext}",
       "icon": "public/assets/apple-touch-icon.ico"
     },
