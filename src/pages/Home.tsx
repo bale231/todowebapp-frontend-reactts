@@ -312,33 +312,39 @@ export default function Home() {
       return;
     }
 
-    try {
-      if (editListId !== null) {
-        const ok = await editListOffline(editListId, newListName, newListColor, newListCategory);
-        if (ok) {
-          setAlert({ type: "success", message: "Lista modificata con successo!" });
-        } else {
-          setAlert({ type: "error", message: "Errore nella modifica della lista" });
-          return;
-        }
-        setEditListId(null);
-      } else {
-        const result = await createListOffline(newListName, newListColor, newListCategory);
-        if (result.success) {
-          setAlert({ type: "success", message: "Lista creata con successo!" });
-        } else {
-          setAlert({ type: "error", message: "Errore nella creazione della lista" });
-          return;
-        }
+    if (editListId !== null) {
+      // OPTIMISTIC: Update UI immediately
+      setLists((prev) =>
+        prev.map((list) =>
+          list.id === editListId
+            ? {
+                ...list,
+                name: newListName,
+                color: newListColor,
+                category: newListCategory
+                  ? categories.find((c) => c.id === newListCategory) || null
+                  : null,
+              }
+            : list
+        )
+      );
+      setAlert({ type: "success", message: "Lista modificata con successo!" });
+      // Sync to backend in background (no await needed)
+      editListOffline(editListId, newListName, newListColor, newListCategory);
+      setEditListId(null);
+    } else {
+      // OPTIMISTIC: Add to UI immediately
+      const result = await createListOffline(newListName, newListColor, newListCategory);
+      if (result.success && result.data) {
+        setLists((prev) => [...prev, result.data as TodoList]);
+        setAlert({ type: "success", message: "Lista creata con successo!" });
       }
-      fetchLists();
-      setNewListName("");
-      setNewListColor("blue");
-      setShowForm(false);
-      setNewListCategory(null);
-    } catch (err) {
-      setAlert({ type: "error", message: "Errore di connessione" });
     }
+
+    setNewListName("");
+    setNewListColor("blue");
+    setShowForm(false);
+    setNewListCategory(null);
   };
 
   const handleEditList = (list: TodoList) => {
@@ -349,8 +355,18 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleSortChange = async (newOpt: "created" | "alphabetical" | "complete") => {
+  const handleSortChange = (newOpt: "created" | "alphabetical" | "complete") => {
+    // OPTIMISTIC: Update UI immediately
     setSortOption(newOpt);
+
+    const messages: Record<string, string> = {
+      created: "Ordinamento: Più recente",
+      alphabetical: "Ordinamento: Alfabetico",
+      complete: "Ordinamento: Per completezza",
+    };
+    setAlert({ type: "success", message: messages[newOpt] });
+
+    // Sync to backend in background (don't await)
     const backendOrder =
       newOpt === "alphabetical"
         ? "alphabetical"
@@ -358,40 +374,28 @@ export default function Home() {
         ? "complete"
         : "created";
 
-    const messages: Record<string, string> = {
-      created: "Ordinamento: Più recente",
-      alphabetical: "Ordinamento: Alfabetico",
-      complete: "Ordinamento: Per completezza",
-    };
-
-    setAlert({ type: "success", message: messages[newOpt] });
-
-    try {
-      await fetch(`${API_URL}/lists/sort_order/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getAccessToken()}`,
-        },
-        body: JSON.stringify({ sort_order: backendOrder }),
-      });
-    } catch (err) {
+    fetch(`${API_URL}/lists/sort_order/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
+      body: JSON.stringify({ sort_order: backendOrder }),
+    }).catch((err) => {
       console.error("Errore salvataggio ordinamento:", err);
-    }
+    });
   };
 
-  const deleteListAsync = async (id: number) => {
-    try {
-      await deleteListOffline(id);
-      fetchLists();
-      setShowDeleteConfirm(null);
-      setAlert({ type: "success", message: "Lista eliminata" });
-    } catch (err) {
-      setAlert({ type: "error", message: "Errore nell'eliminazione" });
-    }
+  const deleteListAsync = (id: number) => {
+    // OPTIMISTIC: Remove from UI immediately
+    setLists((prev) => prev.filter((list) => list.id !== id));
+    setShowDeleteConfirm(null);
+    setAlert({ type: "success", message: "Lista eliminata" });
+    // Sync to backend in background (no await needed)
+    deleteListOffline(id);
   };
 
-  const handleDeleteList = async (id: number) => {
+  const handleDeleteList = (id: number) => {
     const cardEl = document.getElementById(`card-${id}`);
     if (cardEl) {
       gsap.fromTo(
@@ -408,29 +412,28 @@ export default function Home() {
         }
       );
     } else {
-      await deleteListOffline(id);
-      fetchLists();
+      // OPTIMISTIC: Remove from UI immediately
+      setLists((prev) => prev.filter((list) => list.id !== id));
       setShowDeleteConfirm(null);
       setAlert({ type: "success", message: "Lista eliminata" });
+      // Sync to backend in background (no await needed)
+      deleteListOffline(id);
     }
   };
 
-  const handleArchiveList = async (id: number, isCurrentlyArchived: boolean) => {
-    try {
-      const ok = await archiveListOffline(id, !isCurrentlyArchived);
-      if (ok) {
-        setAlert({
-          type: "success",
-          message: isCurrentlyArchived ? "Lista ripristinata" : "Lista archiviata",
-        });
-      } else {
-        setAlert({ type: "error", message: "Errore durante l'operazione" });
-      }
-      fetchLists();
-    } catch (error) {
-      console.error("Errore archivio:", error);
-      setAlert({ type: "error", message: "Errore durante l'operazione" });
-    }
+  const handleArchiveList = (id: number, isCurrentlyArchived: boolean) => {
+    // OPTIMISTIC: Update UI immediately
+    setLists((prev) =>
+      prev.map((list) =>
+        list.id === id ? { ...list, is_archived: !isCurrentlyArchived } : list
+      )
+    );
+    setAlert({
+      type: "success",
+      message: isCurrentlyArchived ? "Lista ripristinata" : "Lista archiviata",
+    });
+    // Sync to backend in background (no await needed)
+    archiveListOffline(id, !isCurrentlyArchived);
   };
 
   const handleCreateOrEditCat = async () => {
@@ -442,33 +445,28 @@ export default function Home() {
       return;
     }
 
-    try {
-      let ok: boolean;
-      if (editCatId) {
-        ok = await editCategoryOffline(editCatId, catName);
-      } else {
-        ok = await createCategoryOffline(catName);
+    if (editCatId) {
+      // OPTIMISTIC: Update UI immediately
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.id === editCatId ? { ...cat, name: catName } : cat
+        )
+      );
+      setAlert({ type: "success", message: "Categoria modificata!" });
+      // Sync to backend in background (no await needed)
+      editCategoryOffline(editCatId, catName);
+    } else {
+      // OPTIMISTIC: Add to UI immediately
+      const result = await createCategoryOffline(catName);
+      if (result.success && result.data) {
+        setCategories((prev) => [...prev, result.data as Category]);
+        setAlert({ type: "success", message: "Categoria creata!" });
       }
-
-      if (!ok) {
-        setAlert({
-          type: "error",
-          message: "Errore nella gestione della categoria",
-        });
-        return;
-      }
-
-      fetchCategories();
-      setShowCatForm(false);
-      setEditCatId(null);
-      setCatName("");
-      setAlert({
-        type: "success",
-        message: editCatId ? "Categoria modificata!" : "Categoria creata!",
-      });
-    } catch (err) {
-      setAlert({ type: "error", message: "Errore di connessione" });
     }
+
+    setShowCatForm(false);
+    setEditCatId(null);
+    setCatName("");
   };
 
   const handleEditCat = (cat: Category) => {
