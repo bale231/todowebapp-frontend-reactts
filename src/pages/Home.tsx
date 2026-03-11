@@ -32,6 +32,7 @@ import {
   createCategoryOffline,
   editCategoryOffline,
 } from "../services/offlineService";
+import { addSyncListener } from "../services/syncService";
 import SwipeableListItem from "../components/SwipeableListItem";
 import { useThemeColor } from "../hooks/useThemeColor";
 import NotificationPrompt from "../components/NotificationPrompt";
@@ -232,6 +233,38 @@ export default function Home() {
       }
     }
   }, [user, hasAnimated]);
+
+  // Listen for sync events to reload data when sync completes
+  useEffect(() => {
+    const unsubscribe = addSyncListener((event) => {
+      if (event.type === "complete" && user) {
+        // Reload lists and categories silently when sync completes
+        fetchListsOfflineFirst((freshData) => {
+          if (Array.isArray(freshData)) {
+            setLists(freshData);
+          }
+        }).then((data) => {
+          if (Array.isArray(data)) {
+            setLists(data);
+          }
+        });
+
+        fetchCategoriesOfflineFirst((freshData) => {
+          if (Array.isArray(freshData)) {
+            setCategories(freshData);
+            localStorage.setItem("cachedCategories", JSON.stringify(freshData));
+          }
+        }).then((data) => {
+          if (Array.isArray(data)) {
+            setCategories(data);
+            localStorage.setItem("cachedCategories", JSON.stringify(data));
+          }
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [user]);
 
   useEffect(() => {
     if (showForm && modalRef.current) {

@@ -39,6 +39,7 @@ import {
   updateSortOrderOffline,
   moveTodoOffline,
 } from "../services/offlineService";
+import { addSyncListener } from "../services/syncService";
 import { getListShares } from "../api/sharing";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableTodoItem from "../components/SwipeableTodoItem";
@@ -518,6 +519,18 @@ export default function ToDoListPage() {
   useEffect(() => {
     fetchTodos();
     loadAllLists();
+  }, [fetchTodos]);
+
+  // Listen for sync events to reload data when sync completes
+  useEffect(() => {
+    const unsubscribe = addSyncListener((event) => {
+      if (event.type === "complete") {
+        // Reload list data silently when sync completes (preserving current sort)
+        fetchTodos(true);
+      }
+    });
+
+    return unsubscribe;
   }, [fetchTodos]);
 
   useEffect(() => {

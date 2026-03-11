@@ -18,6 +18,7 @@ import { NetworkProvider } from './context/NetworkContext'
 import NotificationPopup from './components/NotificationPopup'
 import OfflineBanner from './components/OfflineBanner'
 import VersionChecker from './components/VersionChecker'
+import SyncManager from './components/SyncManager'
 import UsersPage from './pages/UsersPage'
 import FriendsPage from './pages/FriendsPage'
 import FriendRequestsPage from './pages/FriendRequestsPage'
@@ -31,6 +32,7 @@ function App() {
           <NotificationProvider>
             <OfflineBanner />
             <VersionChecker />
+            <SyncManager />
             <Routes>
               <Route path="/profile" element={<Profile />} />
               <Route path="/" element={<Login />} />
