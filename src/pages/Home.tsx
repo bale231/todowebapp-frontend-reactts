@@ -86,8 +86,16 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [lists, setLists] = useState<TodoList[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  // Load selected category from localStorage instantly (no lag)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
+    () => {
+      try {
+        const saved = localStorage.getItem("selectedCategory");
+        return saved ? JSON.parse(saved) : null;
+      } catch {
+        return null;
+      }
+    }
   );
   const [newListName, setNewListName] = useState("");
   const [newListColor, setNewListColor] = useState("blue");
@@ -307,15 +315,23 @@ export default function Home() {
 
   const loadSelectedCategory = async (categoriesData: Category[]) => {
     try {
+      // Sync with server (localStorage already loaded in useState initializer)
       const result = await getSelectedCategory();
       if (result && result.selected_category !== null && result.selected_category !== undefined) {
         const cat = categoriesData.find((c) => c.id === result.selected_category);
         if (cat) {
+          // Update state and localStorage if server differs
           setSelectedCategory(cat);
+          localStorage.setItem("selectedCategory", JSON.stringify(cat));
         }
+      } else if (result && result.selected_category === null) {
+        // Server says "no category selected" - sync local
+        setSelectedCategory(null);
+        localStorage.removeItem("selectedCategory");
       }
     } catch (err) {
       console.error("Errore caricamento categoria selezionata:", err);
+      // Keep localStorage value on error (already loaded)
     }
   };
 
@@ -710,7 +726,14 @@ export default function Home() {
               const cat = categories.find((c) => c.id === id) || null;
               setSelectedCategory(cat);
 
-              // Salva la categoria selezionata nel backend
+              // Salva localmente per caricamento istantaneo al prossimo avvio
+              if (cat) {
+                localStorage.setItem("selectedCategory", JSON.stringify(cat));
+              } else {
+                localStorage.removeItem("selectedCategory");
+              }
+
+              // Salva la categoria selezionata nel backend (background)
               try {
                 await saveSelectedCategory(cat ? cat.id : null);
               } catch (err) {
