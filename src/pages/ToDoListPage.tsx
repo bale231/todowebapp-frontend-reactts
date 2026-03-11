@@ -249,34 +249,56 @@ export default function ToDoListPage() {
       return;
     }
 
-    await createTodoOffline(Number(id), title, qty, unit);
+    // OPTIMISTIC: Update UI immediately
+    const result = await createTodoOffline(Number(id), title, qty, unit);
+    if (result.tempTodo) {
+      setTodos((prev) => [...prev, result.tempTodo as Todo]);
+    }
+
     setTitle("");
     setQuantityValue("");
     setUnitValue("");
     setShowQuantityModal(false);
-    fetchTodos();
+    // No fetchTodos() needed - state already updated
   };
 
   const handleToggle = async (todoId: number) => {
-    await toggleTodoOffline(todoId);
-    await fetchTodos();
+    // OPTIMISTIC: Update UI immediately
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+    // Sync to backend in background (no await needed)
+    toggleTodoOffline(todoId);
   };
 
   const handleDelete = async (todoId: number) => {
-    await deleteTodoOffline(todoId);
-    fetchTodos();
+    // OPTIMISTIC: Remove from UI immediately
+    setTodos((prev) => prev.filter((todo) => todo.id !== todoId));
+    // Sync to backend in background (no await needed)
+    deleteTodoOffline(todoId);
   };
 
   const handleEdit = async () => {
     if (editedTodo) {
-      await updateTodoOffline(
+      // OPTIMISTIC: Update UI immediately
+      setTodos((prev) =>
+        prev.map((todo) =>
+          todo.id === editedTodo.id
+            ? { ...todo, title: editedTodo.title, quantity: editedTodo.quantity, unit: editedTodo.unit }
+            : todo
+        )
+      );
+      // Sync to backend in background (no await needed)
+      updateTodoOffline(
         editedTodo.id,
         editedTodo.title,
         editedTodo.quantity,
         editedTodo.unit
       );
       setEditedTodo(null);
-      fetchTodos();
+      // No fetchTodos() needed - state already updated
     }
   };
 
@@ -284,10 +306,12 @@ export default function ToDoListPage() {
   const handleMoveTodo = async (newListId: number) => {
     if (!todoToMove) return;
 
-    await moveTodo(todoToMove.id, newListId);
+    // OPTIMISTIC: Remove from current list immediately
+    setTodos((prev) => prev.filter((todo) => todo.id !== todoToMove.id));
     setShowMoveModal(false);
     setTodoToMove(null);
-    fetchTodos();
+    // Sync to backend (this still awaits since moveTodo doesn't support optimistic yet)
+    moveTodo(todoToMove.id, newListId);
   };
 
   const handleDragStart = () => {
