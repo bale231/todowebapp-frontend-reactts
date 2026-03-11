@@ -7,9 +7,13 @@ let mainWindow = null;
 function createWindow() {
   const appPath = app.getAppPath();
 
+  // Windows needs .ico for taskbar/window icon
+  const isWindows = process.platform === "win32";
+  const iconExt = isWindows ? "ico" : "png";
+
   const iconPath = app.isPackaged
-    ? path.join(process.resourcesPath, "icon.png")
-    : path.join(appPath, "public/assets/apple-touch-icon.png");
+    ? path.join(process.resourcesPath, `icon.${iconExt}`)
+    : path.join(appPath, `public/assets/apple-touch-icon.${iconExt}`);
 
   const icon = nativeImage.createFromPath(iconPath);
   const preloadPath = path.join(__dirname, "preload.cjs");

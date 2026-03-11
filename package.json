@@ -81,6 +81,10 @@
       {
         "from": "public/assets/apple-touch-icon.png",
         "to": "icon.png"
+      },
+      {
+        "from": "public/assets/apple-touch-icon.ico",
+        "to": "icon.ico"
       }
     ],
     "win": {
