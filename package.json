@@ -1,7 +1,7 @@
 {
   "name": "todoapp",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "description": "ToDoApp - Gestisci le tue attivita",
   "author": "ToDoApp Team",
@@ -80,7 +80,9 @@
     ],
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "artifactName": "ToDoApp-Setup.${ext}",
+      "icon": "public/assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
