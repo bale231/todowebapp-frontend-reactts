@@ -61,7 +61,8 @@
     "directories": {
       "output": "release"
     },
-    "asar": false,
+    "asar": true,
+    "compression": "maximum",
     "files": [
       {
         "from": "dist",
@@ -70,7 +71,8 @@
       },
       "main.cjs",
       "preload.cjs",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
     "extraResources": [
       {
@@ -86,7 +88,8 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true
     },
     "mac": {
       "target": "dmg",
