@@ -85,7 +85,15 @@ const colorClasses: Record<string, string> = {
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [lists, setLists] = useState<TodoList[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  // Load categories from localStorage instantly (no lag)
+  const [categories, setCategories] = useState<Category[]>(() => {
+    try {
+      const saved = localStorage.getItem("cachedCategories");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   // Load selected category from localStorage instantly (no lag)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     () => {
@@ -143,6 +151,13 @@ export default function Home() {
   const scrollRestoredRef = useRef(false); // ✅ Track if scroll has been restored
 
   useThemeColor();
+
+  // Sync categories to localStorage for instant loading (skip initial render)
+  useEffect(() => {
+    if (categories.length > 0) {
+      localStorage.setItem("cachedCategories", JSON.stringify(categories));
+    }
+  }, [categories]);
 
   // ✅ Helper function to get access token from both storages
   const getAccessToken = () => {
@@ -301,11 +316,15 @@ export default function Home() {
         // Background update callback - update UI with fresh data
         if (Array.isArray(freshData)) {
           setCategories(freshData);
+          // Cache in localStorage for instant loading next time
+          localStorage.setItem("cachedCategories", JSON.stringify(freshData));
           loadSelectedCategory(freshData);
         }
       });
       if (Array.isArray(data)) {
         setCategories(data);
+        // Cache in localStorage for instant loading next time
+        localStorage.setItem("cachedCategories", JSON.stringify(data));
         await loadSelectedCategory(data);
       }
     } catch (err) {
