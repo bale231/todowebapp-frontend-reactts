@@ -300,48 +300,88 @@ export async function archiveListOffline(
 
 // --- TODOS ---
 
+/**
+ * Create todo with optimistic updates.
+ * Updates local DB immediately, then syncs to backend in background.
+ * Returns the temporary todo object for immediate UI update.
+ */
 export async function createTodoOffline(
   listId: number | string,
   title: string,
   quantity?: number | null,
   unit?: string | null
-): Promise<boolean> {
+): Promise<{ success: boolean; tempTodo?: { id: number; title: string; completed: boolean; quantity: number | null; unit: string | null } }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const body: Record<string, any> = { title };
   if (quantity !== undefined && quantity !== null) body.quantity = quantity;
   if (unit !== undefined && unit !== null) body.unit = unit;
 
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/lists/${listId}/todos/`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        invalidateCache(/^lists?:/);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
+  // Create temp todo for immediate local update
+  const tempTodo = {
+    id: -Date.now(),
+    title,
+    completed: false,
+    quantity: quantity ?? null,
+    unit: unit ?? null,
+  };
 
-  // Offline: add todo locally
+  // OPTIMISTIC: Update local DB immediately
   const local = await getLocalList(Number(listId));
   if (local) {
-    const tempTodo = {
-      id: -Date.now(),
-      title,
-      completed: false,
-      quantity: quantity ?? null,
-      unit: unit ?? null,
-    };
     local.todos = [...local.todos, tempTodo];
     await saveListToLocal(local);
   }
 
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/lists/${listId}/todos/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          invalidateCache(/^lists?:/);
+          // Optionally: replace temp ID with real ID from response
+          const data = await res.json();
+          const localList = await getLocalList(Number(listId));
+          if (localList) {
+            const todoIndex = localList.todos.findIndex((t) => t.id === tempTodo.id);
+            if (todoIndex !== -1) {
+              localList.todos[todoIndex] = { ...localList.todos[todoIndex], id: data.id };
+              await saveListToLocal(localList);
+            }
+          }
+        } else {
+          // API failed: queue for retry
+          await addToSyncQueue({
+            action: "CREATE_TODO",
+            endpoint: `${API_URL}/lists/${listId}/todos/`,
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(async () => {
+        // Network error: queue for retry
+        await addToSyncQueue({
+          action: "CREATE_TODO",
+          endpoint: `${API_URL}/lists/${listId}/todos/`,
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return { success: true, tempTodo };
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: "CREATE_TODO",
     endpoint: `${API_URL}/lists/${listId}/todos/`,
@@ -352,27 +392,15 @@ export async function createTodoOffline(
     retries: 0,
   });
 
-  return true;
+  return { success: true, tempTodo };
 }
 
+/**
+ * Toggle todo with optimistic updates.
+ * Updates local DB immediately, then syncs to backend in background.
+ */
 export async function toggleTodoOffline(todoId: number): Promise<boolean> {
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/todos/${todoId}/toggle/`, {
-        method: "PATCH",
-        headers: authHeaders(),
-      });
-      if (res.ok) {
-        invalidateCache(/^lists?:/);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Offline: toggle locally
+  // OPTIMISTIC: Toggle locally FIRST
   const allLists = await getLocalLists();
   for (const list of allLists) {
     const todo = list.todos.find((t) => t.id === todoId);
@@ -383,6 +411,43 @@ export async function toggleTodoOffline(todoId: number): Promise<boolean> {
     }
   }
 
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/todos/${todoId}/toggle/`, {
+      method: "PATCH",
+      headers: authHeaders(),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(/^lists?:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "TOGGLE_TODO",
+            endpoint: `${API_URL}/todos/${todoId}/toggle/`,
+            method: "PATCH",
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "TOGGLE_TODO",
+          endpoint: `${API_URL}/todos/${todoId}/toggle/`,
+          method: "PATCH",
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: "TOGGLE_TODO",
     endpoint: `${API_URL}/todos/${todoId}/toggle/`,
@@ -395,24 +460,12 @@ export async function toggleTodoOffline(todoId: number): Promise<boolean> {
   return true;
 }
 
+/**
+ * Delete todo with optimistic updates.
+ * Removes from local DB immediately, then syncs to backend in background.
+ */
 export async function deleteTodoOffline(todoId: number): Promise<boolean> {
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/todos/${todoId}/`, {
-        method: "DELETE",
-        headers: authHeaders(),
-      });
-      if (res.ok || res.status === 204) {
-        invalidateCache(/^lists?:/);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Offline: remove locally
+  // OPTIMISTIC: Remove locally FIRST
   const allLists = await getLocalLists();
   for (const list of allLists) {
     const idx = list.todos.findIndex((t) => t.id === todoId);
@@ -423,6 +476,43 @@ export async function deleteTodoOffline(todoId: number): Promise<boolean> {
     }
   }
 
+  if (navigator.onLine && todoId > 0) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/todos/${todoId}/`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    })
+      .then((res) => {
+        if (res.ok || res.status === 204) {
+          invalidateCache(/^lists?:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "DELETE_TODO",
+            endpoint: `${API_URL}/todos/${todoId}/`,
+            method: "DELETE",
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "DELETE_TODO",
+          endpoint: `${API_URL}/todos/${todoId}/`,
+          method: "DELETE",
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync (only if it's a real todo, not temp)
   if (todoId > 0) {
     await addToSyncQueue({
       action: "DELETE_TODO",
@@ -437,6 +527,10 @@ export async function deleteTodoOffline(todoId: number): Promise<boolean> {
   return true;
 }
 
+/**
+ * Update todo with optimistic updates.
+ * Updates local DB immediately, then syncs to backend in background.
+ */
 export async function updateTodoOffline(
   todoId: number,
   title: string,
@@ -448,24 +542,7 @@ export async function updateTodoOffline(
   if (quantity !== undefined) body.quantity = quantity;
   if (unit !== undefined) body.unit = unit;
 
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${API_URL}/todos/${todoId}/update/`, {
-        method: "PATCH",
-        headers: authHeaders(),
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        invalidateCache(/^lists?:/);
-        return true;
-      }
-      return false;
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Offline: update locally
+  // OPTIMISTIC: Update locally FIRST
   const allLists = await getLocalLists();
   for (const list of allLists) {
     const todo = list.todos.find((t) => t.id === todoId);
@@ -478,6 +555,46 @@ export async function updateTodoOffline(
     }
   }
 
+  if (navigator.onLine) {
+    // Send to backend in BACKGROUND (don't await)
+    fetch(`${API_URL}/todos/${todoId}/update/`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    })
+      .then((res) => {
+        if (res.ok) {
+          invalidateCache(/^lists?:/);
+        } else {
+          // API failed: queue for retry
+          addToSyncQueue({
+            action: "UPDATE_TODO",
+            endpoint: `${API_URL}/todos/${todoId}/update/`,
+            method: "PATCH",
+            body: JSON.stringify(body),
+            headers: authHeaders(),
+            timestamp: Date.now(),
+            retries: 0,
+          });
+        }
+      })
+      .catch(() => {
+        // Network error: queue for retry
+        addToSyncQueue({
+          action: "UPDATE_TODO",
+          endpoint: `${API_URL}/todos/${todoId}/update/`,
+          method: "PATCH",
+          body: JSON.stringify(body),
+          headers: authHeaders(),
+          timestamp: Date.now(),
+          retries: 0,
+        });
+      });
+
+    return true;
+  }
+
+  // Offline: queue for later sync
   await addToSyncQueue({
     action: "UPDATE_TODO",
     endpoint: `${API_URL}/todos/${todoId}/update/`,
