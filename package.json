@@ -61,7 +61,8 @@
     "directories": {
       "output": "release"
     },
-    "asar": false,
+    "asar": true,
+    "compression": "maximum",
     "files": [
       {
         "from": "dist",
@@ -70,7 +71,8 @@
       },
       "main.cjs",
       "preload.cjs",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
     "extraResources": [
       {
@@ -80,13 +82,13 @@
     ],
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false,
       "artifactName": "ToDoApp-Setup.${ext}",
       "icon": "public/assets/apple-touch-icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true
     },
     "mac": {
       "target": "dmg",
