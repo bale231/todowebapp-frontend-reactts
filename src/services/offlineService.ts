@@ -71,10 +71,20 @@ export async function fetchListsOfflineFirst(
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          await saveListsToLocal(data);
+          // Merge: preserve sort_order from dirty local lists (pending PATCH not yet confirmed)
+          const existingLocal = await getLocalLists();
+          const localMap = new Map(existingLocal.map(l => [l.id, l]));
+          const merged = data.map((serverList: LocalTodoList) => {
+            const localList = localMap.get(serverList.id);
+            if (localList?._syncStatus === "dirty" && localList?.sort_order) {
+              return { ...serverList, sort_order: localList.sort_order, _syncStatus: "dirty" as const, _localUpdatedAt: localList._localUpdatedAt };
+            }
+            return serverList;
+          });
+          await saveListsToLocal(merged);
           // Notify caller if callback provided
           if (onUpdate) {
-            onUpdate(data);
+            onUpdate(merged);
           }
         }
       }
@@ -1019,11 +1029,12 @@ export async function updateSortOrderOffline(
 ): Promise<boolean> {
   const id = Number(listId);
 
-  // OPTIMISTIC: Update locally FIRST
+  // OPTIMISTIC: Update locally FIRST and mark dirty so background fetch won't overwrite
   const local = await getLocalList(id);
   if (local) {
-    // Store sort_order in the list object
     (local as any).sort_order = sortOrder;
+    (local as any)._syncStatus = "dirty";
+    (local as any)._localUpdatedAt = Date.now();
     await saveListToLocal(local);
   }
 
@@ -1034,9 +1045,15 @@ export async function updateSortOrderOffline(
       headers: authHeaders(),
       body: JSON.stringify({ sort_order: sortOrder }),
     })
-      .then((res) => {
+      .then(async (res) => {
         if (res.ok) {
           invalidateCache(new RegExp(`^list:${id}`));
+          // Mark as synced: PATCH confirmed, background fetch can now use server value
+          const confirmed = await getLocalList(id);
+          if (confirmed && (confirmed as any)._syncStatus === "dirty") {
+            (confirmed as any)._syncStatus = "synced";
+            await saveListToLocal(confirmed);
+          }
         } else {
           // API failed: queue for retry
           addToSyncQueue({

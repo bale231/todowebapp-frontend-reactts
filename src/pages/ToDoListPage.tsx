@@ -70,6 +70,25 @@ interface Todo {
   _originalIndex?: number;
 }
 
+// Module-level sort (no React deps) — usable inside useCallback closures safely
+function applyTodoSort(todos: Todo[], sortBy: "created" | "alphabetical" | "completed"): Todo[] {
+  const sorted = [...todos];
+  switch (sortBy) {
+    case "alphabetical":
+      sorted.sort((a, b) => a.title.localeCompare(b.title, 'it', { sensitivity: 'base' }));
+      break;
+    case "completed":
+      sorted.sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        return (a._originalIndex ?? 0) - (b._originalIndex ?? 0);
+      });
+      break;
+    default:
+      sorted.sort((a, b) => (a._originalIndex ?? 0) - (b._originalIndex ?? 0));
+  }
+  return sorted;
+}
+
 const colorThemes: Record<string, string> = {
   blue: "from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-800 dark:to-purple-900",
   green:
@@ -191,13 +210,19 @@ export default function ToDoListPage() {
           _originalIndex: todo._originalIndex ?? index,
         }));
 
-        setTodos(todosWithIndex);
+        // Determine the effective sort order for this update
+        const effectiveSort = (!preserveSort && !isBackgroundUpdate)
+          ? (((data as any).sort_order || "created") as "created" | "alphabetical" | "completed")
+          : sortOption;
+
+        // Apply sort immediately so todos are displayed correctly on load
+        setTodos(applyTodoSort(todosWithIndex, effectiveSort));
 
         // Only set sort from data on initial load (not from background API callback).
         // Background callback can carry stale sort_order if the PATCH hasn't
         // been processed yet by the server, which would override the user's change.
         if (!preserveSort && !isBackgroundUpdate) {
-          setSortOption((data as any).sort_order || "created");
+          setSortOption(effectiveSort);
         }
 
         setListName(data.name);
