@@ -72,8 +72,19 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
     if (disabled) return; // Non finire swipe se disabled
     setDragging(false);
     const dx = currentXRef.current - startXRef.current;
-    const target = dx < -ACTION_WIDTH ? -ACTION_WIDTH : dx > ACTION_WIDTH ? ACTION_WIDTH : 0;
-    xTo.current(target);
+
+    if (dx > ACTION_WIDTH) {
+      // Swipe destra oltre soglia → apri modale modifica direttamente
+      xTo.current(0);
+      onEdit();
+    } else if (dx < -ACTION_WIDTH) {
+      // Swipe sinistra oltre soglia → apri modale conferma eliminazione
+      xTo.current(0);
+      setShowConfirm(true);
+    } else {
+      // Swipe parziale → torna a 0
+      xTo.current(0);
+    }
   };
 
   const onClickWrapper = (e: React.MouseEvent) => {
@@ -122,30 +133,20 @@ export default function SwipeableTodoItem({ children, label, onEdit, onDelete, d
         {/* Solo se NON disabled, mostra i bottoni di azione */}
         {!disabled && (
           <>
-            {/* Azione Sinistra - MODIFICA */}
+            {/* Azione Sinistra - MODIFICA (visual indicator) */}
             <div
-              className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm"
+              className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm flex items-center justify-start pl-5"
               style={{ width: BUTTON_WIDTH, left: 0 }}
             >
-              <button
-                onClick={onEdit}
-                className="w-full h-full flex items-center justify-start pl-5 text-white hover:bg-yellow-500/80 transition-all"
-              >
-                <Pencil size={20} />
-              </button>
+              <Pencil size={20} className="text-white" />
             </div>
 
-            {/* Azione Destra - ELIMINA */}
+            {/* Azione Destra - ELIMINA (visual indicator) */}
             <div
-              className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm"
+              className="absolute inset-y-0 bg-red-500/80 backdrop-blur-sm flex items-center justify-end pr-5"
               style={{ width: BUTTON_WIDTH, right: 0 }}
             >
-              <button
-                onClick={() => setShowConfirm(true)}
-                className="w-full h-full flex items-center justify-end pr-5 text-white hover:bg-red-600/80 transition-all"
-              >
-                <Trash size={20} />
-              </button>
+              <Trash size={20} className="text-white" />
             </div>
           </>
         )}

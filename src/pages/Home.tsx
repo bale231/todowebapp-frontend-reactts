@@ -471,9 +471,16 @@ export default function Home() {
         Authorization: `Bearer ${getAccessToken()}`,
       },
       body: JSON.stringify({ sort_order: backendOrder }),
-    }).catch((err) => {
-      console.error("Errore salvataggio ordinamento:", err);
-    });
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error(`❌ lists sort_order save failed: ${res.status}`, errText);
+        }
+      })
+      .catch((err) => {
+        console.error("Errore salvataggio ordinamento:", err);
+      });
   };
 
   const deleteListAsync = (id: number) => {
@@ -1144,7 +1151,7 @@ export default function Home() {
                 });
 
                 try {
-                  await fetch(`${API_URL}/categories/sort_preference/`, {
+                  const catSortRes = await fetch(`${API_URL}/categories/sort_preference/`, {
                     method: "PATCH",
                     headers: {
                       "Content-Type": "application/json",
@@ -1152,6 +1159,10 @@ export default function Home() {
                     },
                     body: JSON.stringify({ category_sort_alpha: newValue }),
                   });
+                  if (!catSortRes.ok) {
+                    const errText = await catSortRes.text();
+                    console.error(`❌ categorySortAlpha save failed: ${catSortRes.status}`, errText);
+                  }
                 } catch (err) {
                   console.error(
                     "Errore nel salvataggio preferenza categoria:",
