@@ -64,8 +64,19 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete, o
   const handleEnd = () => {
     setDragging(false);
     const dx = currentXRef.current - startXRef.current;
-    const target = dx < -ACTION_WIDTH ? -ACTION_WIDTH : dx > ACTION_WIDTH ? ACTION_WIDTH : 0;
-    xTo.current(target);
+
+    if (dx > ACTION_WIDTH) {
+      // Swipe destra oltre soglia → apri modale modifica direttamente
+      xTo.current(0);
+      onEdit();
+    } else if (dx < -ACTION_WIDTH) {
+      // Swipe sinistra oltre soglia → archivia/disarchivia direttamente
+      xTo.current(0);
+      onArchive?.();
+    } else {
+      // Swipe parziale → torna a 0
+      xTo.current(0);
+    }
   };
 
   const onClickWrapper = (e: React.MouseEvent) => {
@@ -111,31 +122,21 @@ export default function SwipeableListItem({ children, label, onEdit, onDelete, o
   return (
     <>
       <div className="relative overflow-hidden rounded-xl">
-        {/* Azione Sinistra - MODIFICA (nascosta inizialmente, rivelata quando swipe destro) */}
+        {/* Azione Sinistra - MODIFICA (visual indicator) */}
         <div
-          className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm"
+          className="absolute inset-y-0 bg-yellow-400/80 backdrop-blur-sm flex items-center justify-start pl-5"
           style={{ width: BUTTON_WIDTH, left: 0 }}
         >
-          <button
-            onClick={onEdit}
-            className="w-full h-full flex items-center justify-start pl-5 text-white hover:bg-yellow-500/80 transition-all"
-          >
-            <Pencil size={20} />
-          </button>
+          <Pencil size={20} className="text-white" />
         </div>
 
-        {/* Azione Destra - ARCHIVIA/DISARCHIVIA (nascosta inizialmente, rivelata quando swipe sinistro) */}
+        {/* Azione Destra - ARCHIVIA/DISARCHIVIA (visual indicator) */}
         {onArchive && (
           <div
-            className={`absolute inset-y-0 ${isArchived ? 'bg-green-500/80' : 'bg-orange-500/80'} backdrop-blur-sm`}
+            className={`absolute inset-y-0 ${isArchived ? 'bg-green-500/80' : 'bg-orange-500/80'} backdrop-blur-sm flex items-center justify-end pr-5`}
             style={{ width: BUTTON_WIDTH, right: 0 }}
           >
-            <button
-              onClick={onArchive}
-              className={`w-full h-full flex items-center justify-end pr-5 text-white ${isArchived ? 'hover:bg-green-600/80' : 'hover:bg-orange-600/80'} transition-all`}
-            >
-              {isArchived ? <ArchiveRestore size={20} /> : <Archive size={20} />}
-            </button>
+            {isArchived ? <ArchiveRestore size={20} className="text-white" /> : <Archive size={20} className="text-white" />}
           </div>
         )}
 

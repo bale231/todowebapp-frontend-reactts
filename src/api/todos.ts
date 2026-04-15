@@ -301,6 +301,11 @@ export async function saveSelectedCategory(categoryId: number | null) {
     body: JSON.stringify({ selected_category: categoryId }),
   });
   invalidateCache(/^prefs:/);
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`❌ saveSelectedCategory failed: ${res.status}`, errText);
+    return null;
+  }
   return res.json();
 }
 
