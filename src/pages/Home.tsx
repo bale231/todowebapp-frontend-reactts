@@ -381,15 +381,14 @@ export default function Home() {
       if (result && result.selected_category !== null && result.selected_category !== undefined) {
         const cat = categoriesData.find((c) => c.id === result.selected_category);
         if (cat) {
-          // Update state and localStorage if server differs
+          // Update state and localStorage if server has a valid selection
           setSelectedCategory(cat);
           localStorage.setItem("selectedCategory", JSON.stringify(cat));
         }
-      } else if (result && result.selected_category === null) {
-        // Server says "no category selected" - sync local
-        setSelectedCategory(null);
-        localStorage.removeItem("selectedCategory");
       }
+      // NOTE: When server returns null, do NOT clear local state.
+      // The server may be behind a pending PATCH (race condition).
+      // The user's explicit "clear" action clears localStorage directly via the dropdown.
     } catch (err) {
       console.error("Errore caricamento categoria selezionata:", err);
       // Keep localStorage value on error (already loaded)

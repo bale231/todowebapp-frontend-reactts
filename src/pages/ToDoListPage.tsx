@@ -193,7 +193,10 @@ export default function ToDoListPage() {
 
         setTodos(todosWithIndex);
 
-        if (!preserveSort) {
+        // Only set sort from data on initial load (not from background API callback).
+        // Background callback can carry stale sort_order if the PATCH hasn't
+        // been processed yet by the server, which would override the user's change.
+        if (!preserveSort && !isBackgroundUpdate) {
           setSortOption((data as any).sort_order || "created");
         }
 
