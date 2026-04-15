@@ -116,10 +116,13 @@ export default function Home() {
     null
   );
   const [editMode, setEditMode] = useState(false);
-  const [sortOption, setSortOption] = useState<"created" | "alphabetical" | "complete">(
-    "created"
-  );
-  const [categorySortAlpha, setCategorySortAlpha] = useState(false);
+  const [sortOption, setSortOption] = useState<"created" | "alphabetical" | "complete">(() => {
+    const saved = localStorage.getItem("listsSortOption");
+    return (saved === "alphabetical" || saved === "complete") ? saved : "created";
+  });
+  const [categorySortAlpha, setCategorySortAlpha] = useState<boolean>(() => {
+    return localStorage.getItem("categorySortAlpha") === "true";
+  });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [showCatForm, setShowCatForm] = useState(false);
   const [catName, setCatName] = useState("");
@@ -181,13 +184,11 @@ export default function Home() {
           });
           if (res.ok) {
             const { sort_order } = await res.json();
-            setSortOption(
-              sort_order === "alphabetical"
-                ? "alphabetical"
-                : sort_order === "complete"
-                ? "complete"
-                : "created"
-            );
+            const resolved = sort_order === "alphabetical" ? "alphabetical"
+              : sort_order === "complete" ? "complete"
+              : "created";
+            setSortOption(resolved);
+            localStorage.setItem("listsSortOption", resolved);
           }
 
           const catRes = await fetch(`${API_URL}/categories/sort_preference/`, {
@@ -198,6 +199,7 @@ export default function Home() {
           if (catRes.ok) {
             const { category_sort_alpha } = await catRes.json();
             setCategorySortAlpha(category_sort_alpha);
+            localStorage.setItem("categorySortAlpha", String(category_sort_alpha));
           }
         } catch (err) {
           console.error("Impossibile caricare preferenze:", err);
@@ -445,8 +447,9 @@ export default function Home() {
   };
 
   const handleSortChange = (newOpt: "created" | "alphabetical" | "complete") => {
-    // OPTIMISTIC: Update UI immediately
+    // OPTIMISTIC: Update UI + localStorage immediately
     setSortOption(newOpt);
+    localStorage.setItem("listsSortOption", newOpt);
 
     const messages: Record<string, string> = {
       created: "Ordinamento: Più recente",
@@ -1140,6 +1143,7 @@ export default function Home() {
               onClick={async () => {
                 const newValue = !categorySortAlpha;
                 setCategorySortAlpha(newValue);
+                localStorage.setItem("categorySortAlpha", String(newValue));
                 setMenuOpen(false);
 
                 setAlert({
