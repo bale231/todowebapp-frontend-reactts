@@ -29,7 +29,10 @@ export default function Profile() {
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [clearPicture, setClearPicture] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(() => {
+    const saved = localStorage.getItem("pushNotificationsEnabled");
+    return saved !== null ? saved === "true" : true;
+  });
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
   const { requestPermission, notificationPermission } = useFirebaseNotifications();
@@ -72,7 +75,9 @@ export default function Profile() {
       setUsername(user.username);
       setEmail(user.email);
       setAvatar(user.profile_picture);
-      setPushNotificationsEnabled(user.push_notifications_enabled ?? true);
+      const notifEnabled = user.push_notifications_enabled ?? true;
+      setPushNotificationsEnabled(notifEnabled);
+      localStorage.setItem("pushNotificationsEnabled", String(notifEnabled));
     }
   };
 
@@ -242,6 +247,7 @@ export default function Profile() {
         // Accetta diverse risposte positive dal backend
         if (res.message === "Preferences updated" || res.success || res.push_notifications_enabled !== undefined) {
           setPushNotificationsEnabled(true);
+          localStorage.setItem("pushNotificationsEnabled", "true");
           showAlert("Notifiche push attivate con successo!", "success");
         } else {
           showAlert(res.error || res.message || "Errore nell'aggiornamento preferenze", "error");
@@ -254,6 +260,7 @@ export default function Profile() {
         // Accetta diverse risposte positive dal backend
         if (res.message === "Preferences updated" || res.success || res.push_notifications_enabled !== undefined) {
           setPushNotificationsEnabled(false);
+          localStorage.setItem("pushNotificationsEnabled", "false");
           showAlert("Notifiche push disattivate (notifiche in-app sempre attive)", "success");
         } else {
           showAlert(res.error || res.message || "Errore nell'aggiornamento preferenze", "error");
