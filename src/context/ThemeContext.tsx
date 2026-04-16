@@ -15,19 +15,27 @@ const ThemeContext = createContext<ThemeContextProps>({
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<"light" | "dark">("light");
+  // Initialize from localStorage for instant load, fallback to light
+  const [theme, setThemeState] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("theme");
+    return saved === "dark" ? "dark" : "light";
+  });
   const [themeLoaded, setThemeLoaded] = useState(false);
+
+  // Apply theme class on initial render (before useEffect runs)
+  useEffect(() => {
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(theme);
+  }, []);
 
   useEffect(() => {
     const loadThemeFromBackend = async () => {
       const user = await getCurrentUserOfflineFirst();
       if (user?.theme) {
         setThemeState(user.theme);
-        if (user.theme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
+        localStorage.setItem("theme", user.theme);
+        document.documentElement.classList.remove("dark", "light");
+        document.documentElement.classList.add(user.theme);
       }
       setThemeLoaded(true);
     };
@@ -43,14 +51,15 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setTheme = async (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
-  
+    localStorage.setItem("theme", newTheme);
+
     // ✅ Prima rimuovi sempre entrambe
     document.documentElement.classList.remove("dark", "light");
     // ✅ Poi aggiungi quella giusta
     document.documentElement.classList.add(newTheme);
-  
+
     await updateTheme(newTheme);
-  };  
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, themeLoaded }}>
