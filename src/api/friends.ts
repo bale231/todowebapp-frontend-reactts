@@ -1,4 +1,4 @@
-import { getAuthHeaders } from "./todos";
+import { fetchWithAuth } from "./todos";
 
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
@@ -30,64 +30,53 @@ export const fetchUsers = async (search?: string, signal?: AbortSignal): Promise
     ? `${API_URL}/users/?search=${encodeURIComponent(search)}`
     : `${API_URL}/users/`;
 
-  const res = await fetch(url, {
-    headers: getAuthHeaders(),
-    signal,
-  });
+  const res = await fetchWithAuth(url, { signal });
   if (!res.ok) throw new Error("Errore caricamento utenti");
   return res.json();
 };
 
 // Ottieni lista amici
 export const fetchFriends = async (): Promise<Friendship[]> => {
-  const res = await fetch(`${API_URL}/friends/`, {
-    headers: getAuthHeaders(),
-  });
+  const res = await fetchWithAuth(`${API_URL}/friends/`);
   if (!res.ok) throw new Error("Errore caricamento amici");
   return res.json();
 };
 
 // Ottieni richieste ricevute
 export const fetchFriendRequests = async (): Promise<FriendRequest[]> => {
-  const res = await fetch(`${API_URL}/friend-requests/`, {
-    headers: getAuthHeaders(),
-  });
+  const res = await fetchWithAuth(`${API_URL}/friend-requests/`);
   if (!res.ok) throw new Error("Errore caricamento richieste");
   return res.json();
 };
 
 // Invia richiesta amicizia
 export const sendFriendRequest = async (userId: number): Promise<void> => {
-  const res = await fetch(`${API_URL}/friend-requests/send/${userId}/`, {
+  const res = await fetchWithAuth(`${API_URL}/friend-requests/send/${userId}/`, {
     method: "POST",
-    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Errore invio richiesta");
 };
 
 // Accetta richiesta
 export const acceptFriendRequest = async (requestId: number): Promise<void> => {
-  const res = await fetch(`${API_URL}/friend-requests/${requestId}/accept/`, {
+  const res = await fetchWithAuth(`${API_URL}/friend-requests/${requestId}/accept/`, {
     method: "POST",
-    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Errore accettazione");
 };
 
 // Rifiuta richiesta
 export const rejectFriendRequest = async (requestId: number): Promise<void> => {
-  const res = await fetch(`${API_URL}/friend-requests/${requestId}/reject/`, {
+  const res = await fetchWithAuth(`${API_URL}/friend-requests/${requestId}/reject/`, {
     method: "POST",
-    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Errore rifiuto");
 };
 
 // Rimuovi amico
 export const removeFriend = async (userId: number): Promise<void> => {
-  const res = await fetch(`${API_URL}/friends/${userId}/remove/`, {
+  const res = await fetchWithAuth(`${API_URL}/friends/${userId}/remove/`, {
     method: "DELETE",
-    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Errore rimozione amico");
 };
