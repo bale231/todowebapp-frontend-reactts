@@ -80,6 +80,32 @@ export async function refreshTokenIfNeeded(): Promise<string | null> {
   return _refreshPromise;
 }
 
+/**
+ * Proactively refresh the access token if it expires within 24 hours.
+ * Call this on every app startup to implement sliding expiry:
+ * each time the user opens the app, the 30-day refresh window resets.
+ */
+export async function proactiveTokenRefresh(): Promise<void> {
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken");
+
+  if (!token) return;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expiresAt = payload.exp * 1000;
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    // Refresh if expired or expiring within 24 hours
+    if (expiresAt - now < twentyFourHours) {
+      await refreshTokenIfNeeded();
+    }
+  } catch {
+    // Malformed token - ignore, 401 will handle it
+  }
+}
 
 // 🔐 Recupero utente corrente tramite JWT
 export async function getCurrentUserJWT() {
