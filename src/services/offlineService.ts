@@ -23,7 +23,7 @@ import {
   type LocalUserProfile,
 } from "../db/database";
 import { getAuthHeaders, fetchWithAuth } from "../api/todos";
-import { getCurrentUserJWT } from "../api/auth";
+import { getCurrentUserJWT, proactiveTokenRefresh } from "../api/auth";
 import {
   invalidateCache,
 } from "../utils/apiCache";
@@ -911,6 +911,8 @@ export async function getCurrentUserOfflineFirst(): Promise<LocalUserProfile | n
 
   if (navigator.onLine) {
     try {
+      // Proactively refresh token if expiring within 24h (sliding expiry pattern)
+      await proactiveTokenRefresh();
       const user = await getCurrentUserJWT();
       if (user) {
         // Save to IndexedDB for offline use
