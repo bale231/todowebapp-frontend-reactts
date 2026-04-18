@@ -22,7 +22,7 @@ import {
   type LocalCategory,
   type LocalUserProfile,
 } from "../db/database";
-import { getAuthHeaders } from "../api/todos";
+import { getAuthHeaders, fetchWithAuth } from "../api/todos";
 import { getCurrentUserJWT } from "../api/auth";
 import {
   invalidateCache,
@@ -63,9 +63,8 @@ export async function fetchListsOfflineFirst(
   }
 
   // 2. Fetch from API in BACKGROUND (don't block)
-  fetch(`${API_URL}/lists/`, {
+  fetchWithAuth(`${API_URL}/lists/`, {
     method: "GET",
-    headers: authHeaders(),
   })
     .then(async (res) => {
       if (res.ok) {
@@ -116,9 +115,8 @@ export async function fetchListDetailsOfflineFirst(
   }
 
   // 2. Fetch from API in BACKGROUND (don't block)
-  fetch(`${API_URL}/lists/${id}/`, {
+  fetchWithAuth(`${API_URL}/lists/${id}/`, {
     method: "GET",
-    headers: authHeaders(),
   })
     .then(async (res) => {
       if (res.ok) {
@@ -165,7 +163,7 @@ export async function createListOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/`, {
+    fetchWithAuth(`${API_URL}/lists/`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -245,7 +243,7 @@ export async function editListOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/${listId}/`, {
+    fetchWithAuth(`${API_URL}/lists/${listId}/`, {
       method: "PUT",
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -304,7 +302,7 @@ export async function deleteListOffline(listId: number): Promise<boolean> {
 
   if (navigator.onLine && listId > 0) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/${listId}/`, {
+    fetchWithAuth(`${API_URL}/lists/${listId}/`, {
       method: "DELETE",
       headers: authHeaders(),
     })
@@ -368,7 +366,7 @@ export async function archiveListOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/${listId}/${action}/`, {
+    fetchWithAuth(`${API_URL}/lists/${listId}/${action}/`, {
       method: "PATCH",
       headers: authHeaders(),
     })
@@ -451,7 +449,7 @@ export async function createTodoOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/${listId}/todos/`, {
+    fetchWithAuth(`${API_URL}/lists/${listId}/todos/`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -530,7 +528,7 @@ export async function toggleTodoOffline(todoId: number): Promise<boolean> {
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/todos/${todoId}/toggle/`, {
+    fetchWithAuth(`${API_URL}/todos/${todoId}/toggle/`, {
       method: "PATCH",
       headers: authHeaders(),
     })
@@ -595,7 +593,7 @@ export async function deleteTodoOffline(todoId: number): Promise<boolean> {
 
   if (navigator.onLine && todoId > 0) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/todos/${todoId}/`, {
+    fetchWithAuth(`${API_URL}/todos/${todoId}/`, {
       method: "DELETE",
       headers: authHeaders(),
     })
@@ -674,7 +672,7 @@ export async function updateTodoOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/todos/${todoId}/update/`, {
+    fetchWithAuth(`${API_URL}/todos/${todoId}/update/`, {
       method: "PATCH",
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -743,7 +741,7 @@ export async function fetchCategoriesOfflineFirst(
   }
 
   // 2. Fetch from API in BACKGROUND (don't block)
-  fetch(`${API_URL}/categories/`, {
+  fetchWithAuth(`${API_URL}/categories/`, {
     headers: authHeaders(),
   })
     .then(async (res) => {
@@ -780,7 +778,7 @@ export async function createCategoryOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/categories/`, {
+    fetchWithAuth(`${API_URL}/categories/`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ name }),
@@ -842,7 +840,7 @@ export async function editCategoryOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/categories/${categoryId}/`, {
+    fetchWithAuth(`${API_URL}/categories/${categoryId}/`, {
       method: "PATCH",
       headers: authHeaders(),
       body: JSON.stringify({ name }),
@@ -968,7 +966,7 @@ export async function reorderTodosOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/${listId}/reorder/`, {
+    fetchWithAuth(`${API_URL}/lists/${listId}/reorder/`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ order }),
@@ -1040,7 +1038,7 @@ export async function updateSortOrderOffline(
 
   if (navigator.onLine) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/lists/${id}/sort_order/`, {
+    fetchWithAuth(`${API_URL}/lists/${id}/sort_order/`, {
       method: "PATCH",
       headers: authHeaders(),
       body: JSON.stringify({ sort_order: sortOrder }),
@@ -1131,7 +1129,7 @@ export async function moveTodoOffline(
 
   if (navigator.onLine && todoId > 0) {
     // Send to backend in BACKGROUND (don't await)
-    fetch(`${API_URL}/todos/${todoId}/move/`, {
+    fetchWithAuth(`${API_URL}/todos/${todoId}/move/`, {
       method: "PATCH",
       headers: authHeaders(),
       body: JSON.stringify({ new_list_id: newListId }),

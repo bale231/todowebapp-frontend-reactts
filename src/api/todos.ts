@@ -5,6 +5,7 @@ import {
   CACHE_TTL,
   createCacheKey,
 } from "../utils/apiCache";
+import { refreshTokenIfNeeded } from "./auth";
 
 const API_URL = "https://bale231.pythonanywhere.com/api";
 
@@ -22,6 +23,30 @@ export function getAuthHeaders() {
   }
 
   return headers;
+}
+
+/**
+ * Fetch wrapper that automatically handles 401 by refreshing token and retrying.
+ * Use this for all authenticated API calls to prevent auth failures.
+ */
+export async function fetchWithAuth(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const headers = getAuthHeaders();
+  const mergedHeaders = { ...headers, ...(options.headers as Record<string, string>) };
+
+  const res = await fetch(url, { ...options, headers: mergedHeaders });
+
+  if (res.status === 401) {
+    const newToken = await refreshTokenIfNeeded();
+    if (newToken) {
+      const retryHeaders = { ...mergedHeaders, Authorization: `Bearer ${newToken}` };
+      return fetch(url, { ...options, headers: retryHeaders });
+    }
+  }
+
+  return res;
 }
 
 // --- 📋 LISTE ---

@@ -35,7 +35,7 @@ export const login = async (username: string, password: string, rememberMe: bool
   }
 };
 
-async function refreshTokenIfNeeded(): Promise<string | null> {
+export async function refreshTokenIfNeeded(): Promise<string | null> {
   const refresh =
     sessionStorage.getItem("refreshToken") ||
     localStorage.getItem("refreshToken");
