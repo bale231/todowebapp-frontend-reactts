@@ -10,7 +10,7 @@ import {
   type LocalTodoList,
   type MergeResult,
 } from "../db/database";
-import { getAuthHeaders } from "../api/todos";
+import { fetchWithAuth } from "../api/todos";
 
 const MAX_RETRIES = 5;
 const API_URL = "https://bale231.pythonanywhere.com/api";
@@ -94,9 +94,8 @@ export async function fullSync(): Promise<MergeResult<LocalTodoList> | null> {
  */
 async function fetchServerLists(): Promise<LocalTodoList[] | null> {
   try {
-    const response = await fetch(`${API_URL}/lists/`, {
+    const response = await fetchWithAuth(`${API_URL}/lists/`, {
       method: "GET",
-      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -156,9 +155,8 @@ async function syncPendingDeletions(): Promise<void> {
 
   for (const list of pendingDelete) {
     try {
-      const response = await fetch(`${API_URL}/lists/${list.id}/`, {
+      const response = await fetchWithAuth(`${API_URL}/lists/${list.id}/`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
       });
 
       if (response.ok || response.status === 404) {
@@ -175,9 +173,8 @@ async function syncPendingDeletions(): Promise<void> {
  * Create a new list on server (for lists created offline)
  */
 async function createListOnServer(list: LocalTodoList): Promise<void> {
-  const response = await fetch(`${API_URL}/lists/`, {
+  const response = await fetchWithAuth(`${API_URL}/lists/`, {
     method: "POST",
-    headers: getAuthHeaders(),
     body: JSON.stringify({
       name: list.name,
       color: list.color,
@@ -196,9 +193,8 @@ async function createListOnServer(list: LocalTodoList): Promise<void> {
  * Update an existing list on server
  */
 async function updateListOnServer(list: LocalTodoList): Promise<void> {
-  const response = await fetch(`${API_URL}/lists/${list.id}/`, {
+  const response = await fetchWithAuth(`${API_URL}/lists/${list.id}/`, {
     method: "PUT",
-    headers: getAuthHeaders(),
     body: JSON.stringify({
       name: list.name,
       color: list.color,
@@ -225,11 +221,9 @@ export async function processSyncQueue(): Promise<number> {
 
   for (const entry of queue) {
     try {
-      // Always use fresh auth headers instead of stale stored ones
-      const freshHeaders = getAuthHeaders();
-      const response = await fetch(entry.endpoint, {
+      // Use fetchWithAuth for automatic token refresh on 401
+      const response = await fetchWithAuth(entry.endpoint, {
         method: entry.method,
-        headers: freshHeaders,
         body: entry.body || undefined,
       });
 
