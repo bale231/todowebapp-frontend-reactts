@@ -35,38 +35,49 @@ export const login = async (username: string, password: string, rememberMe: bool
   }
 };
 
+// Singleton refresh: only one refresh at a time, concurrent callers share the promise
+let _refreshPromise: Promise<string | null> | null = null;
+
 export async function refreshTokenIfNeeded(): Promise<string | null> {
-  const refresh =
-    sessionStorage.getItem("refreshToken") ||
-    localStorage.getItem("refreshToken");
+  if (_refreshPromise) return _refreshPromise;
 
-  if (!refresh) return null;
+  _refreshPromise = (async () => {
+    const refresh =
+      sessionStorage.getItem("refreshToken") ||
+      localStorage.getItem("refreshToken");
 
-  try {
-    const res = await fetch(`${API_URL}/token/refresh/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refresh }),
-    });
+    if (!refresh) return null;
 
-    if (!res.ok) return null;
+    try {
+      const res = await fetch(`${API_URL}/token/refresh/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh }),
+      });
 
-    const data = await res.json();
+      if (!res.ok) return null;
 
-    const storage =
-      sessionStorage.getItem("refreshToken") !== null
-        ? sessionStorage
-        : localStorage;
+      const data = await res.json();
 
-    storage.setItem("accessToken", data.access);
+      const storage =
+        sessionStorage.getItem("refreshToken") !== null
+          ? sessionStorage
+          : localStorage;
 
-    return data.access;
-  } catch (err) {
-    console.error("Errore nel refresh del token:", err);
-    return null;
-  }
+      storage.setItem("accessToken", data.access);
+      // Save new refresh token if backend uses token rotation
+      if (data.refresh) storage.setItem("refreshToken", data.refresh);
+
+      return data.access;
+    } catch (err) {
+      console.error("Errore nel refresh del token:", err);
+      return null;
+    } finally {
+      _refreshPromise = null;
+    }
+  })();
+
+  return _refreshPromise;
 }
 
 
