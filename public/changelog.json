@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "date": "2026-04-18",
+  "changes": [
+    {
+      "type": "new",
+      "title": "Sistema di aggiornamento automatico",
+      "description": "L'app ora ti avvisa quando c'è un nuovo aggiornamento disponibile"
+    },
+    {
+      "type": "fix",
+      "title": "Sincronizzazione migliorata",
+      "description": "Risolti problemi di sincronizzazione tra dispositivi"
+    },
+    {
+      "type": "improvement",
+      "title": "Performance ottimizzate",
+      "description": "L'app è ora più veloce e reattiva"
+    }
+  ]
+}
