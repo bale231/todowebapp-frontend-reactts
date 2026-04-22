@@ -1,11 +1,11 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "date": "2026-04-22",
   "changes": [
     {
-      "type": "fix",
-      "title": "Test fix",
-      "description": "Questo è un test per verificare che il deploy funzioni"
+      "type": "new",
+      "title": "Notifiche aggiornamento",
+      "description": "Ora ricevi una notifica quando è disponibile un aggiornamento dell'app"
     },
     {
       "type": "new",
