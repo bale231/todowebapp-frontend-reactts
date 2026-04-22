@@ -48,7 +48,19 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
     needRefresh: [, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    immediate: true,
+    onRegisteredSW(swUrl, registration) {
+      console.log('SW registered:', swUrl);
+      if (registration) {
+        // Check for updates every 60 seconds
+        setInterval(() => {
+          console.log('Checking for SW update...');
+          registration.update();
+        }, 60 * 1000);
+      }
+    },
     onNeedRefresh() {
+      console.log('New version available!');
       setPendingUpdate(true);
       setShowUpdatePopup(true);
       fetchChangelog();
