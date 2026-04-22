@@ -15,40 +15,60 @@ import LoginRedirect from './components/LoginRedirect'
 import { ThemeProvider } from './context/ThemeContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { NetworkProvider } from './context/NetworkContext'
+import { UpdateProvider, useUpdate } from './context/UpdateContext'
 import NotificationPopup from './components/NotificationPopup'
 import OfflineBanner from './components/OfflineBanner'
-import VersionChecker from './components/VersionChecker'
 import SyncManager from './components/SyncManager'
+import UpdatePopup from './components/UpdatePopup'
+import UpdateLoader from './components/UpdateLoader'
 import UsersPage from './pages/UsersPage'
 import FriendsPage from './pages/FriendsPage'
 import FriendRequestsPage from './pages/FriendRequestsPage'
 
-function App() {
+function AppContent() {
+  const { showUpdatePopup, showUpdateLoader, changelog, handleUpdateNow, handleUpdateLater } = useUpdate();
 
+  return (
+    <>
+      <OfflineBanner />
+      <SyncManager />
+      {showUpdatePopup && (
+        <UpdatePopup
+          changelog={changelog}
+          onUpdateNow={handleUpdateNow}
+          onUpdateLater={handleUpdateLater}
+        />
+      )}
+      {showUpdateLoader && <UpdateLoader />}
+      <Routes>
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+        <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
+        <Route path="/lists/:id" element={<ToDoListPage />} />
+        <Route path="/login-success" element={<LoginRedirect />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/friends" element={<FriendsPage />} />
+        <Route path="/friend-requests" element={<FriendRequestsPage />} />
+      </Routes>
+      <NotificationPopup />
+    </>
+  );
+}
+
+function App() {
   return (
     <Router>
       <NetworkProvider>
         <ThemeProvider>
           <NotificationProvider>
-            <OfflineBanner />
-            <VersionChecker />
-            <SyncManager />
-            <Routes>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
-              <Route path="/verify-email/:uid/:token" element={<VerifyEmail />} />
-              <Route path="/lists/:id" element={<ToDoListPage />} />
-              <Route path="/login-success" element={<LoginRedirect />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="*" element={<Navigate to="/" />} />
-              <Route path="/users" element={<UsersPage />} />
-              <Route path="/friends" element={<FriendsPage />} />
-              <Route path="/friend-requests" element={<FriendRequestsPage />} />
-            </Routes>
-            <NotificationPopup />
+            <UpdateProvider>
+              <AppContent />
+            </UpdateProvider>
           </NotificationProvider>
         </ThemeProvider>
       </NetworkProvider>

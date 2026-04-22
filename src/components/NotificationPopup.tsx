@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useNotifications } from "../context/NotificationContext";
+import { useUpdate } from "../context/UpdateContext";
 import gsap from "gsap";
-import { X, Check, Trash2, RefreshCw, AlertCircle } from "lucide-react";
+import { X, Check, Trash2, RefreshCw, AlertCircle, Download } from "lucide-react";
 
 export default function NotificationPopup() {
   const {
@@ -12,6 +13,7 @@ export default function NotificationPopup() {
     markAllAsRead,
     deleteNotification,
   } = useNotifications();
+  const { pendingUpdate, triggerUpdate, changelog } = useUpdate();
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -68,12 +70,37 @@ export default function NotificationPopup() {
 
         {/* Lista notifiche */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-          {notifications.length === 0 ? (
+          {/* Update notification */}
+          {pendingUpdate && (
+            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-900/40 dark:to-purple-900/40 border-l-4 border-purple-500">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 flex-shrink-0">
+                  <Download size={20} className="text-purple-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm mb-1 text-gray-900 dark:text-white">
+                    Aggiornamento disponibile
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {changelog ? `Versione ${changelog.version}` : "Nuova versione disponibile"}
+                  </p>
+                  <button
+                    onClick={triggerUpdate}
+                    className="mt-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all"
+                  >
+                    Aggiorna ora
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {notifications.length === 0 && !pendingUpdate ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <AlertCircle size={48} className="mx-auto mb-3 opacity-50" />
               <p>Nessuna notifica</p>
             </div>
-          ) : (
+          ) : notifications.length > 0 && (
             notifications.map((notif) => (
               <div
                 key={notif.id}
