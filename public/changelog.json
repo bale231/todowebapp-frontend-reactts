@@ -1,26 +1,21 @@
 {
-  "version": "1.0.2",
-  "date": "2026-04-22",
+  "version": "1.0.3",
+  "date": "2026-04-28",
   "changes": [
     {
-      "type": "new",
-      "title": "Notifiche aggiornamento",
-      "description": "Ora ricevi una notifica quando è disponibile un aggiornamento dell'app"
+      "type": "fix",
+      "title": "Correzione modale aggiornamenti",
+      "description": "La modale appare solo quando c'è un nuovo aggiornamento, non più ad ogni apertura dell'app"
     },
     {
       "type": "new",
       "title": "Sistema di aggiornamento automatico",
-      "description": "L'app ora ti avvisa quando c'è un nuovo aggiornamento disponibile"
+      "description": "L'app ti avvisa quando è disponibile un aggiornamento con tutte le novità"
     },
     {
       "type": "fix",
       "title": "Sincronizzazione migliorata",
       "description": "Risolti problemi di sincronizzazione tra dispositivi"
-    },
-    {
-      "type": "improvement",
-      "title": "Performance ottimizzate",
-      "description": "L'app è ora più veloce e reattiva"
     }
   ]
 }
