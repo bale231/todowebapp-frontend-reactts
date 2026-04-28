@@ -1,11 +1,11 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "date": "2026-04-28",
   "changes": [
     {
       "type": "fix",
-      "title": "Correzione modale aggiornamenti",
-      "description": "La modale appare solo quando c'è un nuovo aggiornamento, non più ad ogni apertura dell'app"
+      "title": "Correzione notifiche aggiornamento",
+      "description": "Rimossa la notifica bloccata nel campanello — ora appare solo quando c'è davvero una nuova versione"
     },
     {
       "type": "new",

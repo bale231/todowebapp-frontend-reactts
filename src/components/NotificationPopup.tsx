@@ -13,7 +13,7 @@ export default function NotificationPopup() {
     markAllAsRead,
     deleteNotification,
   } = useNotifications();
-  const { pendingUpdate, triggerUpdate, changelog } = useUpdate();
+  const { pendingUpdate, triggerUpdate, changelog, dismissPendingUpdate } = useUpdate();
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +91,13 @@ export default function NotificationPopup() {
                     Aggiorna ora
                   </button>
                 </div>
+                <button
+                  onClick={dismissPendingUpdate}
+                  className="p-1.5 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition text-gray-500 flex-shrink-0"
+                  title="Ignora"
+                >
+                  <X size={16} />
+                </button>
               </div>
             </div>
           )}
