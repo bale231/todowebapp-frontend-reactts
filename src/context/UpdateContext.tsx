@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 interface ChangelogEntry {
@@ -21,6 +21,7 @@ interface UpdateContextType {
   handleUpdateNow: () => void;
   handleUpdateLater: () => void;
   triggerUpdate: () => void;
+  dismissPendingUpdate: () => void;
 }
 
 const UpdateContext = createContext<UpdateContextType | undefined>(undefined);
@@ -39,6 +40,9 @@ interface UpdateProviderProps {
 }
 
 export const UpdateProvider = ({ children }: UpdateProviderProps) => {
+  // Remove legacy localStorage key from old implementation
+  localStorage.removeItem('pendingAppUpdate');
+
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [showUpdateLoader, setShowUpdateLoader] = useState(false);
   const [changelog, setChangelog] = useState<Changelog | null>(null);
@@ -51,7 +55,6 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
     immediate: true,
     onRegisteredSW(_swUrl, registration) {
       if (registration) {
-        // Check once after 1 minute, then every hour — not constantly
         setTimeout(() => registration.update(), 60 * 1000);
         setInterval(() => registration.update(), 60 * 60 * 1000);
       }
@@ -60,7 +63,7 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
       fetchChangelog().then((data) => {
         if (!data) return;
         const seenVersion = localStorage.getItem('lastSeenUpdateVersion');
-        if (seenVersion === data.version) return; // already shown for this version
+        if (seenVersion === data.version) return;
         setChangelog(data);
         setPendingUpdate(true);
         setShowUpdatePopup(true);
@@ -72,10 +75,7 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
   const fetchChangelog = async (): Promise<Changelog | null> => {
     try {
       const res = await fetch('/changelog.json?t=' + Date.now());
-      if (res.ok) {
-        const data: Changelog = await res.json();
-        return data;
-      }
+      if (res.ok) return await res.json();
     } catch (err) {
       console.error('Errore caricamento changelog:', err);
     }
@@ -85,20 +85,16 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
   const handleUpdateNow = useCallback(async () => {
     setShowUpdatePopup(false);
     setShowUpdateLoader(true);
-    localStorage.removeItem('pendingAppUpdate');
     localStorage.removeItem('lastSeenUpdateVersion');
 
     const minLoadTime = new Promise(resolve => setTimeout(resolve, 3000));
-    const updatePromise = updateServiceWorker(true);
-
-    await Promise.all([minLoadTime, updatePromise]);
+    await Promise.all([minLoadTime, updateServiceWorker(true)]);
     window.location.reload();
   }, [updateServiceWorker]);
 
   const handleUpdateLater = useCallback(() => {
     setShowUpdatePopup(false);
     setNeedRefresh(false);
-    // Mark this version as seen so popup doesn't reappear for same version
     if (changelog) {
       localStorage.setItem('lastSeenUpdateVersion', changelog.version);
     }
@@ -106,33 +102,19 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
 
   const triggerUpdate = useCallback(async () => {
     setShowUpdateLoader(true);
+    localStorage.removeItem('lastSeenUpdateVersion');
 
     const minLoadTime = new Promise(resolve => setTimeout(resolve, 3000));
-    const updatePromise = updateServiceWorker(true);
-
-    await Promise.all([minLoadTime, updatePromise]);
+    await Promise.all([minLoadTime, updateServiceWorker(true)]);
     window.location.reload();
   }, [updateServiceWorker]);
 
-  // Restore pending update state on mount (for notification bell only, no popup)
-  useEffect(() => {
-    const hasPendingUpdate = localStorage.getItem('pendingAppUpdate') === 'true';
-    if (hasPendingUpdate) {
-      fetchChangelog().then((data) => {
-        if (data) setChangelog(data);
-        setPendingUpdate(true);
-      });
+  const dismissPendingUpdate = useCallback(() => {
+    setPendingUpdate(false);
+    if (changelog) {
+      localStorage.setItem('lastSeenUpdateVersion', changelog.version);
     }
-  }, []);
-
-  // Persist pending update state
-  useEffect(() => {
-    if (pendingUpdate) {
-      localStorage.setItem('pendingAppUpdate', 'true');
-    } else {
-      localStorage.removeItem('pendingAppUpdate');
-    }
-  }, [pendingUpdate]);
+  }, [changelog]);
 
   return (
     <UpdateContext.Provider
@@ -144,6 +126,7 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
         handleUpdateNow,
         handleUpdateLater,
         triggerUpdate,
+        dismissPendingUpdate,
       }}
     >
       {children}
