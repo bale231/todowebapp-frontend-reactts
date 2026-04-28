@@ -49,44 +49,45 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
     updateServiceWorker,
   } = useRegisterSW({
     immediate: true,
-    onRegisteredSW(swUrl, registration) {
-      console.log('SW registered:', swUrl);
+    onRegisteredSW(_swUrl, registration) {
       if (registration) {
-        // Check for updates every 60 seconds
-        setInterval(() => {
-          console.log('Checking for SW update...');
-          registration.update();
-        }, 60 * 1000);
+        // Check once after 1 minute, then every hour — not constantly
+        setTimeout(() => registration.update(), 60 * 1000);
+        setInterval(() => registration.update(), 60 * 60 * 1000);
       }
     },
     onNeedRefresh() {
-      console.log('New version available!');
-      setPendingUpdate(true);
-      setShowUpdatePopup(true);
-      fetchChangelog();
+      fetchChangelog().then((data) => {
+        if (!data) return;
+        const seenVersion = localStorage.getItem('lastSeenUpdateVersion');
+        if (seenVersion === data.version) return; // already shown for this version
+        setChangelog(data);
+        setPendingUpdate(true);
+        setShowUpdatePopup(true);
+      });
     },
-    onOfflineReady() {
-      console.log('App pronta per uso offline');
-    },
+    onOfflineReady() {},
   });
 
-  const fetchChangelog = async () => {
+  const fetchChangelog = async (): Promise<Changelog | null> => {
     try {
       const res = await fetch('/changelog.json?t=' + Date.now());
       if (res.ok) {
-        const data = await res.json();
-        setChangelog(data);
+        const data: Changelog = await res.json();
+        return data;
       }
     } catch (err) {
       console.error('Errore caricamento changelog:', err);
     }
+    return null;
   };
 
   const handleUpdateNow = useCallback(async () => {
     setShowUpdatePopup(false);
     setShowUpdateLoader(true);
+    localStorage.removeItem('pendingAppUpdate');
+    localStorage.removeItem('lastSeenUpdateVersion');
 
-    // Minimum 3 seconds loading
     const minLoadTime = new Promise(resolve => setTimeout(resolve, 3000));
     const updatePromise = updateServiceWorker(true);
 
@@ -97,8 +98,11 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
   const handleUpdateLater = useCallback(() => {
     setShowUpdatePopup(false);
     setNeedRefresh(false);
-    // pendingUpdate stays true so notification can show update button
-  }, [setNeedRefresh]);
+    // Mark this version as seen so popup doesn't reappear for same version
+    if (changelog) {
+      localStorage.setItem('lastSeenUpdateVersion', changelog.version);
+    }
+  }, [setNeedRefresh, changelog]);
 
   const triggerUpdate = useCallback(async () => {
     setShowUpdateLoader(true);
@@ -110,12 +114,14 @@ export const UpdateProvider = ({ children }: UpdateProviderProps) => {
     window.location.reload();
   }, [updateServiceWorker]);
 
-  // Check for pending update on mount (in case user closed the popup before)
+  // Restore pending update state on mount (for notification bell only, no popup)
   useEffect(() => {
     const hasPendingUpdate = localStorage.getItem('pendingAppUpdate') === 'true';
     if (hasPendingUpdate) {
-      setPendingUpdate(true);
-      fetchChangelog();
+      fetchChangelog().then((data) => {
+        if (data) setChangelog(data);
+        setPendingUpdate(true);
+      });
     }
   }, []);
 
